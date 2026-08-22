@@ -3,7 +3,7 @@
 ## 現在地
 
 **工程:** P0 プロジェクト計画
-**次にやること:** WBS のタスク分解と P1 の見積もり(Kazuki が先に出す)
+**次にやること:** P0-01 開発環境の構築(Docker 導入 → PostgreSQL 起動確認)と P0-04 P1 のタスク分解・見積もり
 
 ---
 
@@ -29,7 +29,7 @@
 ## Claude Code 機能の整備状況
 
 - [x] `CLAUDE.md`(P0)
-- [ ] commands `/ty-plan` `/ty-end` `/ty-gate`(P0)
+- [x] commands `/ty-plan` `/ty-end` `/ty-gate`(P0)
 - [ ] agents `doc-reviewer` / `test-reviewer` / `ops-reviewer`(P1〜P2)
 - [ ] skills `design-doc` / `testcase-gen` / `estimate-review` / `project-retro`(P2〜P4)
 - [ ] settings.json permissions(P2.5)
