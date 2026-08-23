@@ -1,7 +1,7 @@
 ---
 doc_id: IDX-001
 status: fixed
-updated: 2026-08-22
+updated: 2026-08-23
 ---
 
 # 文書管理台帳
@@ -14,7 +14,7 @@ updated: 2026-08-22
 
 | doc_id | 文書 | status | レビュー |
 |---|---|---|---|
-| PRJ-001 | [charter.md](./00_project/charter.md) — プロジェクト憲章 | draft | — |
+| PRJ-001 | [charter.md](./00_project/charter.md) — プロジェクト憲章 | fixed | [review-20260823_p1-gate1.md](./90_review/review-20260823_p1-gate1.md) |
 | PRJ-002 | [wbs.md](./00_project/wbs.md) — WBS と見積もり | draft | — |
 | PRJ-003 | [estimate-actual.md](./00_project/estimate-actual.md) — 見積もり/実績記録 | fixed | — |
 | PRJ-004 | [change-log.md](./00_project/change-log.md) — 変更管理票 | fixed | — |
@@ -23,9 +23,9 @@ updated: 2026-08-22
 
 | doc_id | 文書 | status | レビュー |
 |---|---|---|---|
-| REQ-001 | requirements.md — 要件定義書(FR / NFR) | 未着手 | — |
-| REQ-002 | use-cases.md — ユースケース | 未着手 | — |
-| REQ-003 | glossary.md — 用語集 | 未着手 | — |
+| REQ-001 | [requirements.md](./10_requirements/requirements.md) — 要件定義書(FR / NFR) | fixed | [interim](./90_review/review-20260823_p1-interim.md) / [gate①](./90_review/review-20260823_p1-gate1.md) |
+| REQ-002 | [use-cases.md](./10_requirements/use-cases.md) — ユースケース | fixed | [interim](./90_review/review-20260823_p1-interim.md) / [gate①](./90_review/review-20260823_p1-gate1.md) |
+| REQ-003 | [glossary.md](./10_requirements/glossary.md) — 用語集 | fixed | [glossary](./90_review/review-20260823_glossary.md) / [gate①](./90_review/review-20260823_p1-gate1.md) |
 
 ## 20_basic-design — 基本設計(P2 / P2.5)
 
@@ -71,10 +71,12 @@ updated: 2026-08-22
 
 | ファイル | 対象 | 重要度A残 |
 |---|---|---|
-| (まだなし) | | |
+| [review-20260823_p1-interim.md](./90_review/review-20260823_p1-interim.md) | charter.md / use-cases.md / requirements.md(P1中間レビュー) | 0(全件クローズ) |
+| [review-20260823_glossary.md](./90_review/review-20260823_glossary.md) | glossary.md(P1-06 doc-reviewer 動作確認) | 0(A1クローズ) |
+| [review-20260823_p1-gate1.md](./90_review/review-20260823_p1-gate1.md) | charter.md / use-cases.md / requirements.md / glossary.md / ADR-001(P1 ゲート①正式レビュー) | 0(該当なし) |
 
 ## decisions — ADR(意思決定記録)
 
 | ADR | 決定内容 | 日付 |
 |---|---|---|
-| (まだなし) | | |
+| [ADR-001](./00_project/decisions/001-auth-out-of-scope.md) | 認証機能を MVP から除外する | 2026-08-23 |
