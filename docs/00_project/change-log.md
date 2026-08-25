@@ -1,7 +1,7 @@
 ---
 doc_id: PRJ-004
 status: fixed
-updated: 2026-08-22
+updated: 2026-08-26
 ---
 
 # 変更管理票
@@ -19,3 +19,6 @@ updated: 2026-08-22
 | ID | 日付 | 対象文書 | 変更内容 | 理由 | 設計時に気づけなかった原因 |
 |---|---|---|---|---|---|
 | CL-001 | 2026-08-23 | `workflow.md`(P9) | 「TypeScript 版が共有テストベクタを Java 版と同じ結果で通す」→「Java 版を TypeScript 版から移植し、共有テストベクタで同じ結果を返す」に移植の向きを修正 | P2-01(ADR-002)で、NFR-01(50ms)を満たすためリアルタイム判定はフロントエンド(TS)完結と決定した。結果、ローマ字オートマトンの実働実装は P5 時点で TS のみになり、Java(`typing-core`)側は当初から存在しない。P9 で Java 版を作る場合、移植元は TS になる | P0 時点では NFR-01 の具体的な遅延目標(50ms)も、判定をどのレイヤで行うかも未確定だった。「typing-core は Java」という技術スタックの取り決めから、素朴に「Java が原本、TS が移植先」と想定してしまい、リアルタイム制約から生じる実行場所の制約を考慮していなかった |
+| CL-002 | 2026-08-23 | `charter.md`(6章 リスク表) | 「userId 推測による他人データ閲覧」リスクと受入判断(ADR-003)を追記 | P2-06a(doc-reviewer Opus版の再レビュー)の過程で、`/api/users/{userId}/...` 系エンドポイントに認可制御がなく、userId を知る第三者が他人の履歴・スコアを閲覧できる点が判明した | ADR-001(認証スコープ外)の検討時は「認証機構を作るか」だけを論点にしており、「認証なしで userId ベースAPIを公開した場合の閲覧リスクそのもの」は独立した論点として扱っていなかった |
+| CL-003 | 2026-08-23 | `requirements.md` FR-04/FR-06 未決事項、`use-cases.md` 4章未決事項、`charter.md` 3.3 規模感 | FR-04・use-cases.md の保存粒度未決事項を解決済みに更新。FR-06 の正確率定義の未決事項を解決済みに更新。charter.md 3.3 をテーブル4〜5→6、API 6〜8→7本、画面4〜5→6に確定値へ更新 | P2-06a(REV-005、B4)で、P2 側の設計書(table-definition.md・api-spec.yaml)が既に回答済みの未決事項を、上流のP1文書側が未更新のまま放置していたことが判明した | P2-03〜P2-04 で個々の未決事項に回答した際、その回答を発生元のP1文書へ遡って反映する手順がなく、下流(P2)の更新だけで完結したと思い込んでいた |
+| CL-004 | 2026-08-26 | `api-spec.yaml`(400/404/ErrorResponse追加、isNewBest→isNetKpmBest/isAccuracyBest分割、expectedKey説明追記)、`table-definition.md`(expected_key未決事項追記)、`screen-design.md`(userId 404時のlocalStorageクリア導線、「別の名前で始める」リンク、自己ベスト強調表示の対応先明記)、`nonfunctional-design.md`(NFR-07にログ項目・例外ハンドラ集約先を追記、NFR-08をP2.5確認待ちに改訂、NFR-09を400/404/500の切り分けに改訂)、`system-architecture.md`(`@RestControllerAdvice`集約の1行追記) | P2-07(ゲート②、test-reviewer/ops-reviewer初回実行、REV-007/REV-008)で検出した重要度A計6件(4xx未定義・isNewBest判定基準・expectedKey記録規則・エラーボディ/ログ項目・userId復旧導線)を解消した。バックアップ有無の確認(REV-008 A2)のみP2.5着手時の確認事項として`wbs.md`に申し送り | P2-04でAPI仕様を書いた時点では正常系(200/201)とDB障害時(500)の2系統しか想定しておらず、「利用者の入力ミス」「参照先が存在しない」「複数正解候補がある入力の記録規則」を別カテゴリとして洗い出す観点が抜けていた。test-reviewer/ops-reviewerという専用の観点を持つレビュアーを分離して初めて拾えた |

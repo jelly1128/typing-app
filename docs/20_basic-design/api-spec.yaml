@@ -6,8 +6,8 @@ info:
     P2 基本設計(BD-003)。各エンドポイントの description に対応 FR-ID / 画面ID を記載する。
     リアルタイムのローマ字判定(FR-02/FR-03)はフロントエンド完結のため API を持たない(ADR-002)。
   x-doc-id: BD-003
-  x-status: draft
-  x-updated: "2026-08-23"
+  x-status: fixed
+  x-updated: "2026-08-26"
 
 paths:
   /api/users:
@@ -16,7 +16,8 @@ paths:
       summary: 利用者を識別する(S-01)
       description: |
         FR-12。名前で利用者を検索し、存在しなければ新規作成する(find-or-create)。
-        同じ名前を入力した場合は同一人物として扱う。
+        name は前後の空白を trim してから比較・保存する(大文字・小文字は区別する)。
+        trim 後に空文字、または101文字以上の場合は400(NFR-09)。
       requestBody:
         required: true
         content:
@@ -31,11 +32,15 @@ paths:
                   maxLength: 100
       responses:
         "200":
-          description: 既存または新規作成した利用者
+          description: 既存または新規作成した利用者。find-or-create のため新規作成時も 200 を返す
           content:
             application/json:
               schema:
                 $ref: "#/components/schemas/User"
+        "400":
+          $ref: "#/components/responses/BadRequest"
+        "500":
+          $ref: "#/components/responses/ServerError"
 
   /api/topic-sets:
     get:
@@ -51,6 +56,8 @@ paths:
                 type: array
                 items:
                   $ref: "#/components/schemas/TopicSet"
+        "500":
+          $ref: "#/components/responses/ServerError"
 
   /api/topic-sets/{topicSetId}/sentences:
     get:
@@ -77,6 +84,12 @@ paths:
                   $ref: "#/components/schemas/Sentence"
         "404":
           description: 指定したお題セットが存在しない、またはお題が0件
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+        "500":
+          $ref: "#/components/responses/ServerError"
 
   /api/sessions:
     post:
@@ -89,6 +102,11 @@ paths:
         (requirements.md FR-06 未決事項への回答)。
         打鍵間隔(keystrokeIntervalsMs)は算出にのみ使い、永続化しない(table-definition.md TBL-04 参照)。
         保存は1トランザクションで行い、失敗時は部分保存しない(NFR-09)。
+
+        次の場合は400: `endConditionType=sentence_count` のとき `endConditionValue` が1〜50の範囲外、
+        `time_limit` のとき10〜600(秒)の範囲外。`durationSeconds` が1未満。
+        `missRecords[].kana` が `kanaCounts` のいずれの `kana` にも一致しない(分母が存在しないミス記録)。
+        次の場合は404: `userId` または `topicSetId` が存在しない。
       requestBody:
         required: true
         content:
@@ -102,14 +120,18 @@ paths:
             application/json:
               schema:
                 $ref: "#/components/schemas/SessionResult"
+        "400":
+          $ref: "#/components/responses/BadRequest"
+        "404":
+          $ref: "#/components/responses/NotFound"
         "500":
-          description: DB保存失敗(NFR-09。エラー画面表示に使う)
+          $ref: "#/components/responses/ServerError"
 
   /api/users/{userId}/sessions:
     get:
       operationId: listSessionHistory
       summary: 練習履歴を新しい順に取得する(S-05)
-      description: FR-08。
+      description: FR-08。userId が存在しない場合は404。
       parameters:
         - name: userId
           in: path
@@ -126,12 +148,16 @@ paths:
                 type: array
                 items:
                   $ref: "#/components/schemas/SessionSummary"
+        "404":
+          $ref: "#/components/responses/NotFound"
+        "500":
+          $ref: "#/components/responses/ServerError"
 
   /api/users/{userId}/best:
     get:
       operationId: getPersonalBest
       summary: 難易度別の自己ベストを取得する(S-05)
-      description: FR-09。難易度ごとに KPM 最大・正確率最大を返す。
+      description: FR-09。指定した難易度(topicSetId)の KPM 最大・正確率最大を返す(難易度をまたいだ集計は行わない)。userId または topicSetId が存在しない場合は404。
       parameters:
         - name: userId
           in: path
@@ -154,6 +180,10 @@ paths:
             application/json:
               schema:
                 $ref: "#/components/schemas/PersonalBest"
+        "404":
+          $ref: "#/components/responses/NotFound"
+        "500":
+          $ref: "#/components/responses/ServerError"
 
   /api/users/{userId}/miss-analysis:
     get:
@@ -161,8 +191,10 @@ paths:
       summary: ミスの傾向分析と改善アドバイスを取得する(S-06)
       description: |
         FR-10, FR-11。全期間・全難易度のミス記録(miss_records)とかな出現回数(session_kana_counts)を
-        集計する。ミス記録が0件の場合、4種の集計はすべて空配列、advice は null
-        (screen-design.md 4章 B2)。
+        集計する。セッション自体が0件の場合、4種の集計はすべて空配列、advice は null。
+        セッションはあるがミス記録が0件の場合、byKana / byErrorPattern / byPrevKana は空配列にするが、
+        byCharType はミスなし(全文字種 accuracyRate=100)として算出する
+        (screen-design.md 4章 B2)。userId が存在しない場合は404。
       parameters:
         - name: userId
           in: path
@@ -177,9 +209,51 @@ paths:
             application/json:
               schema:
                 $ref: "#/components/schemas/MissAnalysis"
+        "404":
+          $ref: "#/components/responses/NotFound"
+        "500":
+          $ref: "#/components/responses/ServerError"
 
 components:
+  responses:
+    ServerError:
+      description: DB接続断等のサーバー内部エラー(NFR-09。全エンドポイント共通で一様に返す)。フロントエンドは汎用エラー表示に切り替える
+      content:
+        application/json:
+          schema:
+            $ref: "#/components/schemas/ErrorResponse"
+    BadRequest:
+      description: リクエストの値が不正(必須項目欠落・値域外・enum外・整合性違反。NFR-09)
+      content:
+        application/json:
+          schema:
+            $ref: "#/components/schemas/ErrorResponse"
+    NotFound:
+      description: 指定した userId 等のリソースが存在しない(NFR-09)
+      content:
+        application/json:
+          schema:
+            $ref: "#/components/schemas/ErrorResponse"
   schemas:
+    ErrorResponse:
+      type: object
+      description: 全エンドポイント共通のエラーボディ(NFR-07)
+      properties:
+        timestamp:
+          type: string
+          format: date-time
+        status:
+          type: integer
+          description: HTTPステータスコード
+        code:
+          type: string
+          description: エラー種別を識別する内部コード(例 VALIDATION_ERROR, USER_NOT_FOUND, INTERNAL_ERROR)
+        message:
+          type: string
+        traceId:
+          type: string
+          description: リクエストごとに発行する一意な文字列。障害調査時にログと突き合わせる(nonfunctional-design.md NFR-07)
+
     User:
       type: object
       properties:
@@ -220,11 +294,15 @@ components:
       properties:
         kanaOccurrenceNo:
           type: integer
-          description: セッション内でそのかなが何拍目の出現かの通し番号(table-definition.md TBL-05)
+          description: 同一セッション内で、`kana` と同じかなが何回目に出現したかの連番(かなの種類ごとに1から数え直す。table-definition.md TBL-05)
         kana:
           type: string
         expectedKey:
           type: string
+          description: |
+            期待していたキー。FR-02 により1つのかなに複数の受理表記(例: し→si/shi/ci)がありうるため、
+            複数候補があるときにどの表記由来のキーを記録するかは P3 `logic-spec/romaji-automaton.md`
+            の受理表確定と合わせて定める(未決事項。table-definition.md TBL-05 参照)
         actualKey:
           type: string
         prevKana:
@@ -248,7 +326,7 @@ components:
 
     SessionSubmission:
       type: object
-      required: [userId, topicSetId, correctKeyCount, durationSeconds, keystrokeIntervalsMs, missRecords, kanaCounts]
+      required: [userId, topicSetId, endConditionType, endConditionValue, correctKeyCount, durationSeconds, keystrokeIntervalsMs, missRecords, kanaCounts]
       properties:
         userId:
           type: integer
@@ -256,6 +334,13 @@ components:
         topicSetId:
           type: integer
           format: int64
+        endConditionType:
+          type: string
+          enum: [sentence_count, time_limit]
+          description: S-02で選択した終了条件の種類(FR-05)
+        endConditionValue:
+          type: integer
+          description: 終了条件の値(お題N文のNまたは制限時間の秒数)
         correctKeyCount:
           type: integer
           description: 総正しい確定キー入力数(FR-06 の Net KPM・正確率の分子)
@@ -287,8 +372,10 @@ components:
           type: number
         accuracy:
           type: number
+          description: 正確率(%、0〜100。table-definition.md TBL-04 と同じ単位)
         consistency:
           type: number
+          description: 打鍵間隔のばらつき。統計量の定義(標準偏差か変動係数か)はP3で確定する暫定値
         durationSeconds:
           type: integer
         playedAt:
@@ -298,8 +385,12 @@ components:
           $ref: "#/components/schemas/PersonalBest"
           nullable: true
           description: 今回のセッション以前の、この難易度での自己ベスト(初回の場合 null。screen-design.md 4章 B2)
-        isNewBest:
+        isNetKpmBest:
           type: boolean
+          description: 今回の netKpm が previousBest.netKpmBest を厳密に上回った場合 true(同値は false)。初回セッション(previousBest が null)は true
+        isAccuracyBest:
+          type: boolean
+          description: 今回の accuracy が previousBest.accuracyBest を厳密に上回った場合 true(同値は false)。初回セッション(previousBest が null)は true
 
     SessionSummary:
       type: object
@@ -309,6 +400,11 @@ components:
           format: int64
         topicSetName:
           type: string
+        endConditionType:
+          type: string
+          enum: [sentence_count, time_limit]
+        endConditionValue:
+          type: integer
         playedAt:
           type: string
           format: date-time
@@ -331,6 +427,7 @@ components:
         accuracyBest:
           type: number
           nullable: true
+          description: 正確率(%、0〜100。table-definition.md TBL-04 と同じ単位)
 
     MissAnalysis:
       type: object
@@ -345,8 +442,10 @@ components:
                 type: string
               missCount:
                 type: integer
+                description: かな1拍単位のミス回数(同一拍での複数回ミスは1と数える。er-diagram.md 3.1)
               missRate:
                 type: number
+                description: 拍単位ミス数 ÷ session_kana_counts の該当かなの出現回数合計(%、0〜100)
         byErrorPattern:
           type: array
           description: FR-10(2) 誤りパターン(期待キー→実際キー)別発生回数(多い順)
@@ -369,6 +468,7 @@ components:
                 type: string
               missRate:
                 type: number
+                description: 拍単位ミス数(直前がこのかなだった拍でのミス) ÷ session_kana_counts の該当かなの出現回数合計(近似分母。er-diagram.md 3.3)(%、0〜100)
         byCharType:
           type: array
           description: FR-10(4) 文字種別の正解率
@@ -380,6 +480,7 @@ components:
                 enum: [清音, 拗音, 撥音ん, 促音っ, 長音]
               accuracyRate:
                 type: number
+                description: (該当文字種の出現回数合計 − 該当文字種の拍単位ミス数) ÷ 該当文字種の出現回数合計。session_kana_counts と miss_records から算出(%、0〜100)
         advice:
           type: string
           nullable: true

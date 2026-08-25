@@ -1,12 +1,30 @@
 ---
 doc_id: BD-005
-status: draft
-updated: 2026-08-23
+status: fixed
+updated: 2026-08-26
 ---
 
 # テーブル定義
 
 ER図は [er-diagram.md](./er-diagram.md) を参照。各テーブルに TBL-ID を振る。
+
+## FR-ID × テーブル対応表
+
+| FR-ID | 対応テーブル | 備考 |
+|---|---|---|
+| FR-01 | TBL-03 | |
+| FR-02 | (なし) | フロントエンド完結、DB非経由(ADR-002) |
+| FR-03 | (なし) | フロントエンド完結、DB非経由(ADR-002) |
+| FR-04 | TBL-05 | |
+| FR-05 | TBL-04 | 終了条件の種類・値のみ保存。判定自体はフロントエンドで行う |
+| FR-06 | TBL-04 | |
+| FR-07 | TBL-04 | |
+| FR-08 | TBL-04 | |
+| FR-09 | TBL-04 | |
+| FR-10 | TBL-05, TBL-06 | |
+| FR-11 | (なし) | ミス分析APIが都度生成。永続化しない |
+| FR-12 | TBL-01 | |
+| FR-13 | TBL-02, TBL-03 | |
 
 ## TBL-01 users(利用者)
 
@@ -44,7 +62,7 @@ ER図は [er-diagram.md](./er-diagram.md) を参照。各テーブルに TBL-ID 
 
 ## TBL-04 sessions(セッション結果)
 
-対応FR: FR-06, FR-07, FR-08, FR-09
+対応FR: FR-05, FR-06, FR-07, FR-08, FR-09
 
 | カラム | 型 | 制約 | 内容 |
 |---|---|---|---|
@@ -56,9 +74,11 @@ ER図は [er-diagram.md](./er-diagram.md) を参照。各テーブルに TBL-ID 
 | accuracy | NUMERIC(5,2) | NOT NULL | 正確率(%) |
 | consistency | NUMERIC(8,2) | NOT NULL | 打鍵間隔のばらつき |
 | duration_seconds | INT | NOT NULL | 所要時間 |
+| end_condition_type | VARCHAR(20) | NOT NULL, CHECK IN ('sentence_count','time_limit') | S-02で選択した終了条件の種類(FR-05)。同じ難易度でも条件別に履歴を区別するために使う |
+| end_condition_value | INT | NOT NULL | 終了条件の値(お題N文のNまたは制限時間の秒数) |
 | played_at | TIMESTAMP | NOT NULL, DEFAULT now() | FR-08 の一覧ソートに使う |
 
-正確率算出に必要な「正しく確定したキー入力数」自体は保存しない。フロントエンドが算出した `net_kpm`・`raw_kpm`・`accuracy` の最終値をバックエンドがそのまま受け取り保存する(打鍵の生ログはリクエスト時の計算にのみ使い、永続化しない。詳細は P2-04 `api-spec.yaml` で確定)。
+フロントエンドは正誤ログ(`correctKeyCount` / `durationSeconds` / `keystrokeIntervalsMs` / ミス記録 / かな出現回数)を送信し、バックエンドの typing-core が `net_kpm`・`raw_kpm`・`accuracy`・`consistency` を算出して本テーブルに保存する(ADR-002)。打鍵の生ログ・正しく確定したキー入力数自体は永続化しない(詳細は [`api-spec.yaml`](./api-spec.yaml) を参照)。
 
 セッション終了条件を満たさず中断した場合は行を作らない(FR-05)。DB障害時はトランザクション単位で成功/失敗を確定し、部分保存はしない(NFR-09)。
 
@@ -70,9 +90,9 @@ ER図は [er-diagram.md](./er-diagram.md) を参照。各テーブルに TBL-ID 
 |---|---|---|---|
 | id | BIGSERIAL | PK | |
 | session_id | BIGINT | NOT NULL, FK→sessions(id) | |
-| kana_occurrence_no | INT | NOT NULL | セッション内でそのかなが何拍目の出現かの通し番号。同じ拍への複数ミスをグルーピングするキー(er-diagram.md 3.1) |
+| kana_occurrence_no | INT | NOT NULL | 同一セッション内で、`kana` 列と同じかなが何回目に出現したかの連番(かなの種類ごとに1から数え直す)。`(session_id, kana, kana_occurrence_no)` の組で「同じ拍への複数ミス」をグルーピングするキーになる(er-diagram.md 3.1) |
 | kana | VARCHAR(4) | NOT NULL | ミスが起きたかな1拍(例: し) |
-| expected_key | VARCHAR(10) | NOT NULL | 期待していたキー |
+| expected_key | VARCHAR(10) | NOT NULL | 期待していたキー。FR-02 の複数受理表記(し→si/shi/ci等)がある場合にどの表記由来のキーを記録するかは未決事項(下記参照) |
 | actual_key | VARCHAR(10) | NOT NULL | 実際に入力されたキー |
 | prev_kana | VARCHAR(4) | NULL可 | 直前に確定していたかな1拍。セッション最初の拍はNULL |
 | char_type | VARCHAR(10) | NOT NULL, CHECK IN ('清音','拗音','撥音ん','促音っ','長音') | |
@@ -97,3 +117,5 @@ UNIQUE制約: `(session_id, kana)`。フロントエンドがセッション終�
 
 - 具体的なインデックス設計(検索頻度の高いカラムへの追加インデックス)は P3 `db-access.md` で確定する
 - Flyway のマイグレーションファイル分割は P5 実装時に決める
+- TBL-04 `consistency NUMERIC(8,2)` の桁数は暫定。統計量の定義(標準偏差[ms]か変動係数か)が P3 `logic-spec/romaji-automaton.md` 相当の詳細設計で確定した時点で再確認する
+- TBL-05 `expected_key` の記録規則(複数受理表記があるときにどの表記由来のキーを記録するか)は、P3 `logic-spec/romaji-automaton.md` の受理表確定と合わせて定める。桁数 `VARCHAR(10)` の妥当性もその際に再確認する(2026-08-26, REV-007 A1)

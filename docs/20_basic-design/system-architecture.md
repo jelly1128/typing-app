@@ -1,7 +1,7 @@
 ---
 doc_id: BD-001
-status: draft
-updated: 2026-08-23
+status: fixed
+updated: 2026-08-26
 ---
 
 # システム構成(基本設計)
@@ -41,6 +41,8 @@ NFR-01(入力反応性 50ms 以内)を満たすため、ローマ字入力判定
 | バックエンド 永続化 | Spring Data JPA + Repository | 利用者・お題・セッション結果・ミス記録の読み書き | FR-01, FR-04, FR-07, FR-08, FR-09, FR-10, FR-12, FR-13 |
 | DB | PostgreSQL 16 + Flyway | データ永続化・スキーマ管理 | 全 FR の永続化対象 |
 
+例外→HTTP応答の変換は Controller 個別ではなく `@RestControllerAdvice` の一元的なハンドラ1箇所に集約する(`nonfunctional-design.md` NFR-07。2026-08-26追記、REV-008 A1対応)。
+
 ## 4. モジュール構成
 
 ```
@@ -57,7 +59,7 @@ shared/
 ## 5. データフロー
 
 0. **利用者識別(FR-12)**: フロントエンド → `POST /api/users`(名前) → Repository が find-or-create → DB
-1. **お題取得(FR-01, FR-13)**: フロントエンド → `GET /api/topics?difficulty=...` → Repository → DB
+1. **お題取得(FR-01, FR-13)**: フロントエンド → `GET /api/topic-sets`(お題セット=難易度一覧) → 選択後 `GET /api/topic-sets/{topicSetId}/sentences`(お題文一括取得) → Repository → DB
 2. **タイピング中(FR-02〜FR-05)**: フロントエンド内で完結。バックエンド通信なし。ミス記録・打鍵ログはブラウザ内(Pinia store またはローカル変数)に一時保持する
 3. **セッション終了(FR-05〜FR-07)**: フロントエンドが一時保持したログをまとめて `POST /api/sessions` に送信 → typing-core が Net/Raw KPM・正確率・Consistency を算出 → Repository が結果とミス記録を1トランザクションで保存(NFR-09)
 4. **履歴・自己ベスト・ミス分析(FR-08〜FR-11)**: フロントエンドが対応する GET API を呼び、保存済みデータを取得・表示する

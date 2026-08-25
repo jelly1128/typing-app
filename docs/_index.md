@@ -1,7 +1,7 @@
 ---
 doc_id: IDX-001
 status: fixed
-updated: 2026-08-23
+updated: 2026-08-26
 ---
 
 # 文書管理台帳
@@ -31,12 +31,12 @@ updated: 2026-08-23
 
 | doc_id | 文書 | status | レビュー |
 |---|---|---|---|
-| BD-001 | [system-architecture.md](./20_basic-design/system-architecture.md) — システム構成 | draft | — |
-| BD-002 | [screen-design.md](./20_basic-design/screen-design.md) — 画面設計 | draft | — |
-| BD-003 | [api-spec.yaml](./20_basic-design/api-spec.yaml) — API 仕様(OpenAPI) | draft | — |
-| BD-004 | [er-diagram.md](./20_basic-design/er-diagram.md) — ER 図 | draft | — |
-| BD-005 | [table-definition.md](./20_basic-design/table-definition.md) — テーブル定義 | draft | — |
-| BD-006 | [nonfunctional-design.md](./20_basic-design/nonfunctional-design.md) — 非機能設計 | draft | — |
+| BD-001 | [system-architecture.md](./20_basic-design/system-architecture.md) — システム構成 | fixed | [interim](./90_review/review-20260823_p2-interim.md) / [opus中間](./90_review/review-20260823_p2-interim-opus.md) / [opus検証](./90_review/review-20260823_p2-verify-opus.md) |
+| BD-002 | [screen-design.md](./20_basic-design/screen-design.md) — 画面設計 | fixed | [interim](./90_review/review-20260823_p2-interim.md) / [opus中間](./90_review/review-20260823_p2-interim-opus.md) / [opus検証](./90_review/review-20260823_p2-verify-opus.md) / [test](./90_review/review-20260826_p2-gate2-test.md) / [ops](./90_review/review-20260826_p2-gate2-ops.md) |
+| BD-003 | [api-spec.yaml](./20_basic-design/api-spec.yaml) — API 仕様(OpenAPI) | fixed | [interim](./90_review/review-20260823_p2-interim.md) / [opus中間](./90_review/review-20260823_p2-interim-opus.md) / [opus検証](./90_review/review-20260823_p2-verify-opus.md) / [test](./90_review/review-20260826_p2-gate2-test.md) / [ops](./90_review/review-20260826_p2-gate2-ops.md) |
+| BD-004 | [er-diagram.md](./20_basic-design/er-diagram.md) — ER 図 | fixed | [interim](./90_review/review-20260823_p2-interim.md) / [opus中間](./90_review/review-20260823_p2-interim-opus.md) / [opus検証](./90_review/review-20260823_p2-verify-opus.md) |
+| BD-005 | [table-definition.md](./20_basic-design/table-definition.md) — テーブル定義 | fixed | [interim](./90_review/review-20260823_p2-interim.md) / [opus中間](./90_review/review-20260823_p2-interim-opus.md) / [opus検証](./90_review/review-20260823_p2-verify-opus.md) / [test](./90_review/review-20260826_p2-gate2-test.md) / [ops](./90_review/review-20260826_p2-gate2-ops.md) |
+| BD-006 | [nonfunctional-design.md](./20_basic-design/nonfunctional-design.md) — 非機能設計 | fixed | [interim](./90_review/review-20260823_p2-interim.md) / [opus中間](./90_review/review-20260823_p2-interim-opus.md) / [opus検証](./90_review/review-20260823_p2-verify-opus.md) / [test](./90_review/review-20260826_p2-gate2-test.md) / [ops](./90_review/review-20260826_p2-gate2-ops.md) |
 | BD-007 | deployment.md — デプロイ構成 | 未着手 | — |
 
 ## 30_detail-design — 詳細設計(P3)
@@ -74,7 +74,11 @@ updated: 2026-08-23
 | [review-20260823_p1-interim.md](./90_review/review-20260823_p1-interim.md) | charter.md / use-cases.md / requirements.md(P1中間レビュー) | 0(全件クローズ) |
 | [review-20260823_glossary.md](./90_review/review-20260823_glossary.md) | glossary.md(P1-06 doc-reviewer 動作確認) | 0(A1クローズ) |
 | [review-20260823_p1-gate1.md](./90_review/review-20260823_p1-gate1.md) | charter.md / use-cases.md / requirements.md / glossary.md / ADR-001(P1 ゲート①正式レビュー) | 0(該当なし) |
-| [review-20260823_p2-interim.md](./90_review/review-20260823_p2-interim.md) | system-architecture.md / screen-design.md / api-spec.yaml / er-diagram.md / table-definition.md / nonfunctional-design.md(P2中間レビュー) | 0(全件クローズ) |
+| [review-20260823_p2-interim.md](./90_review/review-20260823_p2-interim.md) | system-architecture.md / screen-design.md / api-spec.yaml / er-diagram.md / table-definition.md / nonfunctional-design.md(P2中間レビュー、Sonnet) | 0(全件クローズ) |
+| [review-20260823_p2-interim-opus.md](./90_review/review-20260823_p2-interim-opus.md) | 同上(P2中間レビュー、Opus再レビュー) | 0(A1〜A3クローズ済み) |
+| [review-20260823_p2-verify-opus.md](./90_review/review-20260823_p2-verify-opus.md) | 同上(P2ゲート②doc観点、Opus検証レビュー) | 0(該当なし) |
+| [review-20260826_p2-gate2-test.md](./90_review/review-20260826_p2-gate2-test.md) | 同上(P2ゲート②test観点) | 0(A1〜A3クローズ済み) |
+| [review-20260826_p2-gate2-ops.md](./90_review/review-20260826_p2-gate2-ops.md) | 同上(P2ゲート②ops観点) | A2のみ残(P2.5着手時対応。`wbs.md`に申し送り済み) |
 
 ## decisions — ADR(意思決定記録)
 
@@ -82,3 +86,4 @@ updated: 2026-08-23
 |---|---|---|
 | [ADR-001](./00_project/decisions/001-auth-out-of-scope.md) | 認証機能を MVP から除外する | 2026-08-23 |
 | [ADR-002](./00_project/decisions/002-realtime-judgment-frontend.md) | リアルタイムのローマ字判定はフロントエンド完結にする | 2026-08-23 |
+| [ADR-003](./00_project/decisions/003-userid-enumeration-accepted-risk.md) | userId 推測による他人データ閲覧リスクを受け入れる | 2026-08-23 |

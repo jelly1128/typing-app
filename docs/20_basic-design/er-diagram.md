@@ -1,7 +1,7 @@
 ---
 doc_id: BD-004
-status: draft
-updated: 2026-08-23
+status: fixed
+updated: 2026-08-26
 ---
 
 # ER図
@@ -48,7 +48,7 @@ updated: 2026-08-23
 
 ### 3.1 ミス記録はキー単位のイベントとして持つ(P1未決事項への回答)
 
-`requirements.md` FR-04 で未決だった「記録の保存粒度」をここで確定する。**キー入力1回=1行**で記録する(セッション単位の集計ではない)。同じかな1拍で複数回ミスした場合、`miss_records` には複数行入るが、`kana_occurrence_no`(セッション内でその拍が何回目の出現かの通し番号)が同じ値になるため、分析時に `COUNT(DISTINCT kana_occurrence_no)` で「拍1回のミス」として数え直せる。
+`requirements.md` FR-04 で未決だった「記録の保存粒度」をここで確定する。**キー入力1回=1行**で記録する(セッション単位の集計ではない)。同じかな1拍で複数回ミスした場合、`miss_records` には複数行入るが、`kana_occurrence_no`(同一セッション内で、そのかなが何回目の出現かを示す連番。かなの種類ごとに1から数え直す)が同じ値になるため、分析時に「拍1回のミス」として数え直せる。`getMissAnalysis` は全セッションを横断して集計するため、数え直す際は `COUNT(DISTINCT (session_id, kana, kana_occurrence_no))` のようにセッションをまたがない形で DISTINCT を取る必要がある(session_id を落とすと、別セッションの同じかなの同じ出現回数が1件に潰れてミス回数を過少計上する)。
 
 ### 3.2 `session_kana_counts` を持つ理由(ミス率・正解率の分母)
 
