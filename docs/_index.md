@@ -37,7 +37,7 @@ updated: 2026-08-26
 | BD-004 | [er-diagram.md](./20_basic-design/er-diagram.md) — ER 図 | fixed | [interim](./90_review/review-20260823_p2-interim.md) / [opus中間](./90_review/review-20260823_p2-interim-opus.md) / [opus検証](./90_review/review-20260823_p2-verify-opus.md) |
 | BD-005 | [table-definition.md](./20_basic-design/table-definition.md) — テーブル定義 | fixed | [interim](./90_review/review-20260823_p2-interim.md) / [opus中間](./90_review/review-20260823_p2-interim-opus.md) / [opus検証](./90_review/review-20260823_p2-verify-opus.md) / [test](./90_review/review-20260826_p2-gate2-test.md) / [ops](./90_review/review-20260826_p2-gate2-ops.md) |
 | BD-006 | [nonfunctional-design.md](./20_basic-design/nonfunctional-design.md) — 非機能設計 | fixed | [interim](./90_review/review-20260823_p2-interim.md) / [opus中間](./90_review/review-20260823_p2-interim-opus.md) / [opus検証](./90_review/review-20260823_p2-verify-opus.md) / [test](./90_review/review-20260826_p2-gate2-test.md) / [ops](./90_review/review-20260826_p2-gate2-ops.md) |
-| BD-007 | deployment.md — デプロイ構成 | 未着手 | — |
+| BD-007 | [deployment.md](./20_basic-design/deployment.md) — デプロイ構成 | fixed | — |
 
 ## 30_detail-design — 詳細設計(P3)
 

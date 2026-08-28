@@ -120,10 +120,27 @@ Kazuki は全タスク一律 1.5h(P1のような内訳の根拠なし)。Claude 
 
 ## P2.5 以降(暫定 — 各工程の直前に分解する)
 
-### P2.5 アーキ検証 — 1〜2 セッション
-Docker Compose で PostgreSQL / Spring Boot 雛形 / Vue 雛形 / Render デプロイ / permissions 整備
+### P2.5 アーキ検証(確定・2026-08-29分解)
 
-- 着手時タスク(2026-08-26, REV-008 A2追記): Render 無料枠 Postgres の自動バックアップ有無・インスタンス有効期限の有無をダッシュボードで確認し、`nonfunctional-design.md` NFR-08 を確定させる
+**目的:** 設計書どおりに Vue → Java → PostgreSQL → Render の経路が本当に通るかだけを確認する Walking Skeleton。機能は作らない(雛形コードは P5 で作り直す前提)。
+
+| タスクID | 内容 | 完了条件 | Kazuki見積 | Claude見積 | 合意値 | 状態 |
+|---|---|---|---|---|---|---|
+| P2.5-01 | Render 無料枠バックアップ/有効期限確認 → NFR-08確定 | `nonfunctional-design.md` NFR-08 が方針(a)/(b)/(c)のいずれかで確定した状態 | 0.67 | 0.5 | **0.5** | 完了(方針(c)受入リスク採用) |
+| P2.5-02 | Docker Compose 雛形(PostgreSQL) | ローカルで `docker compose up` により PostgreSQL が起動する状態 | 0.67 | 0.5 | **0.5** | 完了(PostgreSQL 16.15 起動・psql接続確認済み) |
+| P2.5-03 | Spring Boot 雛形(Hello World API) | `backend/` にビルドが通る雛形ができ、Hello World 相当のAPIが動く状態 | 0.67 | 1.25 | **1.25** | 完了(Java 25 + Spring Boot 4.1.1、`GET /api/hello`がJDBC経由でPostgreSQLから文字列取得・返却まで確認済み) |
+| P2.5-04 | Vue 雛形(API 呼び出し画面) | `frontend/` の雛形が P2.5-03 のAPIを叩いて画面に表示する状態 | 0.5 | 0.5 | **0.5** | 完了(Vite proxy経由で`/api/hello`を取得し画面表示まで確認済み) |
+| P2.5-05 | フロント/バックエンド配信方式の決定 | `deployment.md`(BD-007)が作成された状態 | 0.5 | 0.5 | **0.5** | 完了(Static Site + Web Service分離、Rewriteでプロキシ。CORS設定不要) |
+| P2.5-06 | Render デプロイ・疎通確認 | 本番URL上で Vue→Java→PostgreSQL 経由の文字列が表示される状態(P2.5完了条件そのもの) | 0.5 | 1.75 | **1.75** | 未着手 |
+| P2.5-07 | settings.json permissions 整備 | Claude Code機能整備状況の該当欄が埋まる状態 | 0.5 | 0.25 | **0.25** | 未着手 |
+
+### 見積もり突き合わせの記録(2026-08-29、続き)
+
+P2.5-04〜07もKazuki一律0.5h(根拠なし、と本人が明言)。P2.5-06(1.75h、3.5倍差)とP2.5-07(0.25h、逆に0.5倍)はClaude値を採用。P2.5-06はGitHubリモート未設定・Renderアカウント未作成・フロント/バックエンド初回デプロイの3点が重なるため高め、P2.5-07は定型作業のため低めに見積もった。
+
+### 見積もり突き合わせの記録(2026-08-29)
+
+Kazuki は全タスク一律 0.67h(40分)の直感値(根拠なし、と本人が明言)。P2.5-03(Spring Boot雛形)のみ Claude 1.25h と1.87倍の差があったが、Kazuki側に個別の根拠がなかったため Claude の値を採用。根拠: このプロジェクトで初めて Java に触れるタスクであること、Java 25 + Spring Boot 4.x がまだ枯れていないバージョンであること、`CLAUDE.md` の制約(`typing-core` は言語非依存)を満たすマルチモジュール構成の決定が雛形作成に含まれること。
 
 ### P3 詳細設計 — 2〜3 セッション
 クラス設計 / シーケンス図 / **ローマ字オートマトン仕様** / DB アクセス設計 / rules 整備 / ゲート③
