@@ -131,8 +131,8 @@ Kazuki は全タスク一律 1.5h(P1のような内訳の根拠なし)。Claude 
 | P2.5-03 | Spring Boot 雛形(Hello World API) | `backend/` にビルドが通る雛形ができ、Hello World 相当のAPIが動く状態 | 0.67 | 1.25 | **1.25** | 完了(Java 25 + Spring Boot 4.1.1、`GET /api/hello`がJDBC経由でPostgreSQLから文字列取得・返却まで確認済み) |
 | P2.5-04 | Vue 雛形(API 呼び出し画面) | `frontend/` の雛形が P2.5-03 のAPIを叩いて画面に表示する状態 | 0.5 | 0.5 | **0.5** | 完了(Vite proxy経由で`/api/hello`を取得し画面表示まで確認済み) |
 | P2.5-05 | フロント/バックエンド配信方式の決定 | `deployment.md`(BD-007)が作成された状態 | 0.5 | 0.5 | **0.5** | 完了(Static Site + Web Service分離、Rewriteでプロキシ。CORS設定不要) |
-| P2.5-06 | Render デプロイ・疎通確認 | 本番URL上で Vue→Java→PostgreSQL 経由の文字列が表示される状態(P2.5完了条件そのもの) | 0.5 | 1.75 | **1.75** | 未着手 |
-| P2.5-07 | settings.json permissions 整備 | Claude Code機能整備状況の該当欄が埋まる状態 | 0.5 | 0.25 | **0.25** | 未着手 |
+| P2.5-06 | Render デプロイ・疎通確認 | 本番URL上で Vue→Java→PostgreSQL 経由の文字列が表示される状態(P2.5完了条件そのもの) | 0.5 | 1.75 | **1.75** | 完了(GitHub push→Docker化→Render 3サービス作成→Rewriteで疎通確認まで完了。フロント https://typing-app-1-jofu.onrender.com / バックエンド https://typing-app-xvkn.onrender.com) |
+| P2.5-07 | settings.json permissions 整備 | Claude Code機能整備状況の該当欄が埋まる状態 | 0.5 | 0.25 | **0.25** | 完了(.claude/settings.jsonにgit/docker/mvn/npm/gh/java/node/curlの許可リストと破壊的操作のdenyを追加) |
 
 ### 見積もり突き合わせの記録(2026-08-29、続き)
 

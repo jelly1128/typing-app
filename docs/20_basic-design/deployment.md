@@ -46,3 +46,10 @@ Render 無料枠の範囲で完結させる(`charter.md` 5章)。学習目的の
 ## 6. 未決事項
 
 - ~~フロント/バックエンドを1サービスにまとめるか分離するか~~ → 解決済み。Static Site + Web Service に分離し、Rewrite でプロキシする方式を採用(本節)
+
+## 7. 公開URL(2026-08-29、P2.5-06完了時点)
+
+- フロントエンド: https://typing-app-1-jofu.onrender.com
+- バックエンド: https://typing-app-xvkn.onrender.com
+
+疎通確認済み(本番URL上で `Hello from PostgreSQL` の表示を確認)。
