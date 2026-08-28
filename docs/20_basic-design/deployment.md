@@ -15,7 +15,7 @@ Render 無料枠の範囲で完結させる(`charter.md` 5章)。学習目的の
 | サービス | Render 上の種別 | デプロイ対象 | 備考 |
 |---|---|---|---|
 | フロントエンド | Static Site(無料) | `frontend/`(Vite ビルド成果物 `dist/`) | インスタンス時間を消費しない。スピンダウンなし |
-| バックエンド | Web Service(無料) | `backend/api/`(Spring Boot jar) | 15分無通信でスピンダウン、再起動に約1分(NFR-03で受入済み) |
+| バックエンド | Web Service(無料、**Docker**) | `backend/Dockerfile` | Render のネイティブランタイムは Node.js/Python/Ruby/Go/Rust/Elixir のみで Java 非対応(2026-08-29確認)。マルチステージ Dockerfile(`maven:3.9-eclipse-temurin-25` でビルド→`eclipse-temurin:25-jre` で実行)を使う。15分無通信でスピンダウン、再起動に約1分(NFR-03で受入済み) |
 | DB | Render Postgres(無料) | — | バックアップ非対応・30日+猶予14日で失効(NFR-08で受入済み) |
 
 ## 3. フロント⇔バックエンド間の通信方式
@@ -36,9 +36,9 @@ Render 無料枠の範囲で完結させる(`charter.md` 5章)。学習目的の
 
 ## 5. デプロイ手順の概要(P2.5-06 で実施)
 
-1. GitHub リポジトリへ push(未実施の場合はリモート作成から)
+1. GitHub リポジトリへ push(済み。[jelly1128/typing-app](https://github.com/jelly1128/typing-app))
 2. Render で Postgres インスタンス作成(無料)
-3. Render で Web Service 作成しバックエンドをデプロイ。ビルドコマンド `mvn -f backend clean package`、起動コマンド `java -jar backend/api/target/api.jar`。環境変数に手順4の接続情報を設定
+3. Render で Web Service 作成しバックエンドをデプロイ。**Runtime は Docker**、Dockerfile Path `backend/Dockerfile`、Docker Build Context Directory `backend`。環境変数 `SPRING_DATASOURCE_URL` / `SPRING_DATASOURCE_USERNAME` / `SPRING_DATASOURCE_PASSWORD` に手順2の接続情報を設定(Internal Database URL の `postgresql://USER:PASSWORD@HOST/DB` を `jdbc:postgresql://HOST:5432/DB` 形式に変換し、USER/PASSWORDは分離して設定)
 4. Render で Static Site 作成しフロントエンドをデプロイ。ビルドコマンド `npm --prefix frontend ci && npm --prefix frontend run build`、公開ディレクトリ `frontend/dist`
 5. Static Site に Rewrite ルール(3章)を追加
 6. 公開 URL にアクセスし、`Hello from PostgreSQL` が表示されることを確認(P2.5 完了条件)
