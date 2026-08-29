@@ -7,7 +7,7 @@ info:
     リアルタイムのローマ字判定(FR-02/FR-03)はフロントエンド完結のため API を持たない(ADR-002)。
   x-doc-id: BD-003
   x-status: fixed
-  x-updated: "2026-08-26"
+  x-updated: "2026-08-29"
 
 paths:
   /api/users:
@@ -191,10 +191,12 @@ paths:
       summary: ミスの傾向分析と改善アドバイスを取得する(S-06)
       description: |
         FR-10, FR-11。全期間・全難易度のミス記録(miss_records)とかな出現回数(session_kana_counts)を
-        集計する。セッション自体が0件の場合、4種の集計はすべて空配列、advice は null。
+        集計する。セッション自体が0件の場合、4種の集計はすべて空配列、advice も空配列。
         セッションはあるがミス記録が0件の場合、byKana / byErrorPattern / byPrevKana は空配列にするが、
         byCharType はミスなし(全文字種 accuracyRate=100)として算出する
         (screen-design.md 4章 B2)。userId が存在しない場合は404。
+        advice は該当するカテゴリ(誤りパターン/かな別/文字種別)ごとに0〜1件ずつ、最大3件まで
+        独立に生成される複数アドバイスの配列(P3 logic-spec/advice-generation.md、2026-08-29 CL-005)。
       parameters:
         - name: userId
           in: path
@@ -471,17 +473,27 @@ components:
                 description: 拍単位ミス数(直前がこのかなだった拍でのミス) ÷ session_kana_counts の該当かなの出現回数合計(近似分母。er-diagram.md 3.3)(%、0〜100)
         byCharType:
           type: array
-          description: FR-10(4) 文字種別の正解率
+          description: >-
+            FR-10(4) 文字種別の正解率。出現回数合計が0の文字種(該当難易度のお題にその文字種が
+            出現しない場合)はこの配列に含めない(0除算・意味のない100%表示を避けるため。
+            2026-08-29 CL-007)
           items:
             type: object
             properties:
               charType:
                 type: string
                 enum: [清音, 拗音, 撥音ん, 促音っ, 長音]
+              occurrenceCount:
+                type: integer
+                description: 該当文字種の出現回数合計(session_kana_counts から算出)。1以上
               accuracyRate:
                 type: number
-                description: (該当文字種の出現回数合計 − 該当文字種の拍単位ミス数) ÷ 該当文字種の出現回数合計。session_kana_counts と miss_records から算出(%、0〜100)
+                description: (occurrenceCount − 該当文字種の拍単位ミス数) ÷ occurrenceCount。session_kana_counts と miss_records から算出(%、0〜100)
         advice:
-          type: string
-          nullable: true
-          description: FR-11 改善アドバイス文。分析対象データが0件の場合 null
+          type: array
+          description: >-
+            FR-11 改善アドバイス文の配列(0〜3件)。カテゴリ(誤りパターン/かな別/文字種別)ごとに
+            独立判定し該当するものだけを含む。該当が1つもない場合は「目立った苦手は見つかりませんでした」
+            の1件のみを返す(分析対象データが0件の場合は空配列)。logic-spec/advice-generation.md 参照
+          items:
+            type: string

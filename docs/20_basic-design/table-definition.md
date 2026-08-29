@@ -1,7 +1,7 @@
 ---
 doc_id: BD-005
 status: fixed
-updated: 2026-08-26
+updated: 2026-08-29
 ---
 
 # テーブル定義
@@ -117,5 +117,5 @@ UNIQUE制約: `(session_id, kana)`。フロントエンドがセッション終�
 
 - 具体的なインデックス設計(検索頻度の高いカラムへの追加インデックス)は P3 `db-access.md` で確定する
 - Flyway のマイグレーションファイル分割は P5 実装時に決める
-- TBL-04 `consistency NUMERIC(8,2)` の桁数は暫定。統計量の定義(標準偏差[ms]か変動係数か)が P3 `logic-spec/romaji-automaton.md` 相当の詳細設計で確定した時点で再確認する
+- ~~TBL-04 `consistency NUMERIC(8,2)` の桁数は暫定。統計量の定義(標準偏差[ms]か変動係数か)が P3 の詳細設計で確定した時点で再確認する~~ → 解決済み。`docs/30_detail-design/logic-spec/session-metrics.md` で標準偏差[ms]を採用と確定、桁数は変更不要と確認(2026-08-29)
 - TBL-05 `expected_key` の記録規則(複数受理表記があるときにどの表記由来のキーを記録するか)は、P3 `logic-spec/romaji-automaton.md` の受理表確定と合わせて定める。桁数 `VARCHAR(10)` の妥当性もその際に再確認する(2026-08-26, REV-007 A1)

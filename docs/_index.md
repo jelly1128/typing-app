@@ -1,7 +1,7 @@
 ---
 doc_id: IDX-001
 status: fixed
-updated: 2026-08-26
+updated: 2026-08-29
 ---
 
 # 文書管理台帳
@@ -45,8 +45,10 @@ updated: 2026-08-26
 |---|---|---|---|
 | DD-001 | class-design.md — クラス設計 | 未着手 | — |
 | DD-002 | sequence.md — シーケンス図 | 未着手 | — |
-| DD-003 | logic-spec/romaji-automaton.md — ローマ字入力受理オートマトン仕様 | 未着手 | — |
+| DD-003 | [logic-spec/romaji-automaton.md](./30_detail-design/logic-spec/romaji-automaton.md) — ローマ字入力受理オートマトン仕様 | review | — |
 | DD-004 | db-access.md — DB アクセス設計 | 未着手 | — |
+| DD-005 | [logic-spec/session-metrics.md](./30_detail-design/logic-spec/session-metrics.md) — セッション集計計算仕様 | review | — |
+| DD-006 | [logic-spec/advice-generation.md](./30_detail-design/logic-spec/advice-generation.md) — 改善アドバイス生成仕様 | review | — |
 
 ## 40_test — テスト(P4 / P6)
 
@@ -79,6 +81,7 @@ updated: 2026-08-26
 | [review-20260823_p2-verify-opus.md](./90_review/review-20260823_p2-verify-opus.md) | 同上(P2ゲート②doc観点、Opus検証レビュー) | 0(該当なし) |
 | [review-20260826_p2-gate2-test.md](./90_review/review-20260826_p2-gate2-test.md) | 同上(P2ゲート②test観点) | 0(A1〜A3クローズ済み) |
 | [review-20260826_p2-gate2-ops.md](./90_review/review-20260826_p2-gate2-ops.md) | 同上(P2ゲート②ops観点) | A2のみ残(P2.5着手時対応。`wbs.md`に申し送り済み) |
+| [review-20260829_p3-interim.md](./90_review/review-20260829_p3-interim.md) | romaji-automaton.md / session-metrics.md / advice-generation.md(P3中間レビュー) | 0(A1〜A6全件クローズ。B/Cはゲート③までに対応予定) |
 
 ## decisions — ADR(意思決定記録)
 
@@ -87,3 +90,4 @@ updated: 2026-08-26
 | [ADR-001](./00_project/decisions/001-auth-out-of-scope.md) | 認証機能を MVP から除外する | 2026-08-23 |
 | [ADR-002](./00_project/decisions/002-realtime-judgment-frontend.md) | リアルタイムのローマ字判定はフロントエンド完結にする | 2026-08-23 |
 | [ADR-003](./00_project/decisions/003-userid-enumeration-accepted-risk.md) | userId 推測による他人データ閲覧リスクを受け入れる | 2026-08-23 |
+| [ADR-004](./00_project/decisions/004-long-vowel-hyphen-key.md) | 長音「ー」はハイフンキー"-"1つで確定する(P1確定の母音延長方式を上書き) | 2026-08-29 |
