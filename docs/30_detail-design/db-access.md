@@ -1,6 +1,6 @@
 ---
 doc_id: DD-004
-status: draft
+status: fixed
 updated: 2026-08-29
 ---
 
@@ -23,7 +23,7 @@ updated: 2026-08-29
 |---|---|---|---|
 | `User` | TBL-01 | `id`, `name`(UNIQUE), `createdAt` | — |
 | `TopicSet` | TBL-02 | `id`, `name`, `description`(nullable), `sortOrder` | — |
-| `Sentence` | TBL-03 | `id`, `text`, `reading` | `topicSet: TopicSet`(`@ManyToOne`) |
+| `Sentence` | TBL-03 | `id`, `text`, `moraList`(`List<String>`。`@Type`または`@JdbcTypeCode(SqlTypes.JSON)`でJSONBにマッピング) | `topicSet: TopicSet`(`@ManyToOne`) |
 | `Session` | TBL-04 | `id`, `netKpm`, `rawKpm`, `accuracy`, `consistency`, `durationSeconds`, `endConditionType`(enum), `endConditionValue`, `playedAt` | `user: User`, `topicSet: TopicSet`(いずれも`@ManyToOne`) |
 | `MissRecord` | TBL-05 | `id`, `kanaOccurrenceNo`, `kana`, `expectedKey`, `actualKey`, `prevKana`(nullable), `charType`(enum) | `session: Session`(`@ManyToOne`) |
 | `SessionKanaCount` | TBL-06 | `id`, `kana`, `charType`(enum), `totalCount` | `session: Session`(`@ManyToOne`)。`@Table(uniqueConstraints = @UniqueConstraint(columnNames = {"session_id", "kana"}))` |
@@ -49,8 +49,10 @@ updated: 2026-08-29
 | Repository | メソッド | 用途 |
 |---|---|---|
 | `UserRepository` | `findByName(name)` | find-or-create(FR-12) |
+| `UserRepository` | `existsById(userId)` | userId存在確認(404判定。class-design.md 1.4) |
 | `TopicSetRepository` | `findAllByOrderBySortOrder()` | お題セット一覧(FR-13) |
-| `SentenceRepository` | `findByTopicSetId(topicSetId)` | お題文一覧(FR-01) |
+| `TopicSetRepository` | `existsById(topicSetId)` | topicSetId存在確認(404判定) |
+| `SentenceRepository` | `findByTopicSetIdOrderById(topicSetId)` | お題文一覧(FR-01)。第2ソートキー`id`でタイブレークし順序を確定させる(2026-08-29、ops-reviewer B7対応) |
 | `SessionRepository` | `findByUserIdOrderByPlayedAtDesc(userId)` | 履歴一覧(FR-08) |
 
 ### 4.2 自己ベスト(FR-09)
@@ -65,6 +67,8 @@ WHERE s.user.id = :userId AND s.topicSet.id = :topicSetId
 
 `netKpmBest` と `accuracyBest` は**別々のセッションで達成された値でもよい**(`api-spec.yaml` `PersonalBest` は難易度別の最大値であり、同一セッション由来である必要はない)。そのため2つのMAXを独立に取るだけでよく、「最良セッション1件を探す」クエリにはしない。
 
+**404判定との関係(2026-08-29、doc-reviewer A2/test-reviewer A6対応):** このMAXクエリは0件でも`null`を返すため、「セッションが0件」と「userId/topicSetIdが不存在」を区別できない。`SessionService`は本クエリの前に`UserRepository.existsById`/`TopicSetRepository.existsById`で存在確認を行い、不存在なら404、存在するが0件ならMAXの`null`をそのまま`PersonalBest`(`netKpmBest`/`accuracyBest`ともnull)として200で返す。
+
 ### 4.3 ミス分析(FR-10)
 
 **設計判断: 「拍単位ミス集合」を1本のクエリで取得し、Service層(`MissAnalysisService`)でカテゴリごとに再集計する。**
@@ -77,9 +81,18 @@ SELECT DISTINCT ON (mr.session_id, mr.kana, mr.kana_occurrence_no)
 FROM miss_records mr
 JOIN sessions s ON s.id = mr.session_id
 WHERE s.user_id = :userId
+ORDER BY mr.session_id, mr.kana, mr.kana_occurrence_no, mr.id
 ```
 
+`ORDER BY`末尾に`mr.id`を追加し、`DISTINCT ON`が返す行を一意に確定させる(2026-08-29、doc-reviewer C3/ops-reviewer C1対応)。
+
 このリストを `MissAnalysisService` が `kana` / `prevKana` / `charType` それぞれでグルーピングしてカウントすれば、FR-10(1)(3)(4)の分子(拍単位ミス数)が揃う。
+
+**出力順序・件数・NULL扱い(2026-08-29、test-reviewer A8対応で確定):**
+
+- **件数上限は設けない(全件返す)**。理由: 集計後の行数は「かな/文字種/誤りパターンの種類数」で頭打ちになり、セッション数の増加に比例しないため(種類数自体は拍の種類・キーの組み合わせで有限)
+- 並び順のタイブレーク: `byKana`は`missCount`降順→同数なら`missRate`降順→さらに同値なら`kana`昇順。`byErrorPattern`は`count`降順→同値なら`expectedKey`昇順→`actualKey`昇順。`byPrevKana`は`missRate`降順→同値なら`prevKana`昇順。`byCharType`は文字種の定義順(清音/拗音/撥音ん/促音っ/長音)で固定(「多い順」の指定が無いため)
+- `prev_kana IS NULL`(セッション最初の拍)の行は`byPrevKana`の集計から**除外する**(決定④によりセッション全体で最初の1件のみ発生するため、除外しても分析精度への影響は無視できる。含めると分母が存在せず0除算になる)
 
 **FR-10(2)「誤りパターン別発生回数」だけは拍単位ではなく生イベント単位**であることに注意(`api-spec.yaml` `byErrorPattern` の `count` に「拍単位」の記載がない)。こちらは重複除去せず、別クエリで素直に集計する:
 
@@ -125,6 +138,14 @@ GROUP BY skc.charType
 
 `session_kana_counts` は既存のUNIQUE制約 `(session_id, kana)` が `session_id` 先頭のインデックスを兼ねるため追加不要。`users.name` も既存のUNIQUE制約で足りる。具体的なFlywayマイグレーションファイルへの反映はP5実装時に行う。
 
-## 7. 未決事項
+## 7. シードデータの管理方針(2026-08-29、ゲート③ ops-reviewer A2対応で確定)
 
-なし(本タスクでTBL-05 `expected_key`・インデックス設計の未決事項をいずれも解決した)。
+`nonfunctional-design.md` NFR-08は、Render無料枠のPostgresが失効した場合の復旧策として「DBを作り直す」ことを受入リスクとして採用している(方針(c))。この復旧策を実際に機能させるには、`topic_sets`/`sentences`(お題マスタ)が**DB再作成時に自動的に復元される**必要がある。
+
+**結論: お題マスタ(TBL-02/TBL-03)のシードデータはFlywayの`R__`(繰り返し可能マイグレーション)として管理し、リポジトリにコミットする。** 手動INSERTでは投入しない。DBを作り直してFlywayを実行すれば、アプリケーションスキーマと同時にお題マスタも復元される。具体的なマイグレーションファイルの分割・内容(難易度3件、各セット5文以上、拗音・促音・撥音・長音を各1回以上含む)はP5実装時に決める。
+
+`sessions`/`miss_records`/`session_kana_counts`(利用者の記録)はこの対象外で、DB再作成時に失われることを引き続き受け入れる(NFR-08)。
+
+## 8. 未決事項
+
+なし(本タスクでTBL-05 `expected_key`・インデックス設計・シードデータ管理方針の未決事項をいずれも解決した)。

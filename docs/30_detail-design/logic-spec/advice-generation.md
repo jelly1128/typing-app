@@ -1,6 +1,6 @@
 ---
 doc_id: DD-006
-status: review
+status: fixed
 updated: 2026-08-29
 ---
 

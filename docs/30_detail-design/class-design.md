@@ -1,6 +1,6 @@
 ---
 doc_id: DD-001
-status: draft
+status: fixed
 updated: 2026-08-29
 ---
 
@@ -9,7 +9,7 @@ updated: 2026-08-29
 実装者(Claude)がこの文書だけを見てクラス構成に迷わず書き始められることを目的とする。メソッドの中身(業務ロジックの手順)は書かない。手順は `logic-spec/` の各仕様、または P3-07 `sequence.md` に譲る。
 
 - 1章: バックエンド(P3-04)
-- 2章: フロントエンド(P3-05、未着手)
+- 2章: フロントエンド(P3-05)
 
 ---
 
@@ -61,11 +61,15 @@ Controller → Service → Repository の3層構成。例外→HTTP応答の変�
 | クラス | 責務 | 対応FR |
 |---|---|---|
 | `UserService` | find-or-create、name のバリデーション(trim後1〜100文字) | FR-12 |
-| `TopicSetService` | お題セット一覧・お題文一覧の取得 | FR-01, FR-13 |
-| `SessionService` | リクエストの値域チェック → `SessionMetricsCalculator` 呼び出し → `@Transactional` で結果・ミス記録・かな出現回数を保存 → 自己ベスト比較(`isNetKpmBest`/`isAccuracyBest`) | FR-04〜09 |
-| `MissAnalysisService` | Repositoryから全期間のミス記録・かな出現回数を取得し4観点に集計 → `AdviceGenerator` 呼び出し | FR-10, FR-11 |
+| `TopicSetService` | お題セット一覧・お題文一覧の取得。お題文一覧取得時はtopicSetIdの存在確認に加え、**取得結果が0件の場合も`TopicSetNotFoundException`(404)を投げる**(`api-spec.yaml` `GET /topic-sets/{id}/sentences`の404条件。2026-08-29 ゲート③検証レビューREV-013 A6対応) | FR-01, FR-13 |
+| `SessionService` | userId/topicSetId の存在確認 → リクエストの値域チェック → `SessionMetricsCalculator` 呼び出し → `@Transactional` で結果・ミス記録・かな出現回数を保存 → 自己ベスト比較(`isNetKpmBest`/`isAccuracyBest`)。保存前のMAXクエリが両方nullの場合(初回セッション)、`SessionResult.previousBest`は`null`とし`isNetKpmBest`/`isAccuracyBest`は`true`にする(2026-08-29 REV-013 B7対応)。履歴一覧(FR-08)取得時も Repository から Entity を受け取り DTO へ変換する | FR-04〜09 |
+| `MissAnalysisService` | userId の存在確認 → Repositoryから全期間のミス記録・かな出現回数を取得し4観点に集計 → `AdviceGenerator` 呼び出し | FR-10, FR-11 |
 
 集計クエリの具体的な実装方針(JPQL/ネイティブクエリ、インデックス)は P3-06 `db-access.md` で確定する。
+
+**存在確認の責務(2026-08-29、ゲート③ doc-reviewer A2/test-reviewer A6対応で確定):** userId・topicSetId を受け取る全エンドポイントで、対応する Service の入口(メソッドの最初)で存在確認を行う(`db-access.md` 4.1 の `existsById` 相当を使う)。存在しなければ `UserNotFoundException`/`TopicSetNotFoundException` を投げる。**両方が存在しない場合は userId を先に判定する**(パスパラメータであり、判定順序を先にするのが自然なため)。`UserService`/`TopicSetService` も同様に自分が担当するリソースの存在確認を自分の入口で行う。
+
+**Entity→DTO変換の責務:** Controller は変換を行わず、受け渡しのみを行う。Entity → Response DTO の変換は各 Service が行う(4章で組み立てる `MissAnalysis` と同じ扱いに統一)。
 
 #### Repository(Spring Data JPA)
 
@@ -97,9 +101,36 @@ Controller → Service → Repository の3層構成。例外→HTTP応答の変�
 
 | クラス | 責務 |
 |---|---|
-| `GlobalExceptionHandler`(`@RestControllerAdvice`) | 例外→`ErrorResponse`変換、`traceId`採番、500時のログ出力(NFR-07) |
+| `GlobalExceptionHandler`(`@RestControllerAdvice`) | 例外→`ErrorResponse`変換、`traceId`採番、4xx/500時のログ出力(NFR-07) |
 | `UserNotFoundException` / `TopicSetNotFoundException` | 404応答に変換(userId・topicSetId不在) |
 | `InvalidSessionSubmissionException` | 400応答に変換(値域外、`missRecords[].kana`がkanaCountsに一致しない等) |
+
+**例外→応答の対応表(2026-08-29、ゲート③ doc-reviewer B2/test-reviewer A6対応で確定):**
+
+| 例外/条件 | HTTPステータス | `code` | ログ |
+|---|---|---|---|
+| `UserNotFoundException` | 404 | `USER_NOT_FOUND` | WARN 1行(traceId・エンドポイント・userId) |
+| `TopicSetNotFoundException` | 404 | `TOPIC_SET_NOT_FOUND` | WARN 1行 |
+| `InvalidSessionSubmissionException` | 400 | `VALIDATION_ERROR` | WARN 1行 |
+| `MethodArgumentNotValidException`(Bean Validation失敗) | 400 | `VALIDATION_ERROR` | WARN 1行 |
+| `HttpMessageNotReadableException`(不正JSON・型不一致) | 400 | `VALIDATION_ERROR` | WARN 1行 |
+| `DataIntegrityViolationException`(制約違反) | 500 | `INTERNAL_ERROR` | ERROR + スタックトレース |
+| `CannotGetJdbcConnectionException`等(DB接続断) | 500 | `INTERNAL_ERROR` | ERROR + スタックトレース |
+| 上記以外の未捕捉例外 | 500 | `INTERNAL_ERROR` | ERROR + スタックトレース |
+
+4xxはWARNで1行(スタックトレース不要)、500のみ従来どおりスタックトレースを出す。`UserService`のfind-or-create競合(`users.name`のUNIQUE制約違反)は`DataIntegrityViolationException`を個別にcatchして`findByName`を再実行し既存ユーザーを返す(このハンドラには到達させない。db-access.md 5章)。
+
+**値域チェック表(`SessionService.submitSession`、2026-08-29 test-reviewer A5対応で確定。違反時はすべて`InvalidSessionSubmissionException`):**
+
+| 項目 | 条件 |
+|---|---|
+| `endConditionValue` | `endConditionType=sentence_count`のとき1〜50、`time_limit`のとき10〜600(秒)の範囲外 |
+| `durationSeconds` | 負値(**0は許容**。制限時間モードで1打鍵も無いままセッションが保存されうるため。`session-metrics.md` 4章判断#3、2026-08-29 ゲート③検証レビューREV-013 A5対応) |
+| `correctKeyCount` | 負値 |
+| `keystrokeIntervalsMs` | 負値を含む |
+| `kanaCounts` | 同一`kana`が重複する |
+| `missRecords[].kana` | `kanaCounts`のいずれの`kana`にも一致しない |
+| 算出後の`netKpm`/`rawKpm` | `table-definition.md` TBL-04の桁数上限(9999.99)を超える(`SessionMetricsCalculator`の計算自体は失敗させず、呼び出し元でチェックする。`session-metrics.md`参照) |
 
 ### 1.5 FR-ID トレーサビリティ
 
@@ -110,7 +141,7 @@ Controller → Service → Repository の3層構成。例外→HTTP応答の変�
 | FR-05 | — | `SessionController`/`SessionService`/`SessionRepository` |
 | FR-06 | `SessionMetricsCalculator` | `SessionService` |
 | FR-07 | — | `SessionService`/`SessionRepository` |
-| FR-08 | — | `SessionController`/`SessionRepository` |
+| FR-08 | — | `SessionController`/`SessionService`/`SessionRepository` |
 | FR-09 | — | `SessionController`/`SessionService`/`SessionRepository` |
 | FR-10 | — | `MissAnalysisController`/`MissAnalysisService`/`MissRecordRepository`/`SessionKanaCountRepository` |
 | FR-11 | `AdviceGenerator` | `MissAnalysisController`/`MissAnalysisService` |
@@ -142,11 +173,30 @@ frontend/src/
 
 | モジュール | 責務 | 対応する仕様の章 |
 |---|---|---|
-| `types.ts` | `Mora` / `MoraSequence` / `MissRecord` / `KeystrokeResult`(1キー入力ごとの判定結果。確定済み文字・次の候補・ミス有無を持つ) | 3章 |
+| `types.ts` | `Mora` / `MoraSequence` / `MissRecord` / `KeystrokeResult`(下記フィールド定義参照) | 3章 |
 | `moraPatterns.ts` | 4章の表(清音・拗音)をかな→受理パターンの辞書として持つ | 4章 |
 | `specialMora.ts` | 撥音ん・促音っ・長音ーの受理パターン関数(`んの受理パターン` `っの受理パターン` `次の拍の受理パターンを絞り込む` `ーの受理パターン`) | 5章 |
-| `moraJudge.ts` | 1拍を確定させるループ(`拍を判定する` `この拍を確定する`)。キー入力を1つずつ受け取り `KeystrokeResult` を返す | 6.1 |
-| `sequenceJudge.ts` | 拍列全体のループ(`拍列を判定する`)。押し戻し(持ち越しキー)・促音の絞り込み結果を拍間で引き継ぐ状態を保持するエントリポイント | 6.0 |
+| `moraJudge.ts` | 1拍の受理判定に使う**純粋な部分手順**(候補集合をキー入力で絞り込む、入力済み文字列が候補と完全一致するか判定する)を提供する**無状態のヘルパー関数群**。それ自体はキー入力のループを回さない | 6.1(部分手順のみ) |
+| `sequenceJudge.ts` | `romaji-automaton.md` 6.0(拍列全体のループ)と6.1(1拍を確定させるループ)の**両方を実装するエントリポイント**。拍をまたぐ状態(押し戻しの持ち越しキー・促音の絞り込み結果・直前に確定した拍・累計拍インデックス)に加え、**1拍判定中の状態(候補集合・入力済み文字列・保留中の確定候補)もここに保持する**。`moraJudge`の部分手順を呼び出しながら状態を1キーずつ進め、`KeystrokeResult`を返す | 6.0・6.1(状態保持含む全体) |
+
+**状態保持の分担(2026-08-29、ゲート③ doc-reviewer A5/test-reviewer A1対応で確定。2026-08-29検証レビューREV-013 A4で`moraJudge`の役割を訂正):** 状態は全て`sequenceJudge`に一元化する(採用理由はテストのしやすさ。`romaji-automaton.md` 8章 判断#10)。`romaji-automaton.md` 6.1の疑似コード自体が`sequenceJudge`の内部ロジックであり、「次のキー入力を待つ」は概念上の表現で、実装ではキー入力イベントのたびに1回だけ処理が呼ばれる(状態はインスタンスフィールドとして保持する)。`moraJudge`はこの疑似コードが使う純粋な部分手順だけを切り出したもので、状態は持たない。`MoraSequence`は`api-spec.yaml` `Sentence.moraList`をそのまま使い、`judgment-engine`側での分割処理は持たない(`romaji-automaton.md` 3章、CL-012)。
+
+**お題文をまたぐ呼び出し:** `拍列を判定する`(6.0)は1つのお題文(1つの`MoraSequence`)につき1回、`TypingView`から呼ばれる。`直前に確定した拍`・`累計拍インデックス`(下記)は`sequenceJudge`インスタンス自体が保持しセッション全体で引き継ぐため、次のお題文の呼び出しをまたいでもリセットしない。`次拍への絞り込み候補`・`持ち越しキー`はお題文の切れ目でリセットしてよい(文末の拍は既存ルールにより持ち越しキーを生まないため)。
+
+**`KeystrokeResult`のフィールド定義(2026-08-29検証レビューREV-013 A1/A3対応で`confirmedMora`/`miss`/`moraIndex`を追加):**
+
+| フィールド | 内容 |
+|---|---|
+| `confirmedText` | 確定済みの拍までの表記(採用パターンの連結) |
+| `pendingInput` | 現在判定中の拍について、これまでに入力された文字列 |
+| `nextHint` | 次に打つべき文字のヒント(動的選択方式。`romaji-automaton.md` 6.1末尾で確定) |
+| `missAt` | 直近のミス位置(拍。ミスが無ければnull。次の正解キー入力でクリア) |
+| `currentKana` | 現在判定中の拍のかな表記 |
+| `moraIndex` | セッション開始からの累計拍インデックス(0始まり、お題文をまたいでも増え続ける)。**この値が直前の`KeystrokeResult`から変化したら、新しい拍の判定が始まったことを表す**(同じかなが連続する場合でも区別できる)。`sessionStore`はこの変化を検知して`kanaOccurrenceNo`を採番する(`romaji-automaton.md` 7.1) |
+| `confirmedMora` | このキー入力で拍が確定した場合、その内容(`かな`・`文字種`・`採用パターン`・`moraIndex`)。確定しなければ`null` |
+| `miss` | このキー入力でミスが発生した場合、その内容(`kana`・`expectedKey`(カンマ区切り整形済み)・`actualKey`・`prevKana`・`charType`)。ミスでなければ`null` |
+
+`sessionStore`は`confirmedMora`から`correctKeyCount`・`kanaCounts`を、`miss`から`missRecords[]`(`kanaOccurrenceNo`は現在保持している採番値を付与)を組み立てる(`romaji-automaton.md` 7.1)。
 
 `sequenceJudge.ts` が唯一の外部公開インターフェースとなり、`TypingView.vue`(S-03)はこれ以外の内部モジュールを直接呼ばない。
 
@@ -154,7 +204,7 @@ frontend/src/
 
 | モジュール | 責務 |
 |---|---|
-| `client.ts` | fetchラッパー。baseURL・共通ヘッダー・`ErrorResponse`のパースを一元化 |
+| `client.ts` | fetchラッパー。baseURL・共通ヘッダー・`ErrorResponse`のパースを一元化。**baseURLは`/api`固定(相対パス)とし、環境変数で切り替えない**(環境差の吸収は本番=Renderの Rewrite、local=Viteのproxyが担う。`deployment.md` 3章)。タイムアウトは**90秒**(Renderのコールドスタート復帰時間、約1分を考慮。`nonfunctional-design.md` NFR-03) |
 | `userApi.ts` | `POST /api/users` | 
 | `topicSetApi.ts` | `GET /api/topic-sets`, `GET /api/topic-sets/{id}/sentences` |
 | `sessionApi.ts` | `POST /api/sessions`, `GET /api/users/{id}/sessions`, `GET /api/users/{id}/best` |
@@ -169,9 +219,19 @@ frontend/src/
 |---|---|---|---|
 | `userStore` | `userId`, `name` | localStorageとの同期(起動時読み出し・保存・クリア) | FR-12 |
 | `topicStore` | 選択中 `topicSetId`、お題セット一覧、お題文一覧 | セッション開始時に1回取得し保持(ADR-002 データフロー1) | FR-01, FR-13 |
-| `sessionStore` | 進行中セッションの一時ログ(`correctKeyCount`, `missRecords[]`, `keystrokeIntervalsMs[]`, かな出現回数)、直近の `SessionResult` | タイピング中の一時保持(system-architecture.md データフロー2)、終了時に `SessionSubmission` を組み立てて `sessionApi` へ送信 | FR-04〜09 |
+| `sessionStore` | 進行中セッションの一時ログ(`correctKeyCount`, `missRecords[]`, `keystrokeIntervalsMs[]`, かな出現回数)、かなごとの出現連番カウンタ、直近の `SessionSubmission`(送信失敗時の再送用)、直近の `SessionResult` | `judgment-engine`が返す`KeystrokeResult`を受け取り、`romaji-automaton.md` 7.1の生成規則に従って`correctKeyCount`・`keystrokeIntervalsMs`・`kanaOccurrenceNo`・`kanaCounts`を集計する。**終了条件(FR-05)の判定もここが担う**: `endConditionType=sentence_count`なら確定した文の数、`time_limit`なら`durationSeconds`の計測が`endConditionValue`に達したかを監視する。終了条件達成時に`SessionSubmission`を組み立てて`sessionApi`へ送信し、失敗時は一時ログを破棄せず保持したまま結果画面に留まる(下記「送信失敗時の再送」参照) | FR-04〜09 |
 
-`sessionStore` が保持する一時ログは `judgment-engine` の `KeystrokeResult`/`MissRecord` を蓄積したものであり、Pinia store 自体はロジックを持たず記録のみを行う(判定ロジックとの責務分離)。
+**2026-08-29改訂(ゲート③ doc-reviewer A4/test-reviewer A2・A3対応):** 当初「ロジックを持たず記録のみを行う」としていたが、かな出現連番の採番・終了条件判定は集計ロジックそのものであり実態と矛盾していた。`sessionStore`は判定ロジック(1拍が合っているか)は持たない(それは`judgment-engine`の責務)が、セッション全体の集計・終了判定は持つ、と改める。
+
+**FR-05 終了条件判定の計測定義:**
+
+| 項目 | 定義 |
+|---|---|
+| `durationSeconds`の計測開始 | 最初のキー入力(keydown)イベント |
+| `durationSeconds`の計測終了 | 終了条件達成時点(最後の拍が確定した瞬間、または制限時間到達を検知した瞬間) |
+| 制限時間モードで打鍵途中の拍 | 破棄する。`correctKeyCount`・`kanaCounts`・ミス記録のいずれにも計上しない |
+
+**送信失敗時の再送(2026-08-29、ops-reviewer A1対応で確定):** `POST /api/sessions`が失敗(タイムアウト・500等)した場合、`sessionStore`の一時ログは**破棄せず**保持したまま`ResultView`にエラー表示+「もう一度送信」ボタンを出す(`sequence.md` 5.1)。同じ`SessionSubmission`を再送し、201が返って初めて一時ログを破棄する。送信中は二重送信防止のためボタンを無効化する。
 
 ### 2.5 `views/`(画面、`screen-design.md` 1章と1:1対応)
 
@@ -214,4 +274,4 @@ frontend/src/
 
 ### 2.9 未決事項
 
-- 404時のlocalStorageクリア+S-01強制遷移、および結果保存失敗時のエラー画面遷移の具体的な呼び出し順序は P3-07 `sequence.md` で確定する
+~~404時のlocalStorageクリア+S-01強制遷移、および結果保存失敗時のエラー画面遷移の具体的な呼び出し順序は P3-07 `sequence.md` で確定する~~ → 解決済み。`sequence.md` 5.1・5.2、および起動時ルーターガード(`sequence.md` 5.3)で確定(2026-08-29)

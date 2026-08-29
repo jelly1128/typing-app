@@ -32,7 +32,7 @@ updated: 2026-08-29
 | doc_id | 文書 | status | レビュー |
 |---|---|---|---|
 | BD-001 | [system-architecture.md](./20_basic-design/system-architecture.md) — システム構成 | fixed | [interim](./90_review/review-20260823_p2-interim.md) / [opus中間](./90_review/review-20260823_p2-interim-opus.md) / [opus検証](./90_review/review-20260823_p2-verify-opus.md) |
-| BD-002 | [screen-design.md](./20_basic-design/screen-design.md) — 画面設計 | fixed | [interim](./90_review/review-20260823_p2-interim.md) / [opus中間](./90_review/review-20260823_p2-interim-opus.md) / [opus検証](./90_review/review-20260823_p2-verify-opus.md) / [test](./90_review/review-20260826_p2-gate2-test.md) / [ops](./90_review/review-20260826_p2-gate2-ops.md) |
+| BD-002 | [screen-design.md](./20_basic-design/screen-design.md) — 画面設計 | fixed | [interim](./90_review/review-20260823_p2-interim.md) / [opus中間](./90_review/review-20260823_p2-interim-opus.md) / [opus検証](./90_review/review-20260823_p2-verify-opus.md) / [test](./90_review/review-20260826_p2-gate2-test.md) / [ops](./90_review/review-20260826_p2-gate2-ops.md) / [P3ゲート③検証](./90_review/review-20260829_p3-gate3-verify.md)(CL-013) |
 | BD-003 | [api-spec.yaml](./20_basic-design/api-spec.yaml) — API 仕様(OpenAPI) | fixed | [interim](./90_review/review-20260823_p2-interim.md) / [opus中間](./90_review/review-20260823_p2-interim-opus.md) / [opus検証](./90_review/review-20260823_p2-verify-opus.md) / [test](./90_review/review-20260826_p2-gate2-test.md) / [ops](./90_review/review-20260826_p2-gate2-ops.md) |
 | BD-004 | [er-diagram.md](./20_basic-design/er-diagram.md) — ER 図 | fixed | [interim](./90_review/review-20260823_p2-interim.md) / [opus中間](./90_review/review-20260823_p2-interim-opus.md) / [opus検証](./90_review/review-20260823_p2-verify-opus.md) |
 | BD-005 | [table-definition.md](./20_basic-design/table-definition.md) — テーブル定義 | fixed | [interim](./90_review/review-20260823_p2-interim.md) / [opus中間](./90_review/review-20260823_p2-interim-opus.md) / [opus検証](./90_review/review-20260823_p2-verify-opus.md) / [test](./90_review/review-20260826_p2-gate2-test.md) / [ops](./90_review/review-20260826_p2-gate2-ops.md) |
@@ -43,12 +43,12 @@ updated: 2026-08-29
 
 | doc_id | 文書 | status | レビュー |
 |---|---|---|---|
-| DD-001 | [class-design.md](./30_detail-design/class-design.md) — クラス設計 | draft | — |
-| DD-002 | [sequence.md](./30_detail-design/sequence.md) — シーケンス図 | draft | — |
-| DD-003 | [logic-spec/romaji-automaton.md](./30_detail-design/logic-spec/romaji-automaton.md) — ローマ字入力受理オートマトン仕様 | review | — |
-| DD-004 | [db-access.md](./30_detail-design/db-access.md) — DB アクセス設計 | draft | — |
-| DD-005 | [logic-spec/session-metrics.md](./30_detail-design/logic-spec/session-metrics.md) — セッション集計計算仕様 | review | — |
-| DD-006 | [logic-spec/advice-generation.md](./30_detail-design/logic-spec/advice-generation.md) — 改善アドバイス生成仕様 | review | — |
+| DD-001 | [class-design.md](./30_detail-design/class-design.md) — クラス設計 | fixed | [gate③doc](./90_review/review-20260829_p3-gate3.md) / [gate③test](./90_review/review-20260829_p3-gate3-test.md) / [gate③ops](./90_review/review-20260829_p3-gate3-ops.md) |
+| DD-002 | [sequence.md](./30_detail-design/sequence.md) — シーケンス図 | fixed | 同上 |
+| DD-003 | [logic-spec/romaji-automaton.md](./30_detail-design/logic-spec/romaji-automaton.md) — ローマ字入力受理オートマトン仕様 | fixed | [interim](./90_review/review-20260829_p3-interim.md) / 同上 |
+| DD-004 | [db-access.md](./30_detail-design/db-access.md) — DB アクセス設計 | fixed | 同上 |
+| DD-005 | [logic-spec/session-metrics.md](./30_detail-design/logic-spec/session-metrics.md) — セッション集計計算仕様 | fixed | [interim](./90_review/review-20260829_p3-interim.md) / 同上 |
+| DD-006 | [logic-spec/advice-generation.md](./30_detail-design/logic-spec/advice-generation.md) — 改善アドバイス生成仕様 | fixed | [interim](./90_review/review-20260829_p3-interim.md) / 同上 |
 
 ## 40_test — テスト(P4 / P6)
 
@@ -82,6 +82,10 @@ updated: 2026-08-29
 | [review-20260826_p2-gate2-test.md](./90_review/review-20260826_p2-gate2-test.md) | 同上(P2ゲート②test観点) | 0(A1〜A3クローズ済み) |
 | [review-20260826_p2-gate2-ops.md](./90_review/review-20260826_p2-gate2-ops.md) | 同上(P2ゲート②ops観点) | A2のみ残(P2.5着手時対応。`wbs.md`に申し送り済み) |
 | [review-20260829_p3-interim.md](./90_review/review-20260829_p3-interim.md) | romaji-automaton.md / session-metrics.md / advice-generation.md(P3中間レビュー) | 0(A1〜A6全件クローズ。B/Cはゲート③までに対応予定) |
+| [review-20260829_p3-gate3.md](./90_review/review-20260829_p3-gate3.md) | class-design.md / sequence.md / db-access.md / logic-spec 3本(P3ゲート③doc観点、REV-010) | 0(A1〜A7全件クローズ。B9件・C9件は申し送り) |
+| [review-20260829_p3-gate3-test.md](./90_review/review-20260829_p3-gate3-test.md) | 同上(P3ゲート③test観点、REV-011) | 0(A1〜A8全件クローズ。B10件・C4件は申し送り) |
+| [review-20260829_p3-gate3-ops.md](./90_review/review-20260829_p3-gate3-ops.md) | 同上(P3ゲート③ops観点、REV-012) | 0(A1〜A2全件クローズ。B10件・C4件は申し送り) |
+| [review-20260829_p3-gate3-verify.md](./90_review/review-20260829_p3-gate3-verify.md) | class-design.md/sequence.md/db-access.md/logic-spec 3本(A15件修正直後の検証レビュー、REV-013) | 0(A1〜A7全件クローズ。B4件・C7件は申し送り) |
 
 ## decisions — ADR(意思決定記録)
 

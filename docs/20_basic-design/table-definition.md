@@ -56,9 +56,9 @@ ER図は [er-diagram.md](./er-diagram.md) を参照。各テーブルに TBL-ID 
 | id | BIGSERIAL | PK | |
 | topic_set_id | BIGINT | NOT NULL, FK→topic_sets(id) | |
 | text | VARCHAR(200) | NOT NULL | 日本語表記(かな漢字混じり)。FR-01 の表示に使う |
-| reading | VARCHAR(200) | NOT NULL | かな読み。FR-02 の判定対象の元データ |
+| mora_list | JSONB | NOT NULL | 拍(モーラ)ごとに分解したかな読みの配列(例: `["だ","い","が","く"]`、拗音は`["きゃ"]`のように2文字1拍でまとめる)。FR-02 の判定対象の元データ(`logic-spec/romaji-automaton.md` 3章)。画面表示用の全体かな文字列が必要な場合はこの配列を結合して作る(`reading`列は持たない) |
 
-シードデータとして開発者が投入する(charter.md 3.2「お題投稿」はスコープ外)。
+シードデータとして開発者が投入する(charter.md 3.2「お題投稿」はスコープ外)。**拍への分解は投入時に人力(またはスクリプト)で行い、実行時の自動分割ロジックは持たない**(お題は開発者が管理する固定データであるため。2026-08-29、ゲート③ A4対応、CL-012)。
 
 ## TBL-04 sessions(セッション結果)
 
@@ -92,7 +92,7 @@ ER図は [er-diagram.md](./er-diagram.md) を参照。各テーブルに TBL-ID 
 | session_id | BIGINT | NOT NULL, FK→sessions(id) | |
 | kana_occurrence_no | INT | NOT NULL | 同一セッション内で、`kana` 列と同じかなが何回目に出現したかの連番(かなの種類ごとに1から数え直す)。`(session_id, kana, kana_occurrence_no)` の組で「同じ拍への複数ミス」をグルーピングするキーになる(er-diagram.md 3.1) |
 | kana | VARCHAR(4) | NOT NULL | ミスが起きたかな1拍(例: し) |
-| expected_key | VARCHAR(10) | NOT NULL | 期待していたキー。FR-02 の複数受理表記(し→si/shi/ci等)がある場合にどの表記由来のキーを記録するかは未決事項(下記参照) |
+| expected_key | VARCHAR(10) | NOT NULL | 期待していたキー。FR-02 の複数受理表記(し→si/shi/ci等)が複数ある場合は、候補の1文字ずつをカンマ区切り・アルファベット順に連結して保存する(例: `"c,s"`。`db-access.md` 3章で確定) |
 | actual_key | VARCHAR(10) | NOT NULL | 実際に入力されたキー |
 | prev_kana | VARCHAR(4) | NULL可 | 直前に確定していたかな1拍。セッション最初の拍はNULL |
 | char_type | VARCHAR(10) | NOT NULL, CHECK IN ('清音','拗音','撥音ん','促音っ','長音') | |
@@ -119,3 +119,4 @@ UNIQUE制約: `(session_id, kana)`。フロントエンドがセッション終�
 - Flyway のマイグレーションファイル分割は P5 実装時に決める
 - ~~TBL-04 `consistency NUMERIC(8,2)` の桁数は暫定。統計量の定義(標準偏差[ms]か変動係数か)が P3 の詳細設計で確定した時点で再確認する~~ → 解決済み。`docs/30_detail-design/logic-spec/session-metrics.md` で標準偏差[ms]を採用と確定、桁数は変更不要と確認(2026-08-29)
 - ~~TBL-05 `expected_key` の記録規則(複数受理表記があるときにどの表記由来のキーを記録するか)は、P3 `logic-spec/romaji-automaton.md` の受理表確定と合わせて定める。桁数 `VARCHAR(10)` の妥当性もその際に再確認する(2026-08-26, REV-007 A1)~~ → 解決済み。カンマ区切り・アルファベット順の文字列として保存する方式に確定、桁数は変更不要と確認(`docs/30_detail-design/db-access.md` 3章、2026-08-29)
+- ~~TBL-03 `reading`(かな文字列)から拍列への分解手段が未定義(ゲート③ test-reviewer A4)~~ → 解決済み。分解処理は持たず、拍列(`mora_list`)をシードデータとして直接保持する方式に変更。`reading`列は廃止(2026-08-29、CL-012)

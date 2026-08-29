@@ -103,10 +103,13 @@ paths:
         打鍵間隔(keystrokeIntervalsMs)は算出にのみ使い、永続化しない(table-definition.md TBL-04 参照)。
         保存は1トランザクションで行い、失敗時は部分保存しない(NFR-09)。
 
-        次の場合は400: `endConditionType=sentence_count` のとき `endConditionValue` が1〜50の範囲外、
-        `time_limit` のとき10〜600(秒)の範囲外。`durationSeconds` が1未満。
+        次の場合は400(class-design.md 1.4 値域チェック表を参照): `endConditionType=sentence_count` のとき
+        `endConditionValue` が1〜50の範囲外、`time_limit` のとき10〜600(秒)の範囲外。`durationSeconds` が負値
+        (0は許容。制限時間モードで1打鍵も無いままセッションが保存されうるため)。
+        `correctKeyCount` が負値。`keystrokeIntervalsMs` に負値を含む。`kanaCounts` に同一 `kana` が重複する。
         `missRecords[].kana` が `kanaCounts` のいずれの `kana` にも一致しない(分母が存在しないミス記録)。
-        次の場合は404: `userId` または `topicSetId` が存在しない。
+        算出後の `netKpm`/`rawKpm` が `table-definition.md` TBL-04 の桁数上限(9999.99)を超える。
+        次の場合は404: `userId` または `topicSetId` が存在しない(両方存在しない場合は `userId` を先に判定する)。
       requestBody:
         required: true
         content:
@@ -286,9 +289,11 @@ components:
         text:
           type: string
           description: 日本語表記(かな漢字混じり)。FR-01 の表示に使う
-        reading:
-          type: string
-          description: かな読み。フロントエンドの判定エンジンの入力になる
+        moraList:
+          type: array
+          items:
+            type: string
+          description: 拍(モーラ)ごとに分解したかな読みの配列(例 ["だ","い","が","く"])。フロントエンドの判定エンジンの入力になる(table-definition.md TBL-03、2026-08-29 CL-012)
 
     MissRecordInput:
       type: object
@@ -302,9 +307,9 @@ components:
         expectedKey:
           type: string
           description: |
-            期待していたキー。FR-02 により1つのかなに複数の受理表記(例: し→si/shi/ci)がありうるため、
-            複数候補があるときにどの表記由来のキーを記録するかは P3 `logic-spec/romaji-automaton.md`
-            の受理表確定と合わせて定める(未決事項。table-definition.md TBL-05 参照)
+            期待していたキー。FR-02 により1つのかなに複数の受理表記(例: し→si/shi/ci)がありうる場合は、
+            候補の1文字ずつをカンマ区切り・アルファベット順に連結した文字列にする(例: "c,s"。
+            db-access.md 3章で確定。table-definition.md TBL-05 参照)
         actualKey:
           type: string
         prevKana:
@@ -377,7 +382,7 @@ components:
           description: 正確率(%、0〜100。table-definition.md TBL-04 と同じ単位)
         consistency:
           type: number
-          description: 打鍵間隔のばらつき。統計量の定義(標準偏差か変動係数か)はP3で確定する暫定値
+          description: 打鍵間隔のばらつき。打鍵間隔[ms]の母標準偏差(logic-spec/session-metrics.md 2.5で確定)
         durationSeconds:
           type: integer
         playedAt:

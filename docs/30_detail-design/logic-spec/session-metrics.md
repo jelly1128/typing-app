@@ -1,6 +1,6 @@
 ---
 doc_id: DD-005
-status: review
+status: fixed
 updated: 2026-08-29
 ---
 
@@ -15,12 +15,15 @@ updated: 2026-08-29
 ## 1. 入力データ
 
 ```
-構造体 セッション入力(SessionInput):
+構造体 セッション入力(SessionMetricsInput):
     correctKeyCount          // 正しく確定したキー入力の総数
-    missRecords              // ミス記録の配列(FR-04)。1ミス = 1要素
+    missRecordCount          // ミス記録の件数(FR-04)。1ミス = 1件。class-design.md 1.3の設計判断により、
+                              // ミス記録の中身(kana/expectedKey等)ではなく件数のみを受け取る
     keystrokeIntervalsMs     // 全キー入力(正誤問わず)の間隔[ms]の配列。Consistency算出専用。保存しない(api-spec.yaml参照)
     durationSeconds          // セッション所要時間[秒]
 ```
+
+**2026-08-29改訂(ゲート③ doc-reviewer A3対応):** 当初は `SessionInput`/`missRecords`(配列)としていたが、`class-design.md` 1.3 の `SessionMetricsInput` は `missRecordCount`(int)のみを受け取る設計であり、型名・フィールドの両方が不一致だった。本仕様側を `class-design.md` に合わせて修正した。
 
 ---
 
@@ -29,7 +32,7 @@ updated: 2026-08-29
 ### 2.1 総キー入力数
 
 ```
-総キー入力数 = correctKeyCount + missRecordsの要素数
+総キー入力数 = correctKeyCount + missRecordCount
 ```
 
 requirements.md の決定事項どおり、同じ拍で複数回ミスした場合はその回数分すべて `missRecords` に含まれるため、そのまま加算するだけでよい。
@@ -38,7 +41,7 @@ requirements.md の決定事項どおり、同じ拍で複数回ミスした場�
 
 ```
 もし durationSeconds == 0:
-    netKpm = 0   // 5章「ゼロ除算」参照
+    netKpm = 0   // 4章「設計判断メモ」判断#3参照
 それ以外:
     netKpm = correctKeyCount ÷ (durationSeconds ÷ 60)
 ```
@@ -83,7 +86,7 @@ requirements.md の決定事項どおり、同じ拍で複数回ミスした場�
 ## 3. 出力
 
 ```
-構造体 セッション結果(SessionResult):
+構造体 セッション結果(SessionMetricsResult):
     netKpm        // 2.2、小数第2位で丸め
     rawKpm        // 2.3、小数第2位で丸め
     accuracy      // 2.4、小数第2位で丸め
@@ -92,6 +95,11 @@ requirements.md の決定事項どおり、同じ拍で複数回ミスした場�
 ```
 
 `table-definition.md` TBL-04 への保存、および `api-spec.yaml` のレスポンス(`isNetKpmBest` / `isAccuracyBest` 判定用の比較元データ)はこの構造体を経由する。
+
+**丸め・桁あふれの扱い(2026-08-29、ゲート③ test-reviewer A7対応で確定):**
+
+- 丸めモードは **HALF_UP**(四捨五入)を採用する。丸めは本構造体を組み立てる出口(`SessionMetricsCalculator`の戻り値を作る時点)で**1回だけ**行い、呼び出し元(`SessionService`)では再度丸めない(二重丸めを避ける)
+- `netKpm`/`rawKpm` が `table-definition.md` TBL-04 の桁数上限(`NUMERIC(6,2)`、最大9999.99)を超えた場合、`SessionMetricsCalculator` はそのまま超過した値を返す。上限チェックと400応答への変換は呼び出し元の `SessionService` が行う(`class-design.md` 1.4 値域チェック表を参照。計算自体は失敗させない)
 
 ---
 
@@ -109,6 +117,7 @@ requirements.md の決定事項どおり、同じ拍で複数回ミスした場�
 
 - 通常ケース(correctKeyCount・missRecords・durationSecondsの組み合わせ複数)でNet/Raw KPM・正確率が数式どおりになること
 - keystrokeIntervalsMsが0〜1要素の場合にConsistency=0となること
-- durationSeconds=0、総キー入力数=0のそれぞれで既定値(5章参照)が返ること
+- durationSeconds=0、総キー入力数=0のそれぞれで既定値(4章 判断#3参照)が返ること
+- 丸めモードがHALF_UPであること(境界値: 33.335→33.34等)
 
 具体的なテストベクタ一覧はP4(テスト設計)で作成する。
