@@ -37,7 +37,7 @@ NFR-01(入力反応性 50ms 以内)を満たすため、ローマ字入力判定
 | フロントエンド | Vue 3 + Vite + TS + Pinia | 画面表示・状態管理・利用者名の入力 | FR-01, FR-08, FR-09, FR-10, FR-11, FR-12, FR-13 |
 | フロントエンド | TS(ローマ字判定エンジン) | キー入力ごとの正誤判定・リアルタイム表示更新・ミス記録の一時保持 | FR-02, FR-03, FR-04, FR-05 |
 | バックエンド API | Spring Boot Controller | 利用者識別(find-or-create)・お題取得・セッション結果保存・履歴/自己ベスト/ミス分析取得 | FR-01, FR-07, FR-08, FR-09, FR-10, FR-11, FR-12, FR-13 |
-| バックエンド ロジック | typing-core(純粋 Java) | セッション結果の集計計算(Net/Raw KPM・正確率・Consistency) | FR-06 |
+| バックエンド ロジック | typing-core(純粋 Java) | セッション結果の集計計算(Net/Raw KPM・正確率・Consistency)、ミス分析結果からの改善アドバイス生成 | FR-06, FR-11 |
 | バックエンド 永続化 | Spring Data JPA + Repository | 利用者・お題・セッション結果・ミス記録の読み書き | FR-01, FR-04, FR-07, FR-08, FR-09, FR-10, FR-12, FR-13 |
 | DB | PostgreSQL 16 + Flyway | データ永続化・スキーマ管理 | 全 FR の永続化対象 |
 

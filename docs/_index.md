@@ -43,10 +43,10 @@ updated: 2026-08-29
 
 | doc_id | 文書 | status | レビュー |
 |---|---|---|---|
-| DD-001 | class-design.md — クラス設計 | 未着手 | — |
-| DD-002 | sequence.md — シーケンス図 | 未着手 | — |
+| DD-001 | [class-design.md](./30_detail-design/class-design.md) — クラス設計 | draft | — |
+| DD-002 | [sequence.md](./30_detail-design/sequence.md) — シーケンス図 | draft | — |
 | DD-003 | [logic-spec/romaji-automaton.md](./30_detail-design/logic-spec/romaji-automaton.md) — ローマ字入力受理オートマトン仕様 | review | — |
-| DD-004 | db-access.md — DB アクセス設計 | 未着手 | — |
+| DD-004 | [db-access.md](./30_detail-design/db-access.md) — DB アクセス設計 | draft | — |
 | DD-005 | [logic-spec/session-metrics.md](./30_detail-design/logic-spec/session-metrics.md) — セッション集計計算仕様 | review | — |
 | DD-006 | [logic-spec/advice-generation.md](./30_detail-design/logic-spec/advice-generation.md) — 改善アドバイス生成仕様 | review | — |
 
