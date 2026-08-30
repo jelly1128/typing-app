@@ -1,0 +1,104 @@
+[
+  {
+    "id": "SM-001",
+    "description": "通常ケース(UT-001)",
+    "input": {
+      "correctKeyCount": 120,
+      "missRecordCount": 30,
+      "keystrokeIntervalsMs": [100, 200, 300, 400],
+      "durationSeconds": 60
+    },
+    "expected": {
+      "netKpm": 120.0,
+      "rawKpm": 150.0,
+      "accuracy": 80.0,
+      "consistency": 111.80,
+      "durationSeconds": 60
+    }
+  },
+  {
+    "id": "SM-002",
+    "description": "要素0個でConsistency=0(UT-002)",
+    "input": {
+      "correctKeyCount": 90,
+      "missRecordCount": 10,
+      "keystrokeIntervalsMs": [],
+      "durationSeconds": 60
+    },
+    "expected": {
+      "netKpm": 90.0,
+      "rawKpm": 100.0,
+      "accuracy": 90.0,
+      "consistency": 0.0,
+      "durationSeconds": 60
+    }
+  },
+  {
+    "id": "SM-003",
+    "description": "durationSeconds=0のみ(UT-003)",
+    "input": {
+      "correctKeyCount": 50,
+      "missRecordCount": 5,
+      "keystrokeIntervalsMs": [100, 200, 300],
+      "durationSeconds": 0
+    },
+    "expected": {
+      "netKpm": 0.0,
+      "rawKpm": 0.0,
+      "accuracy": 90.91,
+      "consistency": 81.65,
+      "durationSeconds": 0
+    }
+  },
+  {
+    "id": "SM-004",
+    "description": "総キー入力数=0のみ(UT-004)",
+    "input": {
+      "correctKeyCount": 0,
+      "missRecordCount": 0,
+      "keystrokeIntervalsMs": [150, 250],
+      "durationSeconds": 60
+    },
+    "expected": {
+      "netKpm": 0.0,
+      "rawKpm": 0.0,
+      "accuracy": 0.0,
+      "consistency": 50.0,
+      "durationSeconds": 60
+    }
+  },
+  {
+    "id": "SM-005",
+    "description": "両方0(UT-005)",
+    "input": {
+      "correctKeyCount": 0,
+      "missRecordCount": 0,
+      "keystrokeIntervalsMs": [100, 300],
+      "durationSeconds": 0
+    },
+    "expected": {
+      "netKpm": 0.0,
+      "rawKpm": 0.0,
+      "accuracy": 0.0,
+      "consistency": 100.0,
+      "durationSeconds": 0
+    }
+  },
+  {
+    "id": "SM-006",
+    "description": "HALF_UP境界値: 3.125→3.13(UT-006)",
+    "input": {
+      "correctKeyCount": 1,
+      "missRecordCount": 31,
+      "keystrokeIntervalsMs": [100, 200],
+      "durationSeconds": 60
+    },
+    "expected": {
+      "netKpm": 1.0,
+      "rawKpm": 32.0,
+      "accuracy": 3.13,
+      "consistency": 50.0,
+      "durationSeconds": 60
+    }
+  }
+]

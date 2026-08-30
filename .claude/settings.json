@@ -33,5 +33,19 @@
       "Bash(gh repo delete*)",
       "Bash(rm -rf*)"
     ]
+  },
+  "hooks": {
+    "PostToolUse": [
+      {
+        "matcher": "Write|Edit",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "node -e \"let d='';process.stdin.on('data',c=>d+=c);process.stdin.on('end',()=>{try{const j=JSON.parse(d);const f=(j.tool_input&&j.tool_input.file_path)||'';if(f.endsWith('.java'))console.log(f);}catch(e){}})\" | { read -r f; if [ -n \"$f\" ]; then mvn -q -f backend/pom.xml spotless:apply; fi; } 2>/dev/null || true",
+            "statusMessage": "Spotlessでimport整理中..."
+          }
+        ]
+      }
+    ]
   }
 }
