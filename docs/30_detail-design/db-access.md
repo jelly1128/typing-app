@@ -119,7 +119,7 @@ WHERE s.user.id = :userId
 GROUP BY skc.charType
 ```
 
-`byKana`/`byPrevKana`/`byCharType`のミス数(分子)と出現回数(分母)を`MissAnalysisService`側でキー(kana/charType)ごとに突き合わせ、率を計算する(1.4節どおりServiceの責務)。
+`byKana`/`byPrevKana`/`byCharType`のミス数(分子)と出現回数(分母)を`MissAnalysisService`側でキー(kana/charType)ごとに突き合わせ、率を計算する(1.4節どおりServiceの責務)。**`byKana`の出現回数(分母)はクエリ・突き合わせの時点で既に得られている値であり、率の計算に使うだけでなく`KanaMissStat.occurrenceCount`としてそのまま出力にも含める**(2026-08-30 CL-016。`AdviceGenerator`側の逆算推定をやめ実測値を使うため)。
 
 ## 5. トランザクション境界(NFR-09)
 

@@ -37,7 +37,7 @@ updated: 2026-08-29
 | `SessionMetricsResult` | record | 算出結果。`netKpm`, `rawKpm`, `accuracy`, `consistency`, `durationSeconds`(いずれも小数第2位で丸め済み) | FR-06 | 同上 |
 | `AdviceGenerator` | クラス(静的メソッド) | 3カテゴリを独立判定し、0〜3件のアドバイス文を生成 | FR-11 | `logic-spec/advice-generation.md` |
 | `MissAnalysisInput` | record | アドバイス生成の入力。`byKana`(List\<KanaMissStat\>), `byErrorPattern`(List\<ErrorPatternStat\>), `byCharType`(List\<CharTypeStat\>)。`byPrevKana` はアドバイス生成に使わないため含めない | FR-11 | 同上 |
-| `KanaMissStat` | record | `kana`, `missCount`, `missRate` | FR-11 | 同上 |
+| `KanaMissStat` | record | `kana`, `missCount`, `occurrenceCount`, `missRate` | FR-11 | 同上(2026-08-30 CL-016で`occurrenceCount`追加) |
 | `ErrorPatternStat` | record | `expectedKey`, `actualKey`, `count` | FR-11 | 同上 |
 | `CharTypeStat` | record | `charType`, `occurrenceCount`, `accuracyRate` | FR-11 | 同上 |
 
@@ -66,6 +66,20 @@ Controller → Service → Repository の3層構成。例外→HTTP応答の変�
 | `MissAnalysisService` | userId の存在確認 → Repositoryから全期間のミス記録・かな出現回数を取得し4観点に集計 → `AdviceGenerator` 呼び出し | FR-10, FR-11 |
 
 集計クエリの具体的な実装方針(JPQL/ネイティブクエリ、インデックス)は P3-06 `db-access.md` で確定する。
+
+**Service メソッドシグネチャ(2026-08-30、P4-01 test-reviewer B1対応で確定):** UT ケース ID を「クラス×メソッド×条件」で採番できるようにするため、Controller が呼ぶ Service メソッドの引数・戻り値を確定する。型名は 1.4 上部の DTO 変換規則(`api-spec.yaml` のスキーマ名 → PascalCase + Request/Response サフィックス)に従う。Controller メソッドは対応する Service メソッドをそのまま1回呼ぶだけの薄い層のため、シグネチャは Service 側のみ列挙する。
+
+| Service | メソッド | 引数 | 戻り値 | 対応FR |
+|---|---|---|---|---|
+| `UserService` | `identifyUser` | `name: String` | `User` | FR-12 |
+| `TopicSetService` | `listTopicSets` | (なし) | `List<TopicSet>` | FR-13 |
+| `TopicSetService` | `listSentences` | `topicSetId: Long` | `List<Sentence>` | FR-01, FR-13 |
+| `SessionService` | `submitSession` | `request: SessionSubmissionRequest` | `SessionResultResponse` | FR-04〜09 |
+| `SessionService` | `listSessionHistory` | `userId: Long` | `List<SessionSummaryResponse>` | FR-08 |
+| `SessionService` | `getPersonalBest` | `userId: Long, topicSetId: Long` | `PersonalBestResponse` | FR-09 |
+| `MissAnalysisService` | `getMissAnalysis` | `userId: Long` | `MissAnalysisResponse` | FR-10, FR-11 |
+
+メソッド名は `api-spec.yaml` の `operationId` と同名にする(Controller→Service の対応関係を1:1で追える)。`submitSession`は`userId`/`topicSetId`をリクエストボディ(`SessionSubmissionRequest`)のフィールドとして受け取り、個別の引数には分解しない(`api-spec.yaml`の`SessionSubmission`スキーマと一致させるため)。
 
 **存在確認の責務(2026-08-29、ゲート③ doc-reviewer A2/test-reviewer A6対応で確定):** userId・topicSetId を受け取る全エンドポイントで、対応する Service の入口(メソッドの最初)で存在確認を行う(`db-access.md` 4.1 の `existsById` 相当を使う)。存在しなければ `UserNotFoundException`/`TopicSetNotFoundException` を投げる。**両方が存在しない場合は userId を先に判定する**(パスパラメータであり、判定順序を先にするのが自然なため)。`UserService`/`TopicSetService` も同様に自分が担当するリソースの存在確認を自分の入口で行う。
 

@@ -450,6 +450,9 @@ components:
               missCount:
                 type: integer
                 description: かな1拍単位のミス回数(同一拍での複数回ミスは1と数える。er-diagram.md 3.1)
+              occurrenceCount:
+                type: integer
+                description: 該当かなの出現回数合計(session_kana_counts から算出)。1以上(2026-08-30 CL-016、byCharTypeと同じ対応)
               missRate:
                 type: number
                 description: 拍単位ミス数 ÷ session_kana_counts の該当かなの出現回数合計(%、0〜100)

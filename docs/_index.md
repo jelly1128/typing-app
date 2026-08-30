@@ -54,11 +54,11 @@ updated: 2026-08-29
 
 | doc_id | 文書 | status | レビュー |
 |---|---|---|---|
-| TST-001 | test-plan.md — テスト計画 | 未着手 | — |
-| TST-002 | ut-cases.md — 単体テストケース | 未着手 | — |
-| TST-003 | it-cases.md — 結合テストケース | 未着手 | — |
-| TST-004 | st-cases.md — 総合テストケース | 未着手 | — |
-| TST-005 | traceability-matrix.md — トレーサビリティマトリクス | 未着手 | — |
+| TST-001 | [test-plan.md](./40_test/test-plan.md) — テスト計画 | fixed | — |
+| TST-002 | [ut-cases.md](./40_test/ut-cases.md) — 単体テストケース | fixed | — |
+| TST-003 | [it-cases.md](./40_test/it-cases.md) — 結合テストケース | fixed | — |
+| TST-004 | [st-cases.md](./40_test/st-cases.md) — 総合テストケース | fixed | — |
+| TST-005 | [traceability-matrix.md](./40_test/traceability-matrix.md) — トレーサビリティマトリクス | fixed | — |
 | TST-006 | test-results.md — テスト結果 | 未着手 | — |
 | TST-007 | bug-list.md — バグ一覧 | 未着手 | — |
 

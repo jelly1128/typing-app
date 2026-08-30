@@ -20,7 +20,7 @@ updated: 2026-08-29
 
 ```
 構造体 分析結果(MissAnalysis):
-    byKana          // [{kana, missCount, missRate}]  多い順
+    byKana          // [{kana, missCount, occurrenceCount, missRate}]  多い順(2026-08-30 CL-016でoccurrenceCount追加)
     byErrorPattern  // [{expectedKey, actualKey, count}]  多い順
     byPrevKana      // [{prevKana, missRate}]  多い順
     byCharType      // [{charType, occurrenceCount, accuracyRate}]  出現回数0の文字種は含まれない(0〜5件、api-spec.yaml CL-007)
@@ -50,8 +50,7 @@ updated: 2026-08-29
     // カテゴリ2: かな別ミス
     もし byKana が空でない:
         対象 = byKana[0]
-        総出現回数(推定) = 対象.missCount ÷ (対象.missRate ÷ 100)
-        もし 対象.missCount >= 2 かつ 対象.missRate >= 30 かつ 総出現回数(推定) >= 5:
+        もし 対象.missCount >= 2 かつ 対象.missRate >= 30 かつ 対象.occurrenceCount >= 5:
             結果に追加(テンプレート適用("kana", 対象))
 
     // カテゴリ3: 文字種別正解率(最も粗いが、傾向としては分かりやすい)
