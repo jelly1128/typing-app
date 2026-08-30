@@ -61,6 +61,7 @@
 | 2026-08-29 | P3 | P3-04(クラス設計・バックエンド)/P3-05(同・フロントエンド)/P3-06(DBアクセス設計)/P3-07(シーケンス図)/P3-08(rules整備)完了。`class-design.md`/`db-access.md`/`sequence.md`を新規作成。P3-04でFR-11(改善アドバイス生成)を`typing-core`に含める判断(CL-009、system-architecture.md修正)。P3-06でTBL-05 `expected_key`記録規則(カンマ区切り・アルファベット順)とインデックス設計の未決事項を解決(CL-010、romaji-automaton.md/table-definition.md更新)。P3-08で`.claude/rules/typing-core.md`/`judgment-engine.md`を新規作成(P1-06と同じ理由で本セッション内は読み込み未確認)。見積もりは`/ty-plan`時点で前回の打ち手(誰が実際に手を動かすかを自問)を事前適用し、5タスク中5タスクでズレ率0%を達成 | P3-09(ゲート③)から。rules読み込み確認を最優先で |
 | 2026-08-29〜30 | P3 | P3-09(ゲート③): doc/test/ops 3観点でレビュー実施(REV-010/011/012、重要度A計17件・重複除き15件)、全件クローズ(mora_list事前分割アーキテクチャの採用・KeystrokeResult拡張・状態保持の分担整理・送信失敗時の再送UI・シードデータのFlyway管理化 等)。修正直後の検証レビュー(REV-013)で自己修正が原因のA7件を新規検出、全件クローズ。B29+4件・C17+7件は`wbs.md`にフェーズ振り分け(P4/P5/P6-P8/P7/対象外)として申し送り、うち13件はA対応のついでに解消済み。Kazukiの最終確認完了。**ゲート③通過、P3完了** | P4タスク分解から。`wbs.md`のB/C振り分け表のP4担当分(test-B1/B2/B3, test-C1, test-C3/ops-C3, doc-B9/ops-B8/test-C4)を最初に拾う |
 | 2026-08-30 | P4 | P4タスク分解(P4-00)、`test-plan.md`(P4-01、テストレベル定義・ID体系・shared/testdata形式・test-B1/B2/B3/C1解決)、`testcase-gen` skill(P4-02、初のskill整備)、`ut-cases.md`(P4-03、UT-001〜065)、`it-cases.md`(P4-04、IT-001〜017)、`st-cases.md`(P4-05、ST-001〜015)、`traceability-matrix.md`(P4-06、全FR-ID充足確認)を作成。Kazuki就寝中にP4-02〜06を一括ドラフトし、起床後にレビュー。レビュー中にUT-003の前提条件記述の甘さから設計ケース漏れ(session-metrics.mdの既定値条件が「または」なのに「両方0」の1ケースしか無かった)を発見しUT-003〜005に分割、後続ID全体を+2シフト。`byKana`のoccurrenceCount欠如(doc-B9/ops-B8/test-C4)もUT-065の境界値ケースから未解決と判明し、Kazukiと相談のうえ`byCharType`と同じ対応で解決(CL-016)。E2Eフレームワーク選定等の「P4-02で決める」という記述の誤りも訂正。**P4完了(ゲート無し、Kazuki確認のみ)** | P5タスク分解。着手時に相談: 他レイヤーの分担/shared/testdataの作成方針(決定済み、TDDで埋める)/E2Eフレームワーク選定 |
+| 2026-08-30 | P5 | P5タスク分解(19タスク、wbs.mdに記録)。着手時相談で「typing-core以外はKazuki主体、詰まったらClaude相談」「shared/testdataはKazukiがTDDで埋める」「E2E/Testcontainersは保留」「hooks(PostToolUse)は固定タスクにせず困りごとが出たら検討」を決定。P5-01(`SessionMetricsCalculator`)着手直後、Maven/JUnit5/Jackson配線の環境構築だけで大半の時間を消費しロジック本体に未到達という状況になり、Kazukiから「学習効果が時間に見合わない」との申告を受け、**typing-core/judgment-engineもClaudeドラフトへ方針転換**(合意値3.0h→1.0hに改訂)。ドラフト後、`shared/testdata/session-metrics/cases.json`(SM-001〜006、UT-001〜006対応)を作成し全件Green。「困りごとが出たら検討」としていたhooks(PostToolUse)を実際に導入(Spotless `importOrder`/`removeUnusedImports`をWrite/Edit後に自動実行、動作確認済み。`googleJavaFormat`はJDK25と非互換のため除外)。テストは`@ParameterizedTest`化(1件失敗で残りが実行されない問題を解消)。ソースコードにコメント追加。P5-01完了時点でコミット(9e37a6d)。**P5-01完了** | P5-02(`AdviceGenerator`)から。Claudeドラフト方式で進める |
 
 ---
 
@@ -69,7 +70,9 @@
 > `/ty-end` で毎回1行書く。`/ty-plan` は次回の冒頭でこれを読み上げ、実行されたかを確認する。
 > 打ち手が次のサイクルで実行されていなければ、それは振り返りではない。
 
-- **Claudeが単独で複数タスクを連続実行するセッション(今回のP4-02〜06のようにKazuki不在で進めるケース)では、タスクの区切りごとに完了を一言記録しておく。** 今回はP4-00〜06の7タスクの実績を「セッション全体で体感どおり」という1つの合算値でしか記録できず、タスク別のズレ率が算出不能だった(estimate-actual.md参照、P1-01〜06と同型の記録漏れの再発)。理由は、単独作業中はタスク境界でKazukiに時間を聞く相手がおらず、後から思い出しても粒度が粗くなるため。次回Claude単独作業を挟むセッションでは、各タスク完了時に「P4-03完了、estimate-actual.mdの実績記録は/ty-endで」のように一言残す運用にする(前回の打ち手[検証パスを指摘対応の内訳に含める]はP4に該当タスクが無く未検証のまま持ち越し)
+- **P5-05以降(backend Controller/Service/Repository、frontend api/stores/views等、「Kazuki主体・詰まったらClaude相談」パターンの層)に着手する際は、着手直後に「今回も環境構築とドメインロジックの境界線をどこで引くか」を先に一言確認してから始める。** 今回P5-01(typing-core)で、Kazuki自身が書く前提のままMaven/JUnit5/Jackson配線を先に済ませようとした結果、肝心のロジック実装に到達する前に「学習効果が時間に見合わない」という不満が生じ、セッション途中で方針転換(Claudeドラフトへ変更)する手戻りが発生した(estimate-actual.md「P5-01の合意値改定について」参照)。P5-01では手戻り後に気づいたが、P5-05以降で同種の層に入る前に**事前に**この境界線(定型的な配線はClaudeが引き取る/ドメイン判断が要る部分はKazukiが書く)を一言合意しておけば、同じ回り道を防げる(2026-08-23の「知っている→事後に気づく→事前に適用する」の教訓と同型)
+
+(前回の打ち手[Claude単独連続実行時のタスク区切り記録]は今回該当するタスクが無く未検証のまま持ち越し)
 
 ---
 
