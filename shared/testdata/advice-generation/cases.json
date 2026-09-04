@@ -1,0 +1,99 @@
+[
+  {
+    "id": "AG-001",
+    "description": "カテゴリ1(誤りパターン)単独該当(UT-007)",
+    "input": {
+      "byKana": [],
+      "byErrorPattern": [
+        { "expectedKey": "si", "actualKey": "chi", "count": 3 }
+      ],
+      "byCharType": []
+    },
+    "expected": [
+      "\"si\"を\"chi\"と入力してしまうミスが目立ちます(直近の集計で3回)。次にこの組み合わせが出たら意識してみましょう。"
+    ]
+  },
+  {
+    "id": "AG-002",
+    "description": "カテゴリ2(かな別)単独該当(UT-008)",
+    "input": {
+      "byKana": [
+        { "kana": "ん", "missCount": 2, "occurrenceCount": 5, "missRate": 40.0 }
+      ],
+      "byErrorPattern": [],
+      "byCharType": []
+    },
+    "expected": [
+      "「ん」のミスが多いです(ミス率40%)。この文字を含む単語を重点的に練習してみましょう。"
+    ]
+  },
+  {
+    "id": "AG-003",
+    "description": "カテゴリ3(文字種別)出現回数が閾値ちょうど(5)で該当(UT-009)",
+    "input": {
+      "byKana": [],
+      "byErrorPattern": [],
+      "byCharType": [
+        { "charType": "撥音ん", "occurrenceCount": 5, "accuracyRate": 60.0 }
+      ]
+    },
+    "expected": [
+      "撥音んの正解率が60%とやや低めです。撥音んを含むお題を選んで練習すると効果的です。"
+    ]
+  },
+  {
+    "id": "AG-004",
+    "description": "カテゴリ3(文字種別)出現回数が閾値未満(4)で非該当→goodのみ(UT-009)",
+    "input": {
+      "byKana": [],
+      "byErrorPattern": [],
+      "byCharType": [
+        { "charType": "撥音ん", "occurrenceCount": 4, "accuracyRate": 60.0 }
+      ]
+    },
+    "expected": [
+      "目立った苦手は見つかりませんでした。この調子で練習を続けましょう。"
+    ]
+  },
+  {
+    "id": "AG-005",
+    "description": "全観点空(セッション0件)→advice=[](UT-010)",
+    "input": {
+      "byKana": [],
+      "byErrorPattern": [],
+      "byCharType": []
+    },
+    "expected": []
+  },
+  {
+    "id": "AG-006",
+    "description": "セッションはあるが全観点該当なし/正解率100(ミス記録0件)(UT-011)",
+    "input": {
+      "byKana": [],
+      "byErrorPattern": [],
+      "byCharType": [
+        { "charType": "清音", "occurrenceCount": 50, "accuracyRate": 100.0 }
+      ]
+    },
+    "expected": [
+      "目立った苦手は見つかりませんでした。この調子で練習を続けましょう。"
+    ]
+  },
+  {
+    "id": "AG-007",
+    "description": "2カテゴリ以上同時該当時、誤りパターン→かな別の順で格納(UT-012)",
+    "input": {
+      "byKana": [
+        { "kana": "し", "missCount": 3, "occurrenceCount": 10, "missRate": 30.0 }
+      ],
+      "byErrorPattern": [
+        { "expectedKey": "tu", "actualKey": "tsu", "count": 5 }
+      ],
+      "byCharType": []
+    },
+    "expected": [
+      "\"tu\"を\"tsu\"と入力してしまうミスが目立ちます(直近の集計で5回)。次にこの組み合わせが出たら意識してみましょう。",
+      "「し」のミスが多いです(ミス率30%)。この文字を含む単語を重点的に練習してみましょう。"
+    ]
+  }
+]
