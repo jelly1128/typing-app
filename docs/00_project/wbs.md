@@ -255,6 +255,8 @@ Kazuki は「結構考える必要ありそう」という理由で全タスク�
 
 **方針転換(2026-08-30、同日中):** P5-01(`SessionMetricsCalculator`)に着手したところ、Maven依存関係の追加・JUnit5配線・Jacksonでのshared/testdata読み込みなど、**ロジック本体に到達する前の環境構築だけで大半の時間を消費**した。この部分はP3セッションの懸念(「設計書を読んで判断するだけでは実装力が身につかない」)が想定していた対象ではなく、Kazukiから「かけた時間に対して学習効果が見合わない」との申告があった。これを受け、**`typing-core`/`judgment-engine`もClaudeがドラフトし、Kazukiはレビュー・質問で理解を深める方針(P1〜P4と同じパターン)に変更**する。他の層(backend/frontend)は変更なし。P5-01は環境構築(pom.xml/record/shared testdata)まではKazukiが実施済みのため、残る`calculate()`本体のみClaudeがドラフトする。P5-02〜04は最初からClaudeドラフトで進める。
 
+**注(2026-09-05):** 当初のP5-03完了条件は「`shared/testdata`の受理パターンが全て通る状態」だったが、`test-plan.md`3.1節の`romaji-automaton`(RA-xxx)形式は`sequenceJudge`(P5-04)のキー入力逐次呼び出しを前提にしており、P5-03単体(`moraPatterns`/`specialMora`/`moraJudge`)では検証できないと判明した。P5-03は各モジュールをVitestの通常ユニットテストで検証し、`shared/testdata/romaji-automaton/cases.json`(RA-xxx)の作成・全件Green確認はP5-04(`sequenceJudge`実装)で行う。
+
 依存順: (P5-01〜04 typing-core/judgment-engineは並行可)→ P5-05(Flyway)→ P5-06(Entity/Repository)→ P5-07〜11(backend Controller/Service、並行可)→ P5-12(frontend api/types)→ P5-13(stores)→ P5-14〜17(views、並行可)→ P5-18(router)→ P5-19(結合確認、P5完了条件そのもの)
 
 | タスクID | 内容 | 完了条件 | Kazuki見積 | Claude見積 | 合意値 | 状態 |
@@ -262,7 +264,7 @@ Kazuki は「結構考える必要ありそう」という理由で全タスク�
 | P5-00 | P5タスク分解 | 本表がタスク単位まで分解された状態 | - | 0.5 | **0.5** | 完了 |
 | P5-01 | typing-core: `SessionMetricsCalculator`実装(FR-06) | `shared/testdata`のテストベクタで全ケースが通る状態 | 3.0 | 2.0 | ~~3.0~~ **1.0**(2026-08-30方針転換、下記参照) | 完了(SM-001〜006全件Green) |
 | P5-02 | typing-core: `AdviceGenerator`実装(FR-11) | `shared/testdata`のテストベクタで全ケースが通る状態 | 3.0 | 2.0 | ~~3.0~~ **1.0** | 未着手 |
-| P5-03 | judgment-engine: `types.ts`/`moraPatterns.ts`/`specialMora.ts`/`moraJudge.ts`実装(FR-02) | `shared/testdata`の受理パターン(清音/拗音/撥音/促音/長音)が全て通る状態 | 3.0 | 4.0 | ~~4.0~~ **2.0** | 未着手 |
+| P5-03 | judgment-engine: `types.ts`/`moraPatterns.ts`/`specialMora.ts`/`moraJudge.ts`実装(FR-02) | 各モジュールの単体テスト(Vitest)が全て通る状態(注参照) | 3.0 | 4.0 | ~~4.0~~ **2.0** | 完了(Vitest導入、4モジュール実装、30件Green。RA-xxx testdataはP5-04で作成) |
 | P5-04 | judgment-engine: `sequenceJudge.ts`実装(FR-02〜04、状態保持含む全体) | お題文1本を最初から最後まで判定でき`KeystrokeResult`が仕様どおり返る状態 | 3.0 | 3.0 | ~~4.0~~ **1.5** | 未着手 |
 | P5-05 | Flyway migration(TBL-01〜06 + シードデータ) | `docker compose up`で全テーブルが作成されシードデータが投入される状態 | 3.0 | 1.5 | **2.0** | 未着手 |
 | P5-06 | Entity + Repository(6テーブル分) | 全EntityがJPAでマッピングされ、Repositoryのfind系メソッドが動く状態 | 3.0 | 2.0 | **3.0** | 未着手 |
