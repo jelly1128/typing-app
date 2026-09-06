@@ -1,7 +1,7 @@
 ---
 doc_id: PRJ-002
 status: draft
-updated: 2026-08-26
+updated: 2026-09-06
 ---
 
 # WBS(作業分解構成図)と見積もり
@@ -265,7 +265,7 @@ Kazuki は「結構考える必要ありそう」という理由で全タスク�
 | P5-01 | typing-core: `SessionMetricsCalculator`実装(FR-06) | `shared/testdata`のテストベクタで全ケースが通る状態 | 3.0 | 2.0 | ~~3.0~~ **1.0**(2026-08-30方針転換、下記参照) | 完了(SM-001〜006全件Green) |
 | P5-02 | typing-core: `AdviceGenerator`実装(FR-11) | `shared/testdata`のテストベクタで全ケースが通る状態 | 3.0 | 2.0 | ~~3.0~~ **1.0** | 未着手 |
 | P5-03 | judgment-engine: `types.ts`/`moraPatterns.ts`/`specialMora.ts`/`moraJudge.ts`実装(FR-02) | 各モジュールの単体テスト(Vitest)が全て通る状態(注参照) | 3.0 | 4.0 | ~~4.0~~ **2.0** | 完了(Vitest導入、4モジュール実装、30件Green。RA-xxx testdataはP5-04で作成) |
-| P5-04 | judgment-engine: `sequenceJudge.ts`実装(FR-02〜04、状態保持含む全体) | お題文1本を最初から最後まで判定でき`KeystrokeResult`が仕様どおり返る状態 | 3.0 | 3.0 | ~~4.0~~ **1.5** | 未着手 |
+| P5-04 | judgment-engine: `sequenceJudge.ts`実装(FR-02〜04、状態保持含む全体) | お題文1本を最初から最後まで判定でき`KeystrokeResult`が仕様どおり返る状態 | 3.0 | 3.0 | ~~4.0~~ **1.5** | 完了(Vitest 14件+RA-xxx testdata 11件 全Green。着手時にCL-017/CL-018で設計書の矛盾2件を修正) |
 | P5-05 | Flyway migration(TBL-01〜06 + シードデータ) | `docker compose up`で全テーブルが作成されシードデータが投入される状態 | 3.0 | 1.5 | **2.0** | 未着手 |
 | P5-06 | Entity + Repository(6テーブル分) | 全EntityがJPAでマッピングされ、Repositoryのfind系メソッドが動く状態 | 3.0 | 2.0 | **3.0** | 未着手 |
 | P5-07 | `UserController`/`UserService`(FR-12) | find-or-createがAPI経由で動く状態 | 3.0 | 2.0 | **2.0** | 未着手 |

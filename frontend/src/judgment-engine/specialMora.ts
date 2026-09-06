@@ -20,8 +20,13 @@ export function getBaseReceptionPatterns(mora: Mora, nextMora: Mora | null): str
       return tsuReceptionPatterns(nextMora)
     case '長音':
       return longVowelReceptionPatterns()
-    default:
+    case '清音':
+    case '拗音':
       return lookupMoraPatterns(mora.kana)
+    default: {
+      const exhaustiveCheck: never = mora.charType
+      throw new Error(`未知の文字種: ${exhaustiveCheck}`)
+    }
   }
 }
 

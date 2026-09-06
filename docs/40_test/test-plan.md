@@ -1,7 +1,7 @@
 ---
 doc_id: TST-001
 status: fixed
-updated: 2026-08-30
+updated: 2026-09-06
 ---
 
 # テスト計画
@@ -91,9 +91,9 @@ shared/testdata/
   },
   "expected": {
     "steps": [
-      { "confirmedText": "", "pendingInput": "s", "nextHint": "hi", "missAt": null, "currentKana": "し", "moraIndex": 0, "confirmedMora": null, "miss": null },
+      { "confirmedText": "", "pendingInput": "s", "nextHint": "i", "missAt": null, "currentKana": "し", "moraIndex": 0, "confirmedMora": null, "miss": null },
       { "confirmedText": "", "pendingInput": "sh", "nextHint": "i", "missAt": null, "currentKana": "し", "moraIndex": 0, "confirmedMora": null, "miss": null },
-      { "confirmedText": "し", "pendingInput": "", "nextHint": null, "missAt": null, "currentKana": "し", "moraIndex": 1, "confirmedMora": {"kana": "し", "charType": "清音", "acceptedPattern": "shi", "moraIndex": 0}, "miss": null }
+      { "confirmedText": "shi", "pendingInput": "", "nextHint": null, "missAt": null, "currentKana": "し", "moraIndex": 1, "confirmedMora": {"kana": "し", "charType": "清音", "acceptedPattern": "shi", "moraIndex": 0}, "miss": null }
     ]
   }
 }

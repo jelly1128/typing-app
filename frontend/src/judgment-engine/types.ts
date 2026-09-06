@@ -7,6 +7,19 @@ export interface Mora {
 
 export type MoraSequence = Mora[]
 
+/**
+ * かな文字列1つ(既に1拍に区切られたもの)を文字種に分類する(`romaji-automaton.md` 2章の5分類)。
+ * `api-spec.yaml` `Sentence.moraList`はかな文字列の配列(charTypeを持たない)なので、
+ * `sequenceJudge.startSentence`がこの関数で`MoraSequence`に変換してから判定を始める。
+ */
+export function classifyCharType(kana: string): CharType {
+  if (kana === 'ん') return '撥音ん'
+  if (kana === 'っ') return '促音っ'
+  if (kana === 'ー') return '長音'
+  if (kana.length === 2) return '拗音'
+  return '清音'
+}
+
 export interface ConfirmedMora {
   kana: string
   charType: CharType

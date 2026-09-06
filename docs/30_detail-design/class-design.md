@@ -1,7 +1,7 @@
 ---
 doc_id: DD-001
 status: fixed
-updated: 2026-08-29
+updated: 2026-09-06
 ---
 
 # クラス設計
@@ -193,7 +193,9 @@ frontend/src/
 | `moraJudge.ts` | 1拍の受理判定に使う**純粋な部分手順**(候補集合をキー入力で絞り込む、入力済み文字列が候補と完全一致するか判定する)を提供する**無状態のヘルパー関数群**。それ自体はキー入力のループを回さない | 6.1(部分手順のみ) |
 | `sequenceJudge.ts` | `romaji-automaton.md` 6.0(拍列全体のループ)と6.1(1拍を確定させるループ)の**両方を実装するエントリポイント**。拍をまたぐ状態(押し戻しの持ち越しキー・促音の絞り込み結果・直前に確定した拍・累計拍インデックス)に加え、**1拍判定中の状態(候補集合・入力済み文字列・保留中の確定候補)もここに保持する**。`moraJudge`の部分手順を呼び出しながら状態を1キーずつ進め、`KeystrokeResult`を返す | 6.0・6.1(状態保持含む全体) |
 
-**状態保持の分担(2026-08-29、ゲート③ doc-reviewer A5/test-reviewer A1対応で確定。2026-08-29検証レビューREV-013 A4で`moraJudge`の役割を訂正):** 状態は全て`sequenceJudge`に一元化する(採用理由はテストのしやすさ。`romaji-automaton.md` 8章 判断#10)。`romaji-automaton.md` 6.1の疑似コード自体が`sequenceJudge`の内部ロジックであり、「次のキー入力を待つ」は概念上の表現で、実装ではキー入力イベントのたびに1回だけ処理が呼ばれる(状態はインスタンスフィールドとして保持する)。`moraJudge`はこの疑似コードが使う純粋な部分手順だけを切り出したもので、状態は持たない。`MoraSequence`は`api-spec.yaml` `Sentence.moraList`をそのまま使い、`judgment-engine`側での分割処理は持たない(`romaji-automaton.md` 3章、CL-012)。
+**状態保持の分担(2026-08-29、ゲート③ doc-reviewer A5/test-reviewer A1対応で確定。2026-08-29検証レビューREV-013 A4で`moraJudge`の役割を訂正):** 状態は全て`sequenceJudge`に一元化する(採用理由はテストのしやすさ。`romaji-automaton.md` 8章 判断#10)。`romaji-automaton.md` 6.1の疑似コード自体が`sequenceJudge`の内部ロジックであり、「次のキー入力を待つ」は概念上の表現で、実装ではキー入力イベントのたびに1回だけ処理が呼ばれる(状態はインスタンスフィールドとして保持する)。`moraJudge`はこの疑似コードが使う純粋な部分手順だけを切り出したもので、状態は持たない。
+
+**`Sentence.moraList`から`MoraSequence`への変換(2026-09-06、CL-018対応):** `api-spec.yaml` `Sentence.moraList`は拍ごとに区切られた**かな文字列の配列**(`charType`を持たない)。`judgment-engine`内部の`Mora`(`types.ts`)は判定の分岐に`charType`を必要とするため、`sequenceJudge.startSentence`が`moraList`(`string[]`)を受け取り、`types.ts`の`classifyCharType`(かな1文字/2文字を見るだけの無状態な純粋関数。ん→撥音ん、っ→促音っ、ー→長音、2文字→拗音、それ以外→清音)で`MoraSequence`に変換してから判定を始める。`TypingView`は`moraList`をそのまま渡すだけでよく、`sequenceJudge`が唯一の外部公開インターフェースである原則(下記)を保つ。これは`romaji-automaton.md` 3章・CL-012が対象外とした「拍への分解」(読み文字列をモーラ境界で区切る処理)とは別物で、既に1拍ずつに区切られた文字列を`charType`に分類するだけの機械的な変換である。
 
 **お題文をまたぐ呼び出し:** `拍列を判定する`(6.0)は1つのお題文(1つの`MoraSequence`)につき1回、`TypingView`から呼ばれる。`直前に確定した拍`・`累計拍インデックス`(下記)は`sequenceJudge`インスタンス自体が保持しセッション全体で引き継ぐため、次のお題文の呼び出しをまたいでもリセットしない。`次拍への絞り込み候補`・`持ち越しキー`はお題文の切れ目でリセットしてよい(文末の拍は既存ルールにより持ち越しキーを生まないため)。
 
