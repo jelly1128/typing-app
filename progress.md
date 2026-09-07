@@ -36,7 +36,7 @@
 |---|---|---|
 | CLAUDE.md | P0 | [x] 作成済み |
 | commands (`/ty-plan` `/ty-end` `/ty-gate`) | P0 | [x] 作成済み |
-| agents (`doc-reviewer` 他) | P1 | [x] 動作確認済み(REV-002)。`test-reviewer`/`ops-reviewer`もP2-07で動作確認済み(REV-007/008) |
+| agents (`doc-reviewer` 他) | P1 | [x] 動作確認済み(REV-002)。`test-reviewer`/`ops-reviewer`もP2-07で動作確認済み(REV-007/008)。2026-09-07、P5のコードレビューで見つかった「横展開漏れ」「組み合わせケースの再点検」の2観点を`doc-reviewer`に追加(次回起動時に効果を確認) |
 | skills (`testcase-gen` 他) | P2/P4 | [ ] ドラフト作成(`.claude/skills/testcase-gen/SKILL.md`)。同一セッション内では動作確認不可、次回セッション冒頭で確認(2026-08-30) |
 | settings.json permissions | P2.5 | [x] 作成済み(git/docker/mvn/npm/gh/java/node/curl許可、破壊的操作はdeny) |
 | rules (`paths:` スコープ) | P3 | [x] 作成済み(`typing-core.md`/`judgment-engine.md`)。次回セッション冒頭で読み込み確認 |
@@ -70,6 +70,7 @@
 | 2026-09-07 | P5 | P5-08(`TopicSetController`/`TopicSetService`)着手。`TopicSetServiceTest`(実DB3件、`R__`シードデータ前提)・`TopicSetControllerTest`(`@WebMvcTest`+モック3件)で確認中、`@PathVariable Long topicSetId`が実行時に500エラーになる不具合を発見。原因は`-parameters`コンパイラフラグが無くSpringが引数名をリフレクション解決できなかったこと。`backend/pom.xml`に`maven.compiler.parameters=true`を追加して解決(`spring-boot-starter-parent`の既定値をこのプロジェクトでは明示的に設定する必要があった)。curlでの実API疎通も確認。実績2.0h(合意値どおり)。**P5-08完了** | P5-09(SessionController/SessionService)から |
 | 2026-09-07 | P5 | P5-08完了後、Kazukiの提案で`/code-review`(medium/high並列)による中間レビューを実施。8観点(A〜H)の並列調査により9件の指摘(NPE2件・DB整合性2件・重複/デッドコード4件・`sequenceJudge.ts`の二重確定1件)を発見、優先度順に全て修正・確認。うち2件(CHECK制約の非対称、押し戻し機構の組み合わせケース漏れ)は設計レビューで気づけたはずと判断し、`doc-reviewer`エージェントに観点を追加(つまずき・気づきログ参照)。P5-09(`SessionController`/`SessionService`、FR-04〜09)着手。存在確認→nullチェック→値域チェック→`SessionMetricsCalculator`呼び出し→自己ベストMAXクエリ→`@Transactional`保存→自己ベスト比較のフローを実装、履歴一覧はN+1回避のJOINプロジェクションを新設。`SessionServiceTest`(実DB13件)・`SessionControllerTest`(3件)で確認、curlで送信→履歴→自己ベストの一連を実API確認。実績4.0h(合意値どおり)。**P5-09完了** | P5-10(MissAnalysisController/MissAnalysisService)から |
 | 2026-09-07 | P5 | P5-10(`MissAnalysisController`/`MissAnalysisService`、FR-10/FR-11)着手。`db-access.md` 4.3のクエリ結果を4観点に再集計し、既存の`AdviceGenerator`(P5-02実装済み)を呼び出すだけで完結。`CharType` enumの宣言順が`ordinal()`と一致するためbyCharTypeの固定順ソートに追加コード不要だった。`MissAnalysisServiceTest`(`SessionService`経由で実データ生成、実DB3件)・`MissAnalysisControllerTest`(2件)で確認、curlでの実API疎通も確認。実績3.0h(合意値どおり)。**P5-10完了、これでbackend(P5-05〜11)が全完了** | P5-12(frontend api/types)から |
+| 2026-09-07 | P5 | `/ty-end`。今日完了した7タスク(P5-05〜11)のうちズレ率±30%を超えたのはP5-11(-63%)のみ。深掘りの結果、要因は「前回合意値をそのまま再利用する際、その合意値がどの実行方式(Kazuki主体/Claudeドラフト)前提の数字かを確認しなかったこと」と判明(Kazuki自身は経過時間の詳細を覚えておらず、Claude側の観察を基に整理)。estimate-actual.mdに深掘り行と直近3タスク(P5-08〜10、全て0%)の補正係数を追記。**本セッションでbackend(P5-05〜11)が全完了、次回はP5-12(frontend api/types)から** | |
 
 ---
 
@@ -81,6 +82,8 @@
 - ~~P5-05以降(backend Controller/Service/Repository、frontend api/stores/views等、「Kazuki主体・詰まったらClaude相談」パターンの層)に着手する際は、着手直後に「今回も環境構築とドメインロジックの境界線をどこで引くか」を先に一言確認してから始める。~~ **→ 実行・解消済み(2026-09-07)。** P5-05(Flyway migration)着手時にこの確認を実際に行ったところ、P5-01と同じく「Kazuki主体」では回り道になることが2回目の実例で裏付けられたため、確認自体をやめてP5-06以降は最初からClaudeドラフト・Kazukiレビューを標準にする方針に格上げした(上記P5チェックリスト行参照)。「事前に確認する」打ち手は1回機能したら役目を終え、次は「確認不要にする」判断に進化する、という良い例になった
 
 **(2026-09-05確定)Claude単独連続実行時のタスク区切り記録:** P5-01完了→P5-02着手→完了を`/ty-end`を挟まずに連続実行した結果、P5-02の実績記録・コミットが漏れ、次回`/ty-plan`(2026-09-05)で発覚・救済する事態になった(estimate-actual.md「P5-02」の要因欄参照)。**今後はP5の各タスク完了ごとに必ずコミットする**運用に切り替える(実績記入は`/ty-end`でまとめてでもよいが、コミット自体はタスク区切りで都度行う)。
+
+**(2026-09-07確定)合意値の前提確認:** P5-11で唯一ズレ率±30%を超えた(-63%)。原因は「前回合意値をそのまま再利用する」際、その合意値がどの実行方式(Kazuki主体で書く/Claudeドラフト)を前提に設定されたものかを確認しなかったこと(P5-11の合意値2.0hは方針転換前の古い数字だった)。**次回以降、「前回合意値を再利用する」を選ぶ際は、その合意値がどちらの実行方式を前提にしたものかを一言確認してから採用する。**
 
 ---
 
