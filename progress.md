@@ -5,7 +5,7 @@
 | 項目 | 内容 |
 |---|---|
 | **現在の工程** | P5 実装(P4 完了、P5タスク分解済み) |
-| **次にやること** | P5-12(frontend api/types)から着手(backend P5-05〜11完了) |
+| **次にやること** | P5-13(stores: userStore/topicStore/sessionStore)から着手 |
 | **開始日** | 2026-08-22 |
 | **ゴール予定日** | 2026年12月〜2027年1月(22〜32セッション ÷ 週1.5回) |
 
@@ -71,6 +71,7 @@
 | 2026-09-07 | P5 | P5-08完了後、Kazukiの提案で`/code-review`(medium/high並列)による中間レビューを実施。8観点(A〜H)の並列調査により9件の指摘(NPE2件・DB整合性2件・重複/デッドコード4件・`sequenceJudge.ts`の二重確定1件)を発見、優先度順に全て修正・確認。うち2件(CHECK制約の非対称、押し戻し機構の組み合わせケース漏れ)は設計レビューで気づけたはずと判断し、`doc-reviewer`エージェントに観点を追加(つまずき・気づきログ参照)。P5-09(`SessionController`/`SessionService`、FR-04〜09)着手。存在確認→nullチェック→値域チェック→`SessionMetricsCalculator`呼び出し→自己ベストMAXクエリ→`@Transactional`保存→自己ベスト比較のフローを実装、履歴一覧はN+1回避のJOINプロジェクションを新設。`SessionServiceTest`(実DB13件)・`SessionControllerTest`(3件)で確認、curlで送信→履歴→自己ベストの一連を実API確認。実績4.0h(合意値どおり)。**P5-09完了** | P5-10(MissAnalysisController/MissAnalysisService)から |
 | 2026-09-07 | P5 | P5-10(`MissAnalysisController`/`MissAnalysisService`、FR-10/FR-11)着手。`db-access.md` 4.3のクエリ結果を4観点に再集計し、既存の`AdviceGenerator`(P5-02実装済み)を呼び出すだけで完結。`CharType` enumの宣言順が`ordinal()`と一致するためbyCharTypeの固定順ソートに追加コード不要だった。`MissAnalysisServiceTest`(`SessionService`経由で実データ生成、実DB3件)・`MissAnalysisControllerTest`(2件)で確認、curlでの実API疎通も確認。実績3.0h(合意値どおり)。**P5-10完了、これでbackend(P5-05〜11)が全完了** | P5-12(frontend api/types)から |
 | 2026-09-07 | P5 | `/ty-end`。今日完了した7タスク(P5-05〜11)のうちズレ率±30%を超えたのはP5-11(-63%)のみ。深掘りの結果、要因は「前回合意値をそのまま再利用する際、その合意値がどの実行方式(Kazuki主体/Claudeドラフト)前提の数字かを確認しなかったこと」と判明(Kazuki自身は経過時間の詳細を覚えておらず、Claude側の観察を基に整理)。estimate-actual.mdに深掘り行と直近3タスク(P5-08〜10、全て0%)の補正係数を追記。**本セッションでbackend(P5-05〜11)が全完了、次回はP5-12(frontend api/types)から** | |
+| 2026-09-08 | P5 | 前回の打ち手(合意値を再利用する際は実行方式を確認する)を、Kazukiが見積もり時に自ら「Claudeドラフト方式で1.5h」と明示する形で実践。P5-12(frontend `api/client.ts`+各apiモジュール+`types/api.ts`)着手。`api-spec.yaml`の全スキーマをTS型に変換(`types/api.ts`)、fetchラッパー(`client.ts`、baseURL`/api`固定・90秒タイムアウト・`ErrorResponse`解析)、7エンドポイントを`operationId`と同名の関数でラップする4つのapiモジュールを実装。`vue-tsc -b`で`erasableSyntaxOnly`によるconstructor parameter property構文のエラーを検出し通常のフィールド代入に修正。レビュー中、Kazukiから「baseURL固定はハードコーディングとして仕方ないものか」「定数は名前を付けて定義しないのか」「`/users`のような繰り返し出現する文字列も定数化すべきか」の3点の質問があり、それぞれP3ゲート③ops-B4指摘の経緯・既にconstとして定義済みであること・`api-spec.yaml`との1:1対応を優先し定数化しない判断、を説明し合意。実績1.0h(合意値どおり)。**P5-12完了** | P5-13(stores)から |
 
 ---
 
