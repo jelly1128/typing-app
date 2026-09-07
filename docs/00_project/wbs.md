@@ -276,7 +276,7 @@ Kazuki は「結構考える必要ありそう」という理由で全タスク�
 | P5-10 | `MissAnalysisController`/`MissAnalysisService`(FR-10, FR-11) | ミス分析4観点の集計とアドバイス生成がAPI経由で動く状態 | 3.0 | 2.5 | **3.0** | 完了(`MissAnalysisServiceTest`3件+`MissAnalysisControllerTest`2件Green。curlで実API疎通確認。**これでbackend P5-05〜11が全完了**) |
 | P5-11 | `GlobalExceptionHandler` + 例外クラス群 | class-design.md 1.4の例外→応答対応表どおりに4xx/500が返る状態 | 3.0 | 1.5 | **2.0** | 完了(`ThrowingTestController`+`@WebMvcTest`で対応表8行→5件のGreen確認。P5-07〜10の他Controllerからも同じ`GlobalExceptionHandler`を使う) |
 | P5-12 | frontend `api/client.ts` + 各apiモジュール + `types/api.ts` | 全APIエンドポイントがフロントから型付きで呼べる状態 | 3.0 | 2.0 | ~~2.0~~ **1.0**(2026-09-07再見積。P5-06以降Claudeドラフト方式に統一したため) | 完了(`client.ts`(fetchラッパー、baseURL固定/90秒タイムアウト)、`userApi.ts`/`topicSetApi.ts`/`sessionApi.ts`/`missAnalysisApi.ts`(7エンドポイント)、`types/api.ts`(全スキーマのTS型)を実装。`client.test.ts`3件Green、`vue-tsc -b`型チェック通過) |
-| P5-13 | `stores`(`userStore`/`topicStore`/`sessionStore`) | セッション中の集計・終了条件判定・送信失敗時再送がストア経由で動く状態 | 3.0 | 2.5 | **3.0** | 未着手 |
+| P5-13 | `stores`(`userStore`/`topicStore`/`sessionStore`) | セッション中の集計・終了条件判定・送信失敗時再送がストア経由で動く状態 | 3.0 | 2.5 | ~~3.0~~ **1.5**(2026-09-08再見積。Claudeドラフト方式が前提だが、sessionStoreの状態を持つ集計ロジックはP5-04`sequenceJudge`相当と見て他タスクより高めに設定) | 完了(`userStore`/`topicStore`(薄い)+`sessionStore`(`romaji-automaton.md`7.1の生成規則を実装: `kanaOccurrenceNo`採番・集計・終了条件判定・送信失敗時再送)。Vitest 13件(新規)Green、`vue-tsc -b`型チェック通過) |
 | P5-14 | views: `NameInputView`/`HomeView`(S-01, S-02) | 名前入力→ホーム画面遷移が動く状態 | 3.0 | 1.5 | **2.0** | 未着手 |
 | P5-15 | views: `TypingView` + `TypingDisplay`(S-03) | judgment-engineの結果を使い実際にタイピングできる状態 | 3.0 | 3.0 | **4.0** | 未着手 |
 | P5-16 | views: `ResultView` + `SessionMetricsSummary`(S-04) | セッション結果と自己ベスト比較が表示される状態 | 3.0 | 1.5 | **2.0** | 未着手 |

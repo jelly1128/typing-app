@@ -5,7 +5,7 @@
 | 項目 | 内容 |
 |---|---|
 | **現在の工程** | P5 実装(P4 完了、P5タスク分解済み) |
-| **次にやること** | P5-13(stores: userStore/topicStore/sessionStore)から着手 |
+| **次にやること** | P5-14〜17(views、並行可)から着手(P5-18 router → P5-19 結合確認の順) |
 | **開始日** | 2026-08-22 |
 | **ゴール予定日** | 2026年12月〜2027年1月(22〜32セッション ÷ 週1.5回) |
 
@@ -72,6 +72,7 @@
 | 2026-09-07 | P5 | P5-10(`MissAnalysisController`/`MissAnalysisService`、FR-10/FR-11)着手。`db-access.md` 4.3のクエリ結果を4観点に再集計し、既存の`AdviceGenerator`(P5-02実装済み)を呼び出すだけで完結。`CharType` enumの宣言順が`ordinal()`と一致するためbyCharTypeの固定順ソートに追加コード不要だった。`MissAnalysisServiceTest`(`SessionService`経由で実データ生成、実DB3件)・`MissAnalysisControllerTest`(2件)で確認、curlでの実API疎通も確認。実績3.0h(合意値どおり)。**P5-10完了、これでbackend(P5-05〜11)が全完了** | P5-12(frontend api/types)から |
 | 2026-09-07 | P5 | `/ty-end`。今日完了した7タスク(P5-05〜11)のうちズレ率±30%を超えたのはP5-11(-63%)のみ。深掘りの結果、要因は「前回合意値をそのまま再利用する際、その合意値がどの実行方式(Kazuki主体/Claudeドラフト)前提の数字かを確認しなかったこと」と判明(Kazuki自身は経過時間の詳細を覚えておらず、Claude側の観察を基に整理)。estimate-actual.mdに深掘り行と直近3タスク(P5-08〜10、全て0%)の補正係数を追記。**本セッションでbackend(P5-05〜11)が全完了、次回はP5-12(frontend api/types)から** | |
 | 2026-09-08 | P5 | 前回の打ち手(合意値を再利用する際は実行方式を確認する)を、Kazukiが見積もり時に自ら「Claudeドラフト方式で1.5h」と明示する形で実践。P5-12(frontend `api/client.ts`+各apiモジュール+`types/api.ts`)着手。`api-spec.yaml`の全スキーマをTS型に変換(`types/api.ts`)、fetchラッパー(`client.ts`、baseURL`/api`固定・90秒タイムアウト・`ErrorResponse`解析)、7エンドポイントを`operationId`と同名の関数でラップする4つのapiモジュールを実装。`vue-tsc -b`で`erasableSyntaxOnly`によるconstructor parameter property構文のエラーを検出し通常のフィールド代入に修正。レビュー中、Kazukiから「baseURL固定はハードコーディングとして仕方ないものか」「定数は名前を付けて定義しないのか」「`/users`のような繰り返し出現する文字列も定数化すべきか」の3点の質問があり、それぞれP3ゲート③ops-B4指摘の経緯・既にconstとして定義済みであること・`api-spec.yaml`との1:1対応を優先し定数化しない判断、を説明し合意。実績1.0h(合意値どおり)。**P5-12完了** | P5-13(stores)から |
+| 2026-09-08 | P5 | P5-13(`userStore`/`topicStore`/`sessionStore`)着手。見積もりでsessionStoreの複雑度(状態を持つ集計ロジック)を理由にP5-04`sequenceJudge`相当と判定し合意値1.5hに設定(Kazuki当初1h→1.5hに自己改訂)。`userStore`/`topicStore`は薄く実装、`sessionStore`は`romaji-automaton.md`7.1の生成規則(`moraIndex`変化トリガの`kanaOccurrenceNo`採番、`correctKeyCount`/`kanaCounts`集計、終了条件判定、送信失敗時の再送)を実装。設計書に無い実装判断3点(localStorageキー名`typingApp.userId`/`typingApp.name`、セッション開始時刻と最初のキー入力時刻の分離、`completeSentence()`という新規メソッド)をKazukiに説明し了承を得た。レビュー中、Kazukiから「localStorageキーとは何か」「VitestのbeforeEach/describe/expect/it/viとは何か」「Piniaの2つの書き方(Options Store/Setup Store)の違い」の3点の質問があり説明、Options Storeのまま進めることで合意。テストにjsdom環境が必要と判明し`jsdom`を追加、`vite.config.ts`の`defineConfig`を`vitest/config`からに変更。実績1.0h(合意値1.5h比-33%、要因: `romaji-automaton.md`7.1に生成規則が既に確定済みで実装中に解くべき曖昧さがほぼ無く、複雑度を高めに見積もった分が短縮に効いた)。**P5-13完了** | P5-14〜17(views)から |
 
 ---
 
