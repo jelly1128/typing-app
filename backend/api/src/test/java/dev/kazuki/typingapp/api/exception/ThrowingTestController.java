@@ -26,6 +26,11 @@ class ThrowingTestController {
         throw new InvalidSessionSubmissionException("durationSeconds must not be negative");
     }
 
+    @GetMapping("/test/invalid-request")
+    void invalidRequest() {
+        throw new InvalidRequestException("name must not be empty");
+    }
+
     @GetMapping("/test/data-access")
     void dataAccess() {
         throw new DataIntegrityViolationException("duplicate key");

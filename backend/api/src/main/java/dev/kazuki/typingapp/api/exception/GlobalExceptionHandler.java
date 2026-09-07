@@ -57,6 +57,12 @@ public class GlobalExceptionHandler {
         return handleValidationError(ex.getMessage(), request);
     }
 
+    @ExceptionHandler(InvalidRequestException.class)
+    public ResponseEntity<ErrorResponse> handleInvalidRequest(
+            InvalidRequestException ex, HttpServletRequest request) {
+        return handleValidationError(ex.getMessage(), request);
+    }
+
     /** Bean Validation失敗(@Valid)。現時点でこの経路を使うControllerは無いが、対応表どおりに用意しておく。 */
     @ExceptionHandler(MethodArgumentNotValidException.class)
     public ResponseEntity<ErrorResponse> handleMethodArgumentNotValid(

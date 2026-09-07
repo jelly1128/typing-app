@@ -1,7 +1,7 @@
 ---
 doc_id: DD-001
 status: fixed
-updated: 2026-09-06
+updated: 2026-09-07
 ---
 
 # クラス設計
@@ -71,9 +71,9 @@ Controller → Service → Repository の3層構成。例外→HTTP応答の変�
 
 | Service | メソッド | 引数 | 戻り値 | 対応FR |
 |---|---|---|---|---|
-| `UserService` | `identifyUser` | `name: String` | `User` | FR-12 |
-| `TopicSetService` | `listTopicSets` | (なし) | `List<TopicSet>` | FR-13 |
-| `TopicSetService` | `listSentences` | `topicSetId: Long` | `List<Sentence>` | FR-01, FR-13 |
+| `UserService` | `identifyUser` | `name: String` | `UserResponse` | FR-12 |
+| `TopicSetService` | `listTopicSets` | (なし) | `List<TopicSetResponse>` | FR-13 |
+| `TopicSetService` | `listSentences` | `topicSetId: Long` | `List<SentenceResponse>` | FR-01, FR-13 |
 | `SessionService` | `submitSession` | `request: SessionSubmissionRequest` | `SessionResultResponse` | FR-04〜09 |
 | `SessionService` | `listSessionHistory` | `userId: Long` | `List<SessionSummaryResponse>` | FR-08 |
 | `SessionService` | `getPersonalBest` | `userId: Long, topicSetId: Long` | `PersonalBestResponse` | FR-09 |
@@ -117,7 +117,8 @@ Controller → Service → Repository の3層構成。例外→HTTP応答の変�
 |---|---|
 | `GlobalExceptionHandler`(`@RestControllerAdvice`) | 例外→`ErrorResponse`変換、`traceId`採番、4xx/500時のログ出力(NFR-07) |
 | `UserNotFoundException` / `TopicSetNotFoundException` | 404応答に変換(userId・topicSetId不在) |
-| `InvalidSessionSubmissionException` | 400応答に変換(値域外、`missRecords[].kana`がkanaCountsに一致しない等) |
+| `InvalidSessionSubmissionException` | 400応答に変換(値域外、`missRecords[].kana`がkanaCountsに一致しない等。`SessionService.submitSession`専用) |
+| `InvalidRequestException` | 400応答に変換(上記以外の単純な入力チェック。例: `UserService`のname長さバリデーション。2026-09-07、P5-07着手時にUserServiceのバリデーション失敗を表す例外が定義されていなかったため追加、CL-019) |
 
 **例外→応答の対応表(2026-08-29、ゲート③ doc-reviewer B2/test-reviewer A6対応で確定):**
 
@@ -126,6 +127,7 @@ Controller → Service → Repository の3層構成。例外→HTTP応答の変�
 | `UserNotFoundException` | 404 | `USER_NOT_FOUND` | WARN 1行(traceId・エンドポイント・userId) |
 | `TopicSetNotFoundException` | 404 | `TOPIC_SET_NOT_FOUND` | WARN 1行 |
 | `InvalidSessionSubmissionException` | 400 | `VALIDATION_ERROR` | WARN 1行 |
+| `InvalidRequestException` | 400 | `VALIDATION_ERROR` | WARN 1行 |
 | `MethodArgumentNotValidException`(Bean Validation失敗) | 400 | `VALIDATION_ERROR` | WARN 1行 |
 | `HttpMessageNotReadableException`(不正JSON・型不一致) | 400 | `VALIDATION_ERROR` | WARN 1行 |
 | `DataIntegrityViolationException`(制約違反) | 500 | `INTERNAL_ERROR` | ERROR + スタックトレース |

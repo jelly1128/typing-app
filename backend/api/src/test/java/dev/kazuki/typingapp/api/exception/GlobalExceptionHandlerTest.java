@@ -7,12 +7,10 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.webmvc.test.autoconfigure.WebMvcTest;
-import org.springframework.context.annotation.Import;
 import org.springframework.test.web.servlet.MockMvc;
 
 /** class-design.md 1.4の例外→応答対応表どおりに4xx/500が返ることを確認する(P5-11)。 */
 @WebMvcTest(controllers = ThrowingTestController.class)
-@Import(GlobalExceptionHandler.class)
 class GlobalExceptionHandlerTest {
 
     @Autowired private MockMvc mockMvc;
@@ -39,6 +37,14 @@ class GlobalExceptionHandlerTest {
                 .andExpect(status().isBadRequest())
                 .andExpect(jsonPath("$.code").value("VALIDATION_ERROR"))
                 .andExpect(jsonPath("$.message").value("durationSeconds must not be negative"));
+    }
+
+    @Test
+    void invalidRequest_returns400() throws Exception {
+        mockMvc.perform(get("/test/invalid-request"))
+                .andExpect(status().isBadRequest())
+                .andExpect(jsonPath("$.code").value("VALIDATION_ERROR"))
+                .andExpect(jsonPath("$.message").value("name must not be empty"));
     }
 
     @Test
