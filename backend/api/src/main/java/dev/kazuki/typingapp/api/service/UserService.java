@@ -38,6 +38,9 @@ public class UserService {
     }
 
     private String validateName(String name) {
+        if (name == null) {
+            throw new InvalidRequestException("name must not be null");
+        }
         String trimmed = name.trim();
         if (trimmed.isEmpty() || trimmed.length() > 100) {
             throw new InvalidRequestException("name must be 1 to 100 characters after trimming");

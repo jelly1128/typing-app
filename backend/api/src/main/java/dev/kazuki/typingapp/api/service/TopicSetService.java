@@ -28,13 +28,11 @@ public class TopicSetService {
     }
 
     /**
-     * topicSetId不在なら404。取得結果が0件の場合も404にする
+     * topicSetId不在、または取得結果が0件の場合は404にする
      * (api-spec.yaml `GET /topic-sets/{id}/sentences`の404条件、class-design.md 1.4)。
+     * 両者は同じ例外を投げるだけなので、存在確認と一覧取得を別クエリに分けず1回のクエリで済ませる。
      */
     public List<SentenceResponse> listSentences(Long topicSetId) {
-        if (!topicSetRepository.existsById(topicSetId)) {
-            throw new TopicSetNotFoundException(topicSetId);
-        }
         List<Sentence> sentences = sentenceRepository.findByTopicSetIdOrderById(topicSetId);
         if (sentences.isEmpty()) {
             throw new TopicSetNotFoundException(topicSetId);

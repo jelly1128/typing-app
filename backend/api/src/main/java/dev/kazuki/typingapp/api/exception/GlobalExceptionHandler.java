@@ -4,16 +4,14 @@ import dev.kazuki.typingapp.api.dto.ErrorResponse;
 import jakarta.servlet.http.HttpServletRequest;
 import java.time.Instant;
 import java.util.UUID;
-import java.util.stream.Collectors;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.dao.DataAccessException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.http.converter.HttpMessageNotReadableException;
-import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
+import org.springframework.web.method.annotation.MethodArgumentTypeMismatchException;
 
 /**
  * 例外→{@link ErrorResponse}変換を1箇所に集約する(class-design.md 1.4、NFR-07)。
@@ -28,27 +26,14 @@ public class GlobalExceptionHandler {
     @ExceptionHandler(UserNotFoundException.class)
     public ResponseEntity<ErrorResponse> handleUserNotFound(
             UserNotFoundException ex, HttpServletRequest request) {
-        String traceId = newTraceId();
-        log.warn(
-                "traceId={} endpoint={} {} userId={}",
-                traceId,
-                request.getMethod(),
-                request.getRequestURI(),
-                ex.getUserId());
-        return errorResponse(HttpStatus.NOT_FOUND, "USER_NOT_FOUND", ex.getMessage(), traceId);
+        return handleNotFound("USER_NOT_FOUND", "userId", ex.getUserId(), ex.getMessage(), request);
     }
 
     @ExceptionHandler(TopicSetNotFoundException.class)
     public ResponseEntity<ErrorResponse> handleTopicSetNotFound(
             TopicSetNotFoundException ex, HttpServletRequest request) {
-        String traceId = newTraceId();
-        log.warn(
-                "traceId={} endpoint={} {} topicSetId={}",
-                traceId,
-                request.getMethod(),
-                request.getRequestURI(),
-                ex.getTopicSetId());
-        return errorResponse(HttpStatus.NOT_FOUND, "TOPIC_SET_NOT_FOUND", ex.getMessage(), traceId);
+        return handleNotFound(
+                "TOPIC_SET_NOT_FOUND", "topicSetId", ex.getTopicSetId(), ex.getMessage(), request);
     }
 
     @ExceptionHandler(InvalidSessionSubmissionException.class)
@@ -63,17 +48,6 @@ public class GlobalExceptionHandler {
         return handleValidationError(ex.getMessage(), request);
     }
 
-    /** Bean Validation失敗(@Valid)。現時点でこの経路を使うControllerは無いが、対応表どおりに用意しておく。 */
-    @ExceptionHandler(MethodArgumentNotValidException.class)
-    public ResponseEntity<ErrorResponse> handleMethodArgumentNotValid(
-            MethodArgumentNotValidException ex, HttpServletRequest request) {
-        String detail =
-                ex.getBindingResult().getFieldErrors().stream()
-                        .map(fe -> fe.getField() + ": " + fe.getDefaultMessage())
-                        .collect(Collectors.joining(", "));
-        return handleValidationError(detail, request);
-    }
-
     /** 不正なJSON・型不一致でリクエストボディを読めない場合。 */
     @ExceptionHandler(HttpMessageNotReadableException.class)
     public ResponseEntity<ErrorResponse> handleHttpMessageNotReadable(
@@ -81,17 +55,18 @@ public class GlobalExceptionHandler {
         return handleValidationError("リクエストボディの形式が不正です", request);
     }
 
-    /**
-     * DataIntegrityViolationException・CannotGetJdbcConnectionException等、DBアクセス関連の例外を
-     * まとめて扱う(いずれもDataAccessExceptionのサブクラス。class-design.md 1.4の対応表2行分)。
-     */
-    @ExceptionHandler(DataAccessException.class)
-    public ResponseEntity<ErrorResponse> handleDataAccess(
-            DataAccessException ex, HttpServletRequest request) {
-        return handleUnexpected(ex, request);
+    /** パスパラメータ・クエリパラメータが期待する型に変換できない場合(例: 数値であるべき箇所に文字列)。 */
+    @ExceptionHandler(MethodArgumentTypeMismatchException.class)
+    public ResponseEntity<ErrorResponse> handleMethodArgumentTypeMismatch(
+            MethodArgumentTypeMismatchException ex, HttpServletRequest request) {
+        return handleValidationError("パラメータ " + ex.getName() + " の形式が不正です", request);
     }
 
-    /** 上記のいずれにも当てはまらない未捕捉例外。 */
+    /**
+     * 上記のいずれにも当てはまらない未捕捉例外。DataIntegrityViolationException・
+     * CannotGetJdbcConnectionException等のDBアクセス関連例外(class-design.md 1.4の対応表)も
+     * ここに含む(専用ハンドラを用意しても同じ500/INTERNAL_ERRORになるだけのため一本化)。
+     */
     @ExceptionHandler(Exception.class)
     public ResponseEntity<ErrorResponse> handleUnexpected(Exception ex, HttpServletRequest request) {
         String traceId = newTraceId();
@@ -99,6 +74,19 @@ public class GlobalExceptionHandler {
                 "traceId={} endpoint={} {}", traceId, request.getMethod(), request.getRequestURI(), ex);
         return errorResponse(
                 HttpStatus.INTERNAL_SERVER_ERROR, "INTERNAL_ERROR", "サーバー内部でエラーが発生しました", traceId);
+    }
+
+    private ResponseEntity<ErrorResponse> handleNotFound(
+            String code, String idLabel, Object idValue, String message, HttpServletRequest request) {
+        String traceId = newTraceId();
+        log.warn(
+                "traceId={} endpoint={} {} {}={}",
+                traceId,
+                request.getMethod(),
+                request.getRequestURI(),
+                idLabel,
+                idValue);
+        return errorResponse(HttpStatus.NOT_FOUND, code, message, traceId);
     }
 
     private ResponseEntity<ErrorResponse> handleValidationError(

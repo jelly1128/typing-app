@@ -1,7 +1,7 @@
 ---
 doc_id: BD-005
 status: fixed
-updated: 2026-08-29
+updated: 2026-09-07
 ---
 
 # テーブル定義
@@ -108,7 +108,7 @@ ER図は [er-diagram.md](./er-diagram.md) を参照。各テーブルに TBL-ID 
 | id | BIGSERIAL | PK | |
 | session_id | BIGINT | NOT NULL, FK→sessions(id) | |
 | kana | VARCHAR(4) | NOT NULL | |
-| char_type | VARCHAR(10) | NOT NULL | |
+| char_type | VARCHAR(10) | NOT NULL, CHECK IN ('清音','拗音','撥音ん','促音っ','長音') | TBL-05 `char_type`と同じ値域(2026-09-07、CL-021で追記) |
 | total_count | INT | NOT NULL | そのセッションで、そのかなが出現した総回数(ミスの有無を問わない) |
 
 UNIQUE制約: `(session_id, kana)`。フロントエンドがセッション終了時に集計して送る(er-diagram.md 3.2)。

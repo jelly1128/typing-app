@@ -54,4 +54,11 @@ class TopicSetControllerTest {
                 .andExpect(status().isNotFound())
                 .andExpect(jsonPath("$.code").value("TOPIC_SET_NOT_FOUND"));
     }
+
+    @Test
+    void listSentences_returns400WhenTopicSetIdIsNotNumeric() throws Exception {
+        mockMvc.perform(get("/api/topic-sets/abc/sentences"))
+                .andExpect(status().isBadRequest())
+                .andExpect(jsonPath("$.code").value("VALIDATION_ERROR"));
+    }
 }

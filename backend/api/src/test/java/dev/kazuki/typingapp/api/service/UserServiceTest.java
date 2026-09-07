@@ -41,6 +41,11 @@ class UserServiceTest {
     }
 
     @Test
+    void identifyUser_rejectsNullName() {
+        assertThatThrownBy(() -> userService.identifyUser(null)).isInstanceOf(InvalidRequestException.class);
+    }
+
+    @Test
     void identifyUser_rejectsEmptyNameAfterTrim() {
         assertThatThrownBy(() -> userService.identifyUser("   ")).isInstanceOf(InvalidRequestException.class);
     }

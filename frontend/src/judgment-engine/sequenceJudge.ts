@@ -161,6 +161,9 @@ export function createSequenceJudge() {
       const nextMora = nextMoraOf(indexInSequence)
       if (candidates.length === 1 || !nextMora) {
         const confirmed = confirmCurrentMora(inputSoFar)
+        // pushedBackConfirmもconfirmedも非nullな場合(押し戻しと次拍の即時確定が1キーで両方起きた)、
+        // confirmedMoraは1件しか保持できないため片方の確定通知が失われる。
+        // romaji-automaton.md 6.1末尾「既知の制限」に記録済み、対応不要と合意済み(2026-09-07)。
         return buildResult(pushedBackConfirm ?? confirmed, null)
       }
 
