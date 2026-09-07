@@ -273,7 +273,7 @@ Kazuki は「結構考える必要ありそう」という理由で全タスク�
 | P5-07 | `UserController`/`UserService`(FR-12) | find-or-createがAPI経由で動く状態 | 3.0 | 2.0 | **2.0** | 完了(`UserServiceTest`5件+`UserControllerTest`1件Green、curlで実API疎通確認。CL-019/CL-020で例外・DTO設計の矛盾を修正) |
 | P5-08 | `TopicSetController`/`TopicSetService`(FR-01, FR-13) | お題セット一覧・お題文一覧がAPI経由で取得できる状態 | 3.0 | 1.5 | **2.0** | 完了(`TopicSetServiceTest`3件+`TopicSetControllerTest`3件Green、curlで実API疎通確認。`@PathVariable`の`-parameters`問題を解消) |
 | P5-09 | `SessionController`/`SessionService`(FR-04〜09) | セッション結果の保存(トランザクション・自己ベスト比較含む)と履歴取得がAPI経由で動く状態 | 3.0 | 3.5 | **4.0** | 完了(`SessionServiceTest`13件+`SessionControllerTest`3件Green。curlで送信→履歴→自己ベストの一連の流れを実API確認) |
-| P5-10 | `MissAnalysisController`/`MissAnalysisService`(FR-10, FR-11) | ミス分析4観点の集計とアドバイス生成がAPI経由で動く状態 | 3.0 | 2.5 | **3.0** | 未着手 |
+| P5-10 | `MissAnalysisController`/`MissAnalysisService`(FR-10, FR-11) | ミス分析4観点の集計とアドバイス生成がAPI経由で動く状態 | 3.0 | 2.5 | **3.0** | 完了(`MissAnalysisServiceTest`3件+`MissAnalysisControllerTest`2件Green。curlで実API疎通確認。**これでbackend P5-05〜11が全完了**) |
 | P5-11 | `GlobalExceptionHandler` + 例外クラス群 | class-design.md 1.4の例外→応答対応表どおりに4xx/500が返る状態 | 3.0 | 1.5 | **2.0** | 完了(`ThrowingTestController`+`@WebMvcTest`で対応表8行→5件のGreen確認。P5-07〜10の他Controllerからも同じ`GlobalExceptionHandler`を使う) |
 | P5-12 | frontend `api/client.ts` + 各apiモジュール + `types/api.ts` | 全APIエンドポイントがフロントから型付きで呼べる状態 | 3.0 | 2.0 | **2.0** | 未着手 |
 | P5-13 | `stores`(`userStore`/`topicStore`/`sessionStore`) | セッション中の集計・終了条件判定・送信失敗時再送がストア経由で動く状態 | 3.0 | 2.5 | **3.0** | 未着手 |

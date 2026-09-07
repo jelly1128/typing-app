@@ -5,7 +5,7 @@
 | 項目 | 内容 |
 |---|---|
 | **現在の工程** | P5 実装(P4 完了、P5タスク分解済み) |
-| **次にやること** | P5-10(`MissAnalysisController`/`MissAnalysisService`)から着手 |
+| **次にやること** | P5-12(frontend api/types)から着手(backend P5-05〜11完了) |
 | **開始日** | 2026-08-22 |
 | **ゴール予定日** | 2026年12月〜2027年1月(22〜32セッション ÷ 週1.5回) |
 
@@ -69,6 +69,7 @@
 | 2026-09-07 | P5 | P5-07(`UserController`/`UserService`)着手。設計書の矛盾2件を発見・修正: `InvalidRequestException`新設(CL-019、UserServiceのバリデーション失敗用の例外が未定義だった)、`UserService`/`TopicSetService`のメソッドシグネチャ表をDTO返却に修正(CL-020、Entity返却のままだと同節の「Serviceが必ずDTOに変換する」原則と矛盾していた)。実装後`UserServiceTest`(実DB5件)・`UserControllerTest`(`@WebMvcTest`1件)で確認、curl経由の実API疎通も確認(Windows curlの`-d`インライン日本語が文字化けする現象にぶつかったが、ファイル経由`--data-binary @file`で解決、アプリ側のバグではなかった)。レビューでKazukiが`GlobalExceptionHandlerTest`の冗長な`@Import(GlobalExceptionHandler.class)`を指摘、削除(`@WebMvcTest`が`@RestControllerAdvice`を自動検出するため不要だった)。実績2.0h(合意値どおり)。**P5-07完了** | P5-08(TopicSetController/TopicSetService)から |
 | 2026-09-07 | P5 | P5-08(`TopicSetController`/`TopicSetService`)着手。`TopicSetServiceTest`(実DB3件、`R__`シードデータ前提)・`TopicSetControllerTest`(`@WebMvcTest`+モック3件)で確認中、`@PathVariable Long topicSetId`が実行時に500エラーになる不具合を発見。原因は`-parameters`コンパイラフラグが無くSpringが引数名をリフレクション解決できなかったこと。`backend/pom.xml`に`maven.compiler.parameters=true`を追加して解決(`spring-boot-starter-parent`の既定値をこのプロジェクトでは明示的に設定する必要があった)。curlでの実API疎通も確認。実績2.0h(合意値どおり)。**P5-08完了** | P5-09(SessionController/SessionService)から |
 | 2026-09-07 | P5 | P5-08完了後、Kazukiの提案で`/code-review`(medium/high並列)による中間レビューを実施。8観点(A〜H)の並列調査により9件の指摘(NPE2件・DB整合性2件・重複/デッドコード4件・`sequenceJudge.ts`の二重確定1件)を発見、優先度順に全て修正・確認。うち2件(CHECK制約の非対称、押し戻し機構の組み合わせケース漏れ)は設計レビューで気づけたはずと判断し、`doc-reviewer`エージェントに観点を追加(つまずき・気づきログ参照)。P5-09(`SessionController`/`SessionService`、FR-04〜09)着手。存在確認→nullチェック→値域チェック→`SessionMetricsCalculator`呼び出し→自己ベストMAXクエリ→`@Transactional`保存→自己ベスト比較のフローを実装、履歴一覧はN+1回避のJOINプロジェクションを新設。`SessionServiceTest`(実DB13件)・`SessionControllerTest`(3件)で確認、curlで送信→履歴→自己ベストの一連を実API確認。実績4.0h(合意値どおり)。**P5-09完了** | P5-10(MissAnalysisController/MissAnalysisService)から |
+| 2026-09-07 | P5 | P5-10(`MissAnalysisController`/`MissAnalysisService`、FR-10/FR-11)着手。`db-access.md` 4.3のクエリ結果を4観点に再集計し、既存の`AdviceGenerator`(P5-02実装済み)を呼び出すだけで完結。`CharType` enumの宣言順が`ordinal()`と一致するためbyCharTypeの固定順ソートに追加コード不要だった。`MissAnalysisServiceTest`(`SessionService`経由で実データ生成、実DB3件)・`MissAnalysisControllerTest`(2件)で確認、curlでの実API疎通も確認。実績3.0h(合意値どおり)。**P5-10完了、これでbackend(P5-05〜11)が全完了** | P5-12(frontend api/types)から |
 
 ---
 
