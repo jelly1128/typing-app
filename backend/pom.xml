@@ -11,6 +11,9 @@
 
   <properties>
     <maven.compiler.release>25</maven.compiler.release>
+    <!-- @PathVariable/@RequestParamが引数名(リフレクション)で解決できるようにする。
+         spring-boot-starter-parentのデフォルト設定と同じ(本プロジェクトはそれを継承していないため明記) -->
+    <maven.compiler.parameters>true</maven.compiler.parameters>
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
     <spring-boot.version>4.1.1</spring-boot.version>
   </properties>

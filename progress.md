@@ -5,7 +5,7 @@
 | 項目 | 内容 |
 |---|---|
 | **現在の工程** | P5 実装(P4 完了、P5タスク分解済み) |
-| **次にやること** | P5-08(`TopicSetController`/`TopicSetService`)から着手 |
+| **次にやること** | P5-09(`SessionController`/`SessionService`)から着手 |
 | **開始日** | 2026-08-22 |
 | **ゴール予定日** | 2026年12月〜2027年1月(22〜32セッション ÷ 週1.5回) |
 
@@ -67,6 +67,7 @@
 | 2026-09-07 | P5 | P5-05完了後、Kazukiから「P5-06以降も毎回確認せず最初からClaudeドラフトを標準にするか」を提案し合意。P5-01・P5-05の2例が根拠(「次回の打ち手」の該当項目を解消・格上げ、[[p5_typing_core_hands_on]]メモリ更新)。P5-06(Entity + Repository)着手、見積もり合意値1.0h。`entity/`(User/TopicSet/Sentence/Session/MissRecord/SessionKanaCount + CharType/EndConditionType enum)、`repository/`(6本+db-access.md4章の集計クエリ用プロジェクション5種)を実装。`RepositorySmokeTest`で実DB(docker)に接続しfind系メソッド5件をGreen確認、`spring.jpa.hibernate.ddl-auto=validate`でEntity↔Flywayスキーマの整合性も起動時に検証できる状態にした。レビュー中にKazukiの指摘で`@Query`のJPQL/ネイティブSQLを文字列連結からText Blockに書き換え可読性改善。実績は合意値どおり1.0h。**P5-06完了** | P5-07〜11(backend Controller/Service)から |
 | 2026-09-07 | P5 | P5-07〜11の着手順をKazukiと相談し、P5-11(共通例外基盤)→P5-07(User)→P5-08(TopicSet)→P5-09(Session)→P5-10(MissAnalysis)の順に決定(見積もりは全タスク前回合意値をそのまま再利用)。P5-11(`GlobalExceptionHandler`)着手。`dto/ErrorResponse`、`exception/`(`UserNotFoundException`/`TopicSetNotFoundException`/`InvalidSessionSubmissionException`+`GlobalExceptionHandler`)を実装、class-design.md 1.4の例外→応答対応表を反映。本物のControllerがまだ無いため`ThrowingTestController`(例外を投げるだけの仮Controller)経由の`@WebMvcTest`で5件Green確認。ここでもSpring Boot 4.1.1のモジュール分割(`@WebMvcTest`が`spring-boot-starter-webmvc-test`という別モジュール・別パッケージに移動)にぶつかったが、P5-05のFlyway分離と同型のパターンだったため調査は早かった。実績0.75h(合意値2.0h比-63%)。**P5-11完了** | P5-07(UserController/UserService)から |
 | 2026-09-07 | P5 | P5-07(`UserController`/`UserService`)着手。設計書の矛盾2件を発見・修正: `InvalidRequestException`新設(CL-019、UserServiceのバリデーション失敗用の例外が未定義だった)、`UserService`/`TopicSetService`のメソッドシグネチャ表をDTO返却に修正(CL-020、Entity返却のままだと同節の「Serviceが必ずDTOに変換する」原則と矛盾していた)。実装後`UserServiceTest`(実DB5件)・`UserControllerTest`(`@WebMvcTest`1件)で確認、curl経由の実API疎通も確認(Windows curlの`-d`インライン日本語が文字化けする現象にぶつかったが、ファイル経由`--data-binary @file`で解決、アプリ側のバグではなかった)。レビューでKazukiが`GlobalExceptionHandlerTest`の冗長な`@Import(GlobalExceptionHandler.class)`を指摘、削除(`@WebMvcTest`が`@RestControllerAdvice`を自動検出するため不要だった)。実績2.0h(合意値どおり)。**P5-07完了** | P5-08(TopicSetController/TopicSetService)から |
+| 2026-09-07 | P5 | P5-08(`TopicSetController`/`TopicSetService`)着手。`TopicSetServiceTest`(実DB3件、`R__`シードデータ前提)・`TopicSetControllerTest`(`@WebMvcTest`+モック3件)で確認中、`@PathVariable Long topicSetId`が実行時に500エラーになる不具合を発見。原因は`-parameters`コンパイラフラグが無くSpringが引数名をリフレクション解決できなかったこと。`backend/pom.xml`に`maven.compiler.parameters=true`を追加して解決(`spring-boot-starter-parent`の既定値をこのプロジェクトでは明示的に設定する必要があった)。curlでの実API疎通も確認。実績2.0h(合意値どおり)。**P5-08完了** | P5-09(SessionController/SessionService)から |
 
 ---
 
