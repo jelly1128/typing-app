@@ -255,6 +255,8 @@ Kazuki は「結構考える必要ありそう」という理由で全タスク�
 
 **方針転換(2026-08-30、同日中):** P5-01(`SessionMetricsCalculator`)に着手したところ、Maven依存関係の追加・JUnit5配線・Jacksonでのshared/testdata読み込みなど、**ロジック本体に到達する前の環境構築だけで大半の時間を消費**した。この部分はP3セッションの懸念(「設計書を読んで判断するだけでは実装力が身につかない」)が想定していた対象ではなく、Kazukiから「かけた時間に対して学習効果が見合わない」との申告があった。これを受け、**`typing-core`/`judgment-engine`もClaudeがドラフトし、Kazukiはレビュー・質問で理解を深める方針(P1〜P4と同じパターン)に変更**する。他の層(backend/frontend)は変更なし。P5-01は環境構築(pom.xml/record/shared testdata)まではKazukiが実施済みのため、残る`calculate()`本体のみClaudeがドラフトする。P5-02〜04は最初からClaudeドラフトで進める。
 
+**再改訂(2026-09-07):** P5-05(Flyway migration)着手時にも同じ現象(Kazuki主体前提で見積もった後、着手直後にClaudeドラフトへ変更)が発生した。P5-01・P5-05の2例から「Kazuki主体・詰まったらClaude相談」という層区分自体がもう機能しないと判断し、**P5-06以降はbackend/frontend含む残り全タスクをClaudeドラフト・Kazukiレビュー方式に統一する**(層による使い分けは廃止)。
+
 **注(2026-09-05):** 当初のP5-03完了条件は「`shared/testdata`の受理パターンが全て通る状態」だったが、`test-plan.md`3.1節の`romaji-automaton`(RA-xxx)形式は`sequenceJudge`(P5-04)のキー入力逐次呼び出しを前提にしており、P5-03単体(`moraPatterns`/`specialMora`/`moraJudge`)では検証できないと判明した。P5-03は各モジュールをVitestの通常ユニットテストで検証し、`shared/testdata/romaji-automaton/cases.json`(RA-xxx)の作成・全件Green確認はP5-04(`sequenceJudge`実装)で行う。
 
 依存順: (P5-01〜04 typing-core/judgment-engineは並行可)→ P5-05(Flyway)→ P5-06(Entity/Repository)→ P5-07〜11(backend Controller/Service、並行可)→ P5-12(frontend api/types)→ P5-13(stores)→ P5-14〜17(views、並行可)→ P5-18(router)→ P5-19(結合確認、P5完了条件そのもの)
@@ -267,7 +269,7 @@ Kazuki は「結構考える必要ありそう」という理由で全タスク�
 | P5-03 | judgment-engine: `types.ts`/`moraPatterns.ts`/`specialMora.ts`/`moraJudge.ts`実装(FR-02) | 各モジュールの単体テスト(Vitest)が全て通る状態(注参照) | 3.0 | 4.0 | ~~4.0~~ **2.0** | 完了(Vitest導入、4モジュール実装、30件Green。RA-xxx testdataはP5-04で作成) |
 | P5-04 | judgment-engine: `sequenceJudge.ts`実装(FR-02〜04、状態保持含む全体) | お題文1本を最初から最後まで判定でき`KeystrokeResult`が仕様どおり返る状態 | 3.0 | 3.0 | ~~4.0~~ **1.5** | 完了(Vitest 14件+RA-xxx testdata 11件 全Green。着手時にCL-017/CL-018で設計書の矛盾2件を修正) |
 | P5-05 | Flyway migration(TBL-01〜06 + シードデータ) | `docker compose up`で全テーブルが作成されシードデータが投入される状態 | ~~3.0~~ **1.5** | ~~1.5~~ **1.0** | ~~2.0~~ **1.0**(2026-09-06再見積。P5-01と同様、KazukiがFlywayを自分で書く前提からClaudeドラフト・Kazukiレビュー方式に変更したため) | 完了(V1__create_schema.sql全6テーブル+4インデックス、R__seed_topic_master.sqlで難易度3件・お題15文を投入。`docker compose up`→バックエンド起動でFlyway自動適用を確認済み) |
-| P5-06 | Entity + Repository(6テーブル分) | 全EntityがJPAでマッピングされ、Repositoryのfind系メソッドが動く状態 | 3.0 | 2.0 | **3.0** | 未着手 |
+| P5-06 | Entity + Repository(6テーブル分) | 全EntityがJPAでマッピングされ、Repositoryのfind系メソッドが動く状態 | ~~3.0~~ **1.5** | ~~2.0~~ **1.0** | ~~3.0~~ **1.0**(2026-09-07再見積。P5-06以降Claudeドラフト・Kazukiレビュー方式に統一したため) | 完了(Entity 6種+Repository 6本+プロジェクション5種。RepositorySmokeTestで実DB接続確認、`ddl-auto=validate`でスキーマ整合性も検証) |
 | P5-07 | `UserController`/`UserService`(FR-12) | find-or-createがAPI経由で動く状態 | 3.0 | 2.0 | **2.0** | 未着手 |
 | P5-08 | `TopicSetController`/`TopicSetService`(FR-01, FR-13) | お題セット一覧・お題文一覧がAPI経由で取得できる状態 | 3.0 | 1.5 | **2.0** | 未着手 |
 | P5-09 | `SessionController`/`SessionService`(FR-04〜09) | セッション結果の保存(トランザクション・自己ベスト比較含む)と履歴取得がAPI経由で動く状態 | 3.0 | 3.5 | **4.0** | 未着手 |

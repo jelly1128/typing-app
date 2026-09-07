@@ -5,7 +5,7 @@
 | 項目 | 内容 |
 |---|---|
 | **現在の工程** | P5 実装(P4 完了、P5タスク分解済み) |
-| **次にやること** | P5-06(Entity + Repository、6テーブル分)から着手 |
+| **次にやること** | P5-07〜11(backend Controller/Service、並行可)から着手 |
 | **開始日** | 2026-08-22 |
 | **ゴール予定日** | 2026年12月〜2027年1月(22〜32セッション ÷ 週1.5回) |
 
@@ -22,7 +22,7 @@
 - [x] **P3** 詳細設計 — 設計書だけで実装を書き切れる粒度になっている状態
   - [x] ゲート③ レビュー通過(doc/test/ops 3観点、重要度A計15件+検証パスA7件、全件クローズ)
 - [x] **P4** テスト設計 — 全 FR-ID にテストケース ID が紐づいた状態(`traceability-matrix.md`で確認済み、ゲート無し・Kazukiの確認のみで完了)
-- [ ] **P5** 実装 — ローカルで MVP の全 FR が動く状態 **タスク分解済み(2026-08-30、[wbs.md](./docs/00_project/wbs.md#p5-実装確定2026-08-30分解)、19タスク)。方針転換(2026-08-30同日): 環境構築(Maven/JUnit/Jackson配線)だけで学習効果に見合わない時間がかかったため、`typing-core`/`judgment-engine`もClaudeドラフトに変更(P1〜P4と同じパターン)。それ以外の層(backend/frontend)はKazukiが主体で書き、詰まったらClaudeに相談する方針のまま。合意値合計は53.5h→45.0hに改訂**
+- [ ] **P5** 実装 — ローカルで MVP の全 FR が動く状態 **タスク分解済み(2026-08-30、[wbs.md](./docs/00_project/wbs.md#p5-実装確定2026-08-30分解)、19タスク)。方針転換(2026-08-30同日): 環境構築(Maven/JUnit/Jackson配線)だけで学習効果に見合わない時間がかかったため、`typing-core`/`judgment-engine`もClaudeドラフトに変更(P1〜P4と同じパターン)。合意値合計は53.5h→45.0hに改訂。**2026-09-07再改訂: P5-05(Flyway)でも同じ現象が再発したため、backend/frontend含むP5残り全タスクをClaudeドラフト・Kazukiレビュー方式に統一(層による使い分けは廃止)**
 - [ ] **P6** テスト実施 — ST 全件 PASS、未解決バグ 0
 - [ ] **P7** リリース — 公開 URL を他人にそのまま渡せる状態
 - [ ] **P8** 振り返り — 工程別ズレ率が数値化され補正係数が1行で書かれた状態
@@ -64,6 +64,7 @@
 | 2026-08-30 | P5 | P5タスク分解(19タスク、wbs.mdに記録)。着手時相談で「typing-core以外はKazuki主体、詰まったらClaude相談」「shared/testdataはKazukiがTDDで埋める」「E2E/Testcontainersは保留」「hooks(PostToolUse)は固定タスクにせず困りごとが出たら検討」を決定。P5-01(`SessionMetricsCalculator`)着手直後、Maven/JUnit5/Jackson配線の環境構築だけで大半の時間を消費しロジック本体に未到達という状況になり、Kazukiから「学習効果が時間に見合わない」との申告を受け、**typing-core/judgment-engineもClaudeドラフトへ方針転換**(合意値3.0h→1.0hに改訂)。ドラフト後、`shared/testdata/session-metrics/cases.json`(SM-001〜006、UT-001〜006対応)を作成し全件Green。「困りごとが出たら検討」としていたhooks(PostToolUse)を実際に導入(Spotless `importOrder`/`removeUnusedImports`をWrite/Edit後に自動実行、動作確認済み。`googleJavaFormat`はJDK25と非互換のため除外)。テストは`@ParameterizedTest`化(1件失敗で残りが実行されない問題を解消)。ソースコードにコメント追加。P5-01完了時点でコミット(9e37a6d)。**P5-01完了** | P5-02(`AdviceGenerator`)から。Claudeドラフト方式で進める |
 | 2026-09-06 | P5 | 前回セッション(P5-03)の実績記入漏れを補完(estimate-actual.mdに新規行追記、既存行は書き換えない方針を維持)。P5-04(`sequenceJudge.ts`)をClaudeドラフト方式で実装。着手時に設計書間の矛盾を2件発見: ①`test-plan.md`のRA-001ワークド例が`romaji-automaton.md`の改訂済みルール(`nextHint`最短優先、`confirmedText`は採用パターン表示)と不一致→CL-017で修正、②`class-design.md`の「`MoraSequence`は`moraList`をそのまま使う」記述が`api-spec.yaml`の実際の型(charTypeを持たないかな文字列配列)と不一致→CL-018で`sequenceJudge`内部にかな→文字種の分類処理を追加する方式に決定。実装後、Vitest 14件+`shared/testdata/romaji-automaton/cases.json`(RA-001〜011、11件)全Green。実装直後に「議論タイム」(コミット前にKazukiがコードを読んで質問するフェーズ)を経てからコミットする運用を今回は最初から守れた。**P5-04完了**。作業後、Kazukiから「今のアプリの様子を見たい」と要望があり、Docker(Postgres)+Spring Boot+Vite devサーバーを起動し、ブラウザで実際に「Vue→Java→PostgreSQL」の疎通を確認(現状はタイピング画面が無く「Hello from PostgreSQL」の1行表示のみ、と正直に説明した上で実施) | P5-05(Flyway migration)から |
 | 2026-09-07 | P5 | P5-05(Flyway migration)着手。記録済みの次回の打ち手どおり、着手直後に役割分担(Claudeドラフト・Kazukiレビュー方式に変更)を確認してから着手し、見積もりも合意値1.0hに再設定(Kazuki見積1.5h→Flaywayが初挑戦で理解時間を多めに見た分と判明)。`V1__create_schema.sql`(TBL-01〜06全テーブル+db-access.md 6章の4インデックス)、`R__seed_topic_master.sql`(難易度3件・お題15文、拗音/促音/撥音/長音を各セット1回以上含む)を作成。途中、Spring Boot 4.1.1でFlyway自動設定が`spring-boot-flyway`という別モジュールに分離されており`flyway-core`単体追加では無反応(エラー無し)という点に手間取ったが、`spring-boot-starter-flyway`追加で解決。`docker compose up`→バックエンド起動でマイグレーション適用・シードデータ投入・`R__`再実行時の冪等性(重複しない)まで実機で確認。実績は合意値どおり1.0h。**P5-05完了** | P5-06(Entity + Repository)から |
+| 2026-09-07 | P5 | P5-05完了後、Kazukiから「P5-06以降も毎回確認せず最初からClaudeドラフトを標準にするか」を提案し合意。P5-01・P5-05の2例が根拠(「次回の打ち手」の該当項目を解消・格上げ、[[p5_typing_core_hands_on]]メモリ更新)。P5-06(Entity + Repository)着手、見積もり合意値1.0h。`entity/`(User/TopicSet/Sentence/Session/MissRecord/SessionKanaCount + CharType/EndConditionType enum)、`repository/`(6本+db-access.md4章の集計クエリ用プロジェクション5種)を実装。`RepositorySmokeTest`で実DB(docker)に接続しfind系メソッド5件をGreen確認、`spring.jpa.hibernate.ddl-auto=validate`でEntity↔Flywayスキーマの整合性も起動時に検証できる状態にした。レビュー中にKazukiの指摘で`@Query`のJPQL/ネイティブSQLを文字列連結からText Blockに書き換え可読性改善。実績は合意値どおり1.0h。**P5-06完了** | P5-07〜11(backend Controller/Service)から |
 
 ---
 
@@ -72,9 +73,7 @@
 > `/ty-end` で毎回1行書く。`/ty-plan` は次回の冒頭でこれを読み上げ、実行されたかを確認する。
 > 打ち手が次のサイクルで実行されていなければ、それは振り返りではない。
 
-- **P5-05以降(backend Controller/Service/Repository、frontend api/stores/views等、「Kazuki主体・詰まったらClaude相談」パターンの層)に着手する際は、着手直後に「今回も環境構築とドメインロジックの境界線をどこで引くか」を先に一言確認してから始める。** 今回P5-01(typing-core)で、Kazuki自身が書く前提のままMaven/JUnit5/Jackson配線を先に済ませようとした結果、肝心のロジック実装に到達する前に「学習効果が時間に見合わない」という不満が生じ、セッション途中で方針転換(Claudeドラフトへ変更)する手戻りが発生した(estimate-actual.md「P5-01の合意値改定について」参照)。P5-01では手戻り後に気づいたが、P5-05以降で同種の層に入る前に**事前に**この境界線(定型的な配線はClaudeが引き取る/ドメイン判断が要る部分はKazukiが書く)を一言合意しておけば、同じ回り道を防げる(2026-08-23の「知っている→事後に気づく→事前に適用する」の教訓と同型)
-
-- **P5-05以降(backend Controller/Service/Repository、frontend api/stores/views等、「Kazuki主体・詰まったらClaude相談」パターンの層)着手時の境界線確認**は、まだP5-05に到達していないため今回も未検証のまま持ち越し
+- ~~P5-05以降(backend Controller/Service/Repository、frontend api/stores/views等、「Kazuki主体・詰まったらClaude相談」パターンの層)に着手する際は、着手直後に「今回も環境構築とドメインロジックの境界線をどこで引くか」を先に一言確認してから始める。~~ **→ 実行・解消済み(2026-09-07)。** P5-05(Flyway migration)着手時にこの確認を実際に行ったところ、P5-01と同じく「Kazuki主体」では回り道になることが2回目の実例で裏付けられたため、確認自体をやめてP5-06以降は最初からClaudeドラフト・Kazukiレビューを標準にする方針に格上げした(上記P5チェックリスト行参照)。「事前に確認する」打ち手は1回機能したら役目を終え、次は「確認不要にする」判断に進化する、という良い例になった
 
 **(2026-09-05確定)Claude単独連続実行時のタスク区切り記録:** P5-01完了→P5-02着手→完了を`/ty-end`を挟まずに連続実行した結果、P5-02の実績記録・コミットが漏れ、次回`/ty-plan`(2026-09-05)で発覚・救済する事態になった(estimate-actual.md「P5-02」の要因欄参照)。**今後はP5の各タスク完了ごとに必ずコミットする**運用に切り替える(実績記入は`/ty-end`でまとめてでもよいが、コミット自体はタスク区切りで都度行う)。
 
