@@ -62,7 +62,7 @@ updated: 2026-09-10
 
 - 対象ファイル・箇所: `docs/00_project/estimate-actual.md` 4行目(`updated: 2026-09-07`のまま)
 - 指摘内容: 同じ差分の中で2026-09-10付けの行(P5-15〜17)を追記しているのに、frontmatterの`updated`が古いまま。CLAUDE.mdの「`docs/`配下の文書はfrontmatterに`updated`を持つ」規約との軽微な不整合。
-- 推奨対応(未実施): `updated: 2026-09-10`に更新する。
+- **対応済み(2026-09-10、`/ty-end`時に修正)**: `updated: 2026-09-10`に更新した。
 
 ### C2(申し送り). `userStore.restoreFromStorage()`がどこからも呼ばれていない
 
