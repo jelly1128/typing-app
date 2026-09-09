@@ -261,6 +261,8 @@ Kazuki は「結構考える必要ありそう」という理由で全タスク�
 
 依存順: (P5-01〜04 typing-core/judgment-engineは並行可)→ P5-05(Flyway)→ P5-06(Entity/Repository)→ P5-07〜11(backend Controller/Service、並行可)→ P5-12(frontend api/types)→ P5-13(stores)→ P5-14〜17(views、並行可)→ P5-18(router)→ P5-19(結合確認、P5完了条件そのもの)
 
+**(2026-09-10追記)P5-18着手前に[REV-014](../90_review/review-20260910_p5-interim.md)への対応が必要。** P5-15〜17完了時点の中間コードレビューで重要度A1件(`kanaOccurrenceNo`誤採番、FR-10データ破損)を検出、未対応のまま申し送り。またP5-09〜14はP5-08チェックポイント以降一度もコードレビューされていない(REV-014内で申し送り済み)。
+
 | タスクID | 内容 | 完了条件 | Kazuki見積 | Claude見積 | 合意値 | 状態 |
 |---|---|---|---|---|---|---|
 | P5-00 | P5タスク分解 | 本表がタスク単位まで分解された状態 | - | 0.5 | **0.5** | 完了 |

@@ -1,7 +1,7 @@
 ---
 doc_id: IDX-001
 status: fixed
-updated: 2026-08-29
+updated: 2026-09-10
 ---
 
 # 文書管理台帳
@@ -86,6 +86,7 @@ updated: 2026-08-29
 | [review-20260829_p3-gate3-test.md](./90_review/review-20260829_p3-gate3-test.md) | 同上(P3ゲート③test観点、REV-011) | 0(A1〜A8全件クローズ。B10件・C4件は申し送り) |
 | [review-20260829_p3-gate3-ops.md](./90_review/review-20260829_p3-gate3-ops.md) | 同上(P3ゲート③ops観点、REV-012) | 0(A1〜A2全件クローズ。B10件・C4件は申し送り) |
 | [review-20260829_p3-gate3-verify.md](./90_review/review-20260829_p3-gate3-verify.md) | class-design.md/sequence.md/db-access.md/logic-spec 3本(A15件修正直後の検証レビュー、REV-013) | 0(A1〜A7全件クローズ。B4件・C7件は申し送り) |
+| [review-20260910_p5-interim.md](./90_review/review-20260910_p5-interim.md) | frontend views(P5-15〜17、`/code-review`medium/high並列、REV-014) | A1未対応(次回セッションで対応。B3件・C3件も申し送り。P5-09〜14は未レビューのまま申し送り) |
 
 ## decisions — ADR(意思決定記録)
 
