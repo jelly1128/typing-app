@@ -11,7 +11,11 @@ const emit = defineEmits<{
 // このViewへ切り替わる想定で、その時点で結果は既にsessionStoreに入っているため直接読む
 const sessionStore = useSessionStore()
 
-/** 「もう一度送信」ボタン押下時に呼ぶ。送信内容(lastSubmission)はsessionStore側が保持しており、同じ内容をそのまま再送する */
+/**
+ * 「もう一度送信」ボタン押下時に呼ぶ。送信内容(lastSubmission)はsessionStore側が保持しており、
+ * 同じ内容をそのまま再送する
+ * @returns なし(sessionStore.result/submitErrorを更新する副作用のみ)
+ */
 function retry() {
   sessionStore.submit()
 }

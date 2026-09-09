@@ -40,7 +40,11 @@ let isFinished = false
 // computed() は他の値から自動で計算される値。sentences配列とindexが変わるたびに再計算される
 const currentSentence = computed(() => topicStore.sentences[currentSentenceIndex.value])
 
-/** 指定した番号のお題文の判定を開始する(お題文が変わるたびにこの関数を呼び直す) */
+/**
+ * 指定した番号のお題文の判定を開始する(お題文が変わるたびにこの関数を呼び直す)
+ * @param index topicStore.sentences内でのお題文の番号(0始まり)
+ * @returns なし(keystroke.value等の画面表示用の状態を更新する副作用のみ)
+ */
 function beginSentence(index: number) {
   currentSentenceIndex.value = index
   confirmedMoraCountInSentence = 0
@@ -48,7 +52,10 @@ function beginSentence(index: number) {
   keystroke.value = judge.startSentence(topicStore.sentences[index].moraList)
 }
 
-/** セッションを終える(終了条件達成時に1回だけ呼ばれる) */
+/**
+ * セッションを終える(終了条件達成時に1回だけ呼ばれる)
+ * @returns なし(sessionStore.endSession()の完了を待ってから'finished'をemitする)
+ */
 async function finish() {
   if (isFinished) return // タイマーとキー入力の両方から呼ばれうるため、二重終了を防ぐ
   isFinished = true
@@ -58,7 +65,10 @@ async function finish() {
   emit('finished')
 }
 
-/** 1つのお題文が最後まで打ち終わった時に呼ぶ。終了条件を満たしていれば終了、そうでなければ次のお題文へ */
+/**
+ * 1つのお題文が最後まで打ち終わった時に呼ぶ。終了条件を満たしていれば終了、そうでなければ次のお題文へ
+ * @returns なし(finish()またはbeginSentence()を呼ぶ副作用のみ)
+ */
 async function advance() {
   sessionStore.completeSentence()
   if (sessionStore.isSentenceCountConditionMet || sessionStore.hasTimeLimitElapsed()) {
@@ -72,6 +82,8 @@ async function advance() {
 /**
  * window全体のkeydownイベントのリスナー。ブラウザは「今どの要素にフォーカスがあるか」に関係なく
  * このイベントを毎回発火するので、input欄を使わずキー入力を直接拾う手段として使っている
+ * @param event ブラウザが渡すキーボードイベント。押されたキーは`event.key`で取れる
+ * @returns なし(keystroke.value等の画面表示用の状態を更新する副作用のみ)
  */
 async function handleKeydown(event: KeyboardEvent) {
   if (isFinished || event.key.length !== 1) return // Shift/Tab/矢印キー等(key.lengthが2文字以上)は無視する
@@ -90,7 +102,11 @@ async function handleKeydown(event: KeyboardEvent) {
   }
 }
 
-/** setIntervalから200msごとに呼ばれる。time_limitモードは打鍵が無くても時間経過だけで終了しうるため、監視役として必要 */
+/**
+ * setIntervalから200msごとに呼ばれる。time_limitモードは打鍵が無くても時間経過だけで
+ * 終了しうるため、監視役として必要
+ * @returns なし(remainingSeconds.valueの更新、または終了条件到達時にfinish()を呼ぶ副作用のみ)
+ */
 function tick() {
   if (isFinished) return
   if (sessionStore.hasTimeLimitElapsed()) {
