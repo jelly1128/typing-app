@@ -1,7 +1,7 @@
 ---
 doc_id: DD-001
 status: fixed
-updated: 2026-09-07
+updated: 2026-09-10
 ---
 
 # クラス設計
@@ -217,6 +217,8 @@ frontend/src/
 `sessionStore`は`confirmedMora`から`correctKeyCount`・`kanaCounts`を、`miss`から`missRecords[]`(`kanaOccurrenceNo`は現在保持している採番値を付与)を組み立てる(`romaji-automaton.md` 7.1)。
 
 `sequenceJudge.ts` が唯一の外部公開インターフェースとなり、`TypingView.vue`(S-03)はこれ以外の内部モジュールを直接呼ばない。
+
+**`startSentence`の戻り値(2026-09-10、CL-022対応):** `startSentence`は`void`ではなく、最初の拍(お題文の1文字目)の初期状態を表す`KeystrokeResult`を返す(`confirmedText: ''`・`pendingInput: ''`・`nextHint`は最初の拍の受理パターンから選んだヒント・`missAt: null`・`currentKana`は最初の拍のかな・`confirmedMora: null`・`miss: null`)。1打鍵もしていない時点(お題文表示直後)でも`TypingView`が「次に打つべき文字」を表示できるようにするための戻り値であり、**`sessionStore.recordKeystroke`には渡さない**(実際のキー入力によるものではないため、集計対象にしない)。以降の`handleKeystroke`の呼び出し結果のみを`recordKeystroke`に渡す。
 
 ### 2.3 `api/` と `types/`
 

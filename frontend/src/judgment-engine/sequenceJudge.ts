@@ -70,12 +70,17 @@ export function createSequenceJudge() {
    * 新しいお題文の判定を開始する。1つのお題文につき1回呼ぶ(`romaji-automaton.md` 6.0)。
    * `kanaList`は`api-spec.yaml` `Sentence.moraList`(拍ごとに区切られたかな文字列の配列、charTypeなし)を
    * そのまま渡す。文字種への分類はここで行う(2026-09-06、CL-018対応)。
+   *
+   * 戻り値は最初の拍の初期状態を表す`KeystrokeResult`(2026-09-10、CL-022対応)。
+   * 1打鍵もしていない時点でも`TypingView`が「次に打つべき文字」を表示できるようにするためのもので、
+   * 実際のキー入力の結果ではないため`sessionStore.recordKeystroke`には渡さない。
    */
-  function startSentence(kanaList: string[]): void {
+  function startSentence(kanaList: string[]): KeystrokeResult {
     sequence = kanaList.map((kana): Mora => ({ kana, charType: classifyCharType(kana) }))
     indexInSequence = 0
     confirmedTextForSentence = ''
     initMoraState(null)
+    return buildResult(null, null)
   }
 
   /** 現在の拍を`acceptedPattern`で確定させ、次の拍の状態を初期化する(`この拍を確定する`)。 */

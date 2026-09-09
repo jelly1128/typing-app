@@ -1,7 +1,7 @@
 ---
 doc_id: PRJ-004
 status: fixed
-updated: 2026-09-07
+updated: 2026-09-10
 ---
 
 # 変更管理票
@@ -39,3 +39,4 @@ updated: 2026-09-07
 | CL-019 | 2026-09-07 | `class-design.md`(1.4 例外クラス一覧・例外→応答対応表に`InvalidRequestException`を追加) | P5-07(`UserController`/`UserService`)着手時、`UserService`の責務(「nameのバリデーション(trim後1〜100文字)」)と`api-spec.yaml`の`POST /api/users`が定義する400応答に対応する例外クラスが、`class-design.md`の例外一覧(`UserNotFoundException`/`TopicSetNotFoundException`/`InvalidSessionSubmissionException`の3つのみ)に存在しないことに気づいた。Kazukiと相談し、`InvalidSessionSubmissionException`(Session専用の値域チェック7項目に紐づく名前)を流用せず、単純な入力チェック用の汎用例外`InvalidRequestException`を新設する方針で合意した | `InvalidSessionSubmissionException`は`SessionService.submitSession`の値域チェック表(class-design.md 1.4)に合わせて命名した専用例外であり、他のServiceの単純なバリデーションまで面倒を見る汎用例外として設計されていなかった。P5-06までEntity/Repository/例外基盤の骨格を作る中で、UserServiceのような「存在確認以外の入力チェックを持つ最初のService」に実際に着手するまでこの抜けが表面化しなかった |
 | CL-020 | 2026-09-07 | `class-design.md`(1.4 Serviceメソッドシグネチャ表: `UserService.identifyUser`の戻り値を`User`→`UserResponse`、`TopicSetService.listTopicSets`/`listSentences`を`List<TopicSet>`/`List<Sentence>`→`List<TopicSetResponse>`/`List<SentenceResponse>`に修正) | P5-07着手時、同じ1.4節内でメソッドシグネチャ表(User/TopicSetServiceはEntityを返す)と「Entity→DTO変換の責務」の一般原則(全ServiceがDTOに変換し、ControllerはDTO変換を行わない)が矛盾していることに気づいた。SessionService/MissAnalysisServiceは既にDTOを返す形になっており、User/TopicSetServiceだけ取り残されていた。Kazukiと相談し、一般原則の方に合わせてシグネチャ表を修正する方針で合意した | P4-01(test-reviewer B1対応)でメソッドシグネチャ表を確定した際、SessionService/MissAnalysisServiceの複雑な変換ロジック(4章のMissAnalysis組み立てと同型)を念頭に一般原則を書いたが、User/TopicSetServiceのような単純なfind-or-create・一覧取得もこの原則が及ぶことの確認・横展開を怠っていた |
 | CL-021 | 2026-09-07 | `table-definition.md`(TBL-06 `char_type`列にCHECK制約を追記) | P5-05〜08完了時点で`/code-review`(標準スキル)による中間レビューを実施したところ、`miss_records.char_type`(TBL-05)にはCHECK制約があるのに、同じ値域を持つ`session_kana_counts.char_type`(TBL-06)にはCHECK制約が無いという非対称を指摘された。table-definition.md自体がこの非対称を持っていたと判明したため、まず設計書を修正し、`V1__create_schema.sql`は適用済みのため新規migration(`V2`)で制約を追加する方針にした | TBL-05とTBL-06は元々別々のタイミング(P2-04)で書かれ、どちらも`char_type VARCHAR(10)`という同じ列を持つが、CHECK制約を追記する際にTBL-05にしか適用せず、同じ値域を持つ列への横展開確認を怠っていた。CL-003/CL-008/CL-011と同型の「横展開漏れ」パターン |
+| CL-022 | 2026-09-10 | `class-design.md`(2.2に`startSentence`の戻り値の節を追加)、`logic-spec/romaji-automaton.md`(6.1に「1打鍵もしていない時点のヒント」を追加) | P5-15(`TypingView`)着手時、`sequenceJudge.startSentence()`が`void`を返す(`KeystrokeResult`は`handleKeystroke`しか返さない)ため、お題文表示直後・1打鍵もしていない時点で`TypingView`が「次に打つべき文字」のヒントを取得する手段が設計上無いことに気づいた。Kazukiと相談し、`startSentence`が最初の拍の初期状態を表す`KeystrokeResult`(表示専用、`sessionStore`には渡さない)を返す方式に決定した | 6.0/6.1の疑似コードは「キー入力イベントのたびに1回呼ばれる」処理として書かれており、1打鍵目より前の状態(お題文が表示された直後の画面)は判定オートマトンの疑似コードの対象外だった。画面側(`TypingView`)の初期表示要件は`screen-design.md`/`class-design.md`のどちらにも明記が無く、実際に呼び出し側を実装する段階まで欠落に気づけなかった |

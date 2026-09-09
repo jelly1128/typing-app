@@ -15,6 +15,21 @@ describe('createSequenceJudge (shared/testdata/romaji-automaton/cases.json)', ()
   }
 })
 
+describe('createSequenceJudge (startSentenceの初期ヒント、CL-022)', () => {
+  it('1打鍵もしていない時点で最初の拍のヒントを返す', () => {
+    const judge = createSequenceJudge()
+    const initial = judge.startSentence(['し'])
+
+    expect(initial.confirmedText).toBe('')
+    expect(initial.pendingInput).toBe('')
+    expect(initial.nextHint).toBe('ci')
+    expect(initial.missAt).toBeNull()
+    expect(initial.currentKana).toBe('し')
+    expect(initial.confirmedMora).toBeNull()
+    expect(initial.miss).toBeNull()
+  })
+})
+
 describe('createSequenceJudge (お題文をまたぐ状態)', () => {
   it('UT-024: 累計拍インデックスはお題文をまたいでもリセットされない', () => {
     const judge = createSequenceJudge()
