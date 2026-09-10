@@ -21,6 +21,10 @@ const personalBestError = ref(false)
 const historyLoadError = ref(false)
 const sessionHistory = ref<SessionSummary[] | null>(null)
 
+// 直近に発行したリクエストの番号(REV-014 B3対応)。難易度を素早く切り替えた時、後から発行した
+// リクエストの結果だけを反映し、遅れて返ってきた古いリクエストの結果を無視するために使う
+let personalBestRequestId = 0
+
 /**
  * 難易度選択が変わるたびに、選んだ難易度の自己ベストだけを取り直す
  * @param topicSetId 自己ベストを取得する難易度(お題セット)のID
@@ -28,10 +32,14 @@ const sessionHistory = ref<SessionSummary[] | null>(null)
  */
 async function loadPersonalBest(topicSetId: number) {
   if (userStore.userId === null) return
+  const requestId = ++personalBestRequestId
   personalBestError.value = false
   try {
-    personalBest.value = await getPersonalBest(userStore.userId, topicSetId)
+    const result = await getPersonalBest(userStore.userId, topicSetId)
+    if (requestId !== personalBestRequestId) return // より新しいリクエストが発行済みなら古い結果は破棄する
+    personalBest.value = result
   } catch {
+    if (requestId !== personalBestRequestId) return
     personalBestError.value = true
   }
 }
@@ -69,14 +77,18 @@ onMounted(async () => {
 
   <section>
     <h2>自己ベスト</h2>
-    <p v-if="topicSetLoadError || personalBestError" role="alert">読み込みに失敗しました</p>
+    <p v-if="topicSetLoadError" role="alert">読み込みに失敗しました</p>
     <template v-else>
       <select v-model="selectedTopicSetId">
         <option v-for="topicSet in topicStore.topicSets" :key="topicSet.id" :value="topicSet.id">
           {{ topicSet.name }}
         </option>
       </select>
-      <template v-if="personalBest">
+      <p v-if="personalBestError" role="alert">
+        読み込みに失敗しました
+        <button type="button" @click="selectedTopicSetId !== null && loadPersonalBest(selectedTopicSetId)">再試行</button>
+      </p>
+      <template v-else-if="personalBest">
         <p v-if="personalBest.netKpmBest === null">まだ記録がありません。練習を始めましょう</p>
         <p v-else>Net KPM 最大: {{ personalBest.netKpmBest }} / 正確率最大: {{ personalBest.accuracyBest }}%</p>
       </template>

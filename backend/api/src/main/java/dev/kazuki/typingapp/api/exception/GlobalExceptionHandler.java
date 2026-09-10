@@ -9,6 +9,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.http.converter.HttpMessageNotReadableException;
+import org.springframework.web.bind.MissingServletRequestParameterException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 import org.springframework.web.method.annotation.MethodArgumentTypeMismatchException;
@@ -60,6 +61,16 @@ public class GlobalExceptionHandler {
     public ResponseEntity<ErrorResponse> handleMethodArgumentTypeMismatch(
             MethodArgumentTypeMismatchException ex, HttpServletRequest request) {
         return handleValidationError("パラメータ " + ex.getName() + " の形式が不正です", request);
+    }
+
+    /**
+     * 必須の{@code @RequestParam}が指定されなかった場合(例: `GET /api/users/{userId}/best`の
+     * `topicSetId`)。2026-09-11、追加コードレビューで検出、CL-025で対応表に追加。
+     */
+    @ExceptionHandler(MissingServletRequestParameterException.class)
+    public ResponseEntity<ErrorResponse> handleMissingServletRequestParameter(
+            MissingServletRequestParameterException ex, HttpServletRequest request) {
+        return handleValidationError("必須パラメータ " + ex.getParameterName() + " がありません", request);
     }
 
     /**

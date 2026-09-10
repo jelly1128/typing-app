@@ -32,8 +32,7 @@ const currentSentenceIndex = ref(0)
 const keystroke = ref<KeystrokeResult | null>(null)
 const remainingSeconds = ref<number | null>(null)
 
-// 画面の再描画とは無関係な内部カウンタ・タイマーIDなので、refにせずただの変数で持つ
-let confirmedMoraCountInSentence = 0
+// 画面の再描画とは無関係なタイマーIDなので、refにせずただの変数で持つ
 let timerId: number | undefined
 let isFinished = false
 
@@ -47,7 +46,8 @@ const currentSentence = computed(() => topicStore.sentences[currentSentenceIndex
  */
 function beginSentence(index: number) {
   currentSentenceIndex.value = index
-  confirmedMoraCountInSentence = 0
+  // お題文の切れ目でkanaOccurrenceNoの採番がずれないよう、moraIndexの変化検知状態をリセットする(CL-023)
+  sessionStore.startNewSentence()
   // startSentenceの戻り値はお題文表示直後(1打鍵目より前)のヒント(CL-022)
   keystroke.value = judge.startSentence(topicStore.sentences[index].moraList)
 }
@@ -94,10 +94,8 @@ async function handleKeydown(event: KeyboardEvent) {
   keystroke.value = result
   sessionStore.recordKeystroke(result)
 
-  if (result.confirmedMora !== null) {
-    confirmedMoraCountInSentence += 1
-  }
-  if (confirmedMoraCountInSentence >= currentSentence.value.moraList.length) {
+  // confirmedMoraの発生回数では数えない(CL-024: 1キーで2拍同時確定すると通知が1件失われるため)
+  if (judge.isSentenceComplete()) {
     await advance()
   }
 }

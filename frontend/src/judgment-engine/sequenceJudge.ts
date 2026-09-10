@@ -178,7 +178,16 @@ export function createSequenceJudge() {
     }
   }
 
-  return { startSentence, handleKeystroke }
+  /**
+   * お題文の判定が最後まで終わっているか(`indexInSequence`が唯一の正、CL-024)。
+   * `KeystrokeResult.confirmedMora`の発生回数では判定しない(6.1「既知の制限」により
+   * 1キーで2拍同時確定した場合に通知が1件失われ、カウンタ方式だと完了を検知し損ねるため)。
+   */
+  function isSentenceComplete(): boolean {
+    return indexInSequence >= sequence.length
+  }
+
+  return { startSentence, handleKeystroke, isSentenceComplete }
 }
 
 export type SequenceJudge = ReturnType<typeof createSequenceJudge>

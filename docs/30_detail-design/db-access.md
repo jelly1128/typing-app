@@ -53,7 +53,7 @@ updated: 2026-08-29
 | `TopicSetRepository` | `findAllByOrderBySortOrder()` | お題セット一覧(FR-13) |
 | `TopicSetRepository` | `existsById(topicSetId)` | topicSetId存在確認(404判定) |
 | `SentenceRepository` | `findByTopicSetIdOrderById(topicSetId)` | お題文一覧(FR-01)。第2ソートキー`id`でタイブレークし順序を確定させる(2026-08-29、ops-reviewer B7対応) |
-| `SessionRepository` | `findByUserIdOrderByPlayedAtDesc(userId)` | 履歴一覧(FR-08) |
+| `SessionRepository` | `findSummariesByUserIdOrderByPlayedAtDesc(userId)` | 履歴一覧(FR-08)。`topicSetName`表示のため`topicSet`をJOINするプロジェクションクエリ(2026-09-07 P5-09実装時にN+1回避のため`SessionSummaryProjection`を返す形に変更。CL-025で本行を実装に追従させた) |
 
 ### 4.2 自己ベスト(FR-09)
 

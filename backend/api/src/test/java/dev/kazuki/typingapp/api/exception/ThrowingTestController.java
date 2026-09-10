@@ -2,6 +2,7 @@ package dev.kazuki.typingapp.api.exception;
 
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 /**
@@ -39,5 +40,11 @@ class ThrowingTestController {
     @GetMapping("/test/unexpected")
     void unexpected() {
         throw new IllegalStateException("boom");
+    }
+
+    // MissingServletRequestParameterExceptionを実際にSpringに発生させるため、必須パラメータを1つ要求する
+    @GetMapping("/test/missing-param")
+    void missingParam(@RequestParam Long topicSetId) {
+        // 到達しない(topicSetId未指定でSpringがこのメソッドを呼ぶ前に例外を投げる)
     }
 }

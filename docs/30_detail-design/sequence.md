@@ -64,8 +64,8 @@ sequenceDiagram
     View->>Ctrl: GET /api/users/{userId}/sessions
     Ctrl->>Svc: listSessionHistory(userId)
     Svc->>Svc: userId存在確認(404対象)
-    Svc->>Repo: findByUserIdOrderByPlayedAtDesc(userId)
-    Repo-->>Svc: List<Session>(0件も可)
+    Svc->>Repo: findSummariesByUserIdOrderByPlayedAtDesc(userId)
+    Repo-->>Svc: List<SessionSummaryProjection>(0件も可、topicSetName込みでJOIN済み)
     Svc->>Svc: SessionSummaryへ変換
     Svc-->>Ctrl: List<SessionSummary>
     Ctrl-->>View: 200 List<SessionSummary>

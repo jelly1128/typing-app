@@ -128,13 +128,16 @@ Controller → Service → Repository の3層構成。例外→HTTP応答の変�
 | `TopicSetNotFoundException` | 404 | `TOPIC_SET_NOT_FOUND` | WARN 1行 |
 | `InvalidSessionSubmissionException` | 400 | `VALIDATION_ERROR` | WARN 1行 |
 | `InvalidRequestException` | 400 | `VALIDATION_ERROR` | WARN 1行 |
-| `MethodArgumentNotValidException`(Bean Validation失敗) | 400 | `VALIDATION_ERROR` | WARN 1行 |
 | `HttpMessageNotReadableException`(不正JSON・型不一致) | 400 | `VALIDATION_ERROR` | WARN 1行 |
+| `MethodArgumentTypeMismatchException`(パス/クエリパラメータが期待する型に変換できない。例: 数値であるべき箇所に文字列) | 400 | `VALIDATION_ERROR` | WARN 1行 |
+| `MissingServletRequestParameterException`(必須の`@RequestParam`が未指定) | 400 | `VALIDATION_ERROR` | WARN 1行 |
 | `DataIntegrityViolationException`(制約違反) | 500 | `INTERNAL_ERROR` | ERROR + スタックトレース |
 | `CannotGetJdbcConnectionException`等(DB接続断) | 500 | `INTERNAL_ERROR` | ERROR + スタックトレース |
 | 上記以外の未捕捉例外 | 500 | `INTERNAL_ERROR` | ERROR + スタックトレース |
 
 4xxはWARNで1行(スタックトレース不要)、500のみ従来どおりスタックトレースを出す。`UserService`のfind-or-create競合(`users.name`のUNIQUE制約違反)は`DataIntegrityViolationException`を個別にcatchして`findByName`を再実行し既存ユーザーを返す(このハンドラには到達させない。db-access.md 5章)。
+
+**2026-09-11改訂(P5-09〜17追加コードレビュー対応、CL-025):** `MethodArgumentNotValidException`(Bean Validation失敗)の行を削除した。`@Valid`を使うControllerが1つも無く到達不能なため、2026-09-07(P5-05〜11中間レビュー対応)でハンドラ自体は既に削除済みだったが、この表への反映が漏れていた(将来`@Valid`を使うControllerを追加する場合は、ハンドラと本表の両方を復活させること)。同じ2026-09-07に追加済みだった`MethodArgumentTypeMismatchException`のハンドラも本表に載っていなかったため追加した。`MissingServletRequestParameterException`(`GET /api/users/{userId}/best`の`topicSetId`のような必須`@RequestParam`が未指定の場合)は追加コードレビューで未対応(500応答)と判明し、新たにハンドラを追加した。
 
 **値域チェック表(`SessionService.submitSession`、2026-08-29 test-reviewer A5対応で確定。違反時はすべて`InvalidSessionSubmissionException`):**
 
@@ -218,6 +221,8 @@ frontend/src/
 
 `sequenceJudge.ts` が唯一の外部公開インターフェースとなり、`TypingView.vue`(S-03)はこれ以外の内部モジュールを直接呼ばない。
 
+**お題文完了の判定手段(2026-09-11、REV-014 B1対応、CL-024):** `sequenceJudge`は`startSentence`/`handleKeystroke`に加え`isSentenceComplete(): boolean`を公開する(内部で保持する`indexInSequence >= sequence.length`をそのまま返す)。`TypingView`はこれを1キー入力ごとに呼び、trueならお題文が完了したと判断する。**`KeystrokeResult.confirmedMora !== null`の発生回数を数える自前カウンタでは判定しない**(6.1「既知の制限」により1キーで2拍が同時に確定するケースでは`confirmedMora`の通知が1件失われるため、カウンタ方式だと完了を検知し損ね、次のキー入力で`handleKeystroke`が「拍列の判定が既に終了しています」の例外を投げてセッションが凍結する)。`indexInSequence`は判定エンジンが唯一の正であり、通知の欠落による影響を受けない。
+
 **`startSentence`の戻り値(2026-09-10、CL-022対応):** `startSentence`は`void`ではなく、最初の拍(お題文の1文字目)の初期状態を表す`KeystrokeResult`を返す(`confirmedText: ''`・`pendingInput: ''`・`nextHint`は最初の拍の受理パターンから選んだヒント・`missAt: null`・`currentKana`は最初の拍のかな・`confirmedMora: null`・`miss: null`)。1打鍵もしていない時点(お題文表示直後)でも`TypingView`が「次に打つべき文字」を表示できるようにするための戻り値であり、**`sessionStore.recordKeystroke`には渡さない**(実際のキー入力によるものではないため、集計対象にしない)。以降の`handleKeystroke`の呼び出し結果のみを`recordKeystroke`に渡す。
 
 ### 2.3 `api/` と `types/`
@@ -252,6 +257,8 @@ frontend/src/
 | 制限時間モードで打鍵途中の拍 | 破棄する。`correctKeyCount`・`kanaCounts`・ミス記録のいずれにも計上しない |
 
 **送信失敗時の再送(2026-08-29、ops-reviewer A1対応で確定):** `POST /api/sessions`が失敗(タイムアウト・500等)した場合、`sessionStore`の一時ログは**破棄せず**保持したまま`ResultView`にエラー表示+「もう一度送信」ボタンを出す(`sequence.md` 5.1)。同じ`SessionSubmission`を再送し、201が返って初めて一時ログを破棄する。送信中は二重送信防止のためボタンを無効化する。
+
+**お題文の切れ目での`kanaOccurrenceNo`採番リセット(2026-09-11、CL-023対応):** `moraIndex`は`sequenceJudge`内の累計拍インデックスで、拍が**確定した時**にしか増えない(`romaji-automaton.md` 6.1)。そのため、あるお題文の最後の拍が確定した直後の`moraIndex`(次に来る拍のために予約済みの値)と、次のお題文の最初の拍がまだ未確定のまま判定中の間の`moraIndex`は**同じ値になりうる**。`recordKeystroke`の変化検知(`moraIndex !== lastMoraIndex`)だけでは、この間に発生した次のお題文の最初のミスを「新しい拍」として検知できず、前のお題文の最後の拍の`kanaOccurrenceNo`を誤って使い回してしまう(REV-014 A1)。これを避けるため、`sessionStore`に`startNewSentence()`アクションを追加し`lastMoraIndex`を`null`にリセットする。**`TypingView`は各お題文の開始時(`beginSentence()`、最初のお題文を含む)に必ずこれを呼ぶ**。リセット後は`moraIndex`の値に関わらず次の実キー入力が必ず「新しい拍の開始」として扱われ、`kanaOccurrenceNo`が正しく採番し直される。
 
 ### 2.5 `views/`(画面、`screen-design.md` 1章と1:1対応)
 

@@ -1,7 +1,7 @@
 ---
 doc_id: PRJ-002
 status: draft
-updated: 2026-09-07
+updated: 2026-09-11
 ---
 
 # WBS(作業分解構成図)と見積もり
@@ -280,9 +280,9 @@ Kazuki は「結構考える必要ありそう」という理由で全タスク�
 | P5-12 | frontend `api/client.ts` + 各apiモジュール + `types/api.ts` | 全APIエンドポイントがフロントから型付きで呼べる状態 | 3.0 | 2.0 | ~~2.0~~ **1.0**(2026-09-07再見積。P5-06以降Claudeドラフト方式に統一したため) | 完了(`client.ts`(fetchラッパー、baseURL固定/90秒タイムアウト)、`userApi.ts`/`topicSetApi.ts`/`sessionApi.ts`/`missAnalysisApi.ts`(7エンドポイント)、`types/api.ts`(全スキーマのTS型)を実装。`client.test.ts`3件Green、`vue-tsc -b`型チェック通過) |
 | P5-13 | `stores`(`userStore`/`topicStore`/`sessionStore`) | セッション中の集計・終了条件判定・送信失敗時再送がストア経由で動く状態 | 3.0 | 2.5 | ~~3.0~~ **1.5**(2026-09-08再見積。Claudeドラフト方式が前提だが、sessionStoreの状態を持つ集計ロジックはP5-04`sequenceJudge`相当と見て他タスクより高めに設定) | 完了(`userStore`/`topicStore`(薄い)+`sessionStore`(`romaji-automaton.md`7.1の生成規則を実装: `kanaOccurrenceNo`採番・集計・終了条件判定・送信失敗時再送)。Vitest 13件(新規)Green、`vue-tsc -b`型チェック通過) |
 | P5-14 | views: `NameInputView`/`HomeView`(S-01, S-02) | 名前入力→ホーム画面遷移が動く状態 | 3.0 | 1.5 | ~~2.0~~ **1.0**(2026-09-08再見積。Claudeドラフト方式で見積もり) | 完了(遷移は`emit`で表現しrouter配線はP5-18へ委譲。`NameInputView.vue`/`HomeView.vue`+コンポーネントテスト7件(`@vue/test-utils`新規導入)、全Green) |
-| P5-15 | views: `TypingView` + `TypingDisplay`(S-03) | judgment-engineの結果を使い実際にタイピングできる状態 | 3.0 | 3.0 | **4.0** | 未着手 |
-| P5-16 | views: `ResultView` + `SessionMetricsSummary`(S-04) | セッション結果と自己ベスト比較が表示される状態 | 3.0 | 1.5 | **2.0** | 未着手 |
-| P5-17 | views: `HistoryView`/`MissAnalysisView`/`MissAnalysisSection`(S-05, S-06) | 履歴一覧とミス分析4観点が表示される状態 | 3.0 | 2.0 | **3.0** | 未着手 |
+| P5-15 | views: `TypingView` + `TypingDisplay`(S-03) | judgment-engineの結果を使い実際にタイピングできる状態 | 3.0 | 3.0 | ~~4.0~~ **2.0**(2026-09-10再見積。Claudeドラフト方式、設計書に未解決判断が残っているか確認した上で見積もり) | 完了(`startSentence`が1打鍵前のヒントを返せない設計欠落を発見しCL-022で先に修正してから実装。Vitest計7件追加、全Green) |
+| P5-16 | views: `ResultView` + `SessionMetricsSummary`(S-04) | セッション結果と自己ベスト比較が表示される状態 | 3.0 | 1.5 | ~~2.0~~ **1.0**(2026-09-10再見積、同上) | 完了(設計に未解決判断無く定型翻訳タスク。テスト4件、全Green) |
+| P5-17 | views: `HistoryView`/`MissAnalysisView`/`MissAnalysisSection`(S-05, S-06) | 履歴一覧とミス分析4観点が表示される状態 | 3.0 | 2.0 | ~~3.0~~ **1.5**(2026-09-10再見積、同上) | 完了(空状態仕様は設計済みで追加ロジック不要。テスト8件、全Green。3タスク完了後の中間レビューでREV-014検出、2026-09-11対応済み) |
 | P5-18 | `router`整備(遷移ガード含む) | S-01〜S-06の遷移とuserId未設定時のガードが動く状態 | 3.0 | 1.0 | **2.0** | 未着手 |
 | P5-19 | 結合確認 | ローカルでMVPの全FRが動く状態(P5完了条件そのもの) | 3.0 | 2.0 | **3.0** | 未着手 |
 | | **合計** | | **57.0(P5-00除く)** | **41.0** | ~~53.5~~ **45.0**(2026-08-30 P5-01〜04再改訂後) | |

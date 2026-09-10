@@ -48,6 +48,14 @@ class GlobalExceptionHandlerTest {
     }
 
     @Test
+    void missingRequiredParameter_returns400() throws Exception {
+        mockMvc.perform(get("/test/missing-param"))
+                .andExpect(status().isBadRequest())
+                .andExpect(jsonPath("$.code").value("VALIDATION_ERROR"))
+                .andExpect(jsonPath("$.message").value("必須パラメータ topicSetId がありません"));
+    }
+
+    @Test
     void dataAccessException_returns500() throws Exception {
         mockMvc.perform(get("/test/data-access"))
                 .andExpect(status().isInternalServerError())

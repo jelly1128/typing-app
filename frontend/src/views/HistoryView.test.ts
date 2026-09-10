@@ -73,6 +73,47 @@ describe('HistoryView', () => {
     expect(sessionApi.getPersonalBest).toHaveBeenLastCalledWith(1, 2)
   })
 
+  it('自己ベスト取得が失敗しても<select>は表示されたままで、再試行できる(REV-014 B2)', async () => {
+    const getPersonalBestSpy = vi
+      .spyOn(sessionApi, 'getPersonalBest')
+      .mockRejectedValueOnce(new Error('timeout'))
+    const wrapper = mount(HistoryView)
+    await flushPromises()
+
+    expect(wrapper.find('select').exists()).toBe(true)
+    expect(wrapper.text()).toContain('読み込みに失敗しました')
+
+    getPersonalBestSpy.mockResolvedValueOnce({ topicSetId: 1, netKpmBest: 100, accuracyBest: 90 })
+    const retryButton = wrapper.findAll('button').find((b) => b.text() === '再試行')!
+    await retryButton.trigger('click')
+    await flushPromises()
+
+    expect(wrapper.text()).toContain('Net KPM 最大: 100')
+  })
+
+  it('難易度を素早く切り替えると、後から発行したリクエストの結果だけを反映する(REV-014 B3)', async () => {
+    let resolveFirst: (value: PersonalBest) => void
+    const firstPending = new Promise<PersonalBest>((resolve) => {
+      resolveFirst = resolve
+    })
+    const getPersonalBestSpy = vi
+      .spyOn(sessionApi, 'getPersonalBest')
+      .mockReturnValueOnce(firstPending)
+      .mockResolvedValueOnce({ topicSetId: 2, netKpmBest: 200, accuracyBest: 80 })
+    const wrapper = mount(HistoryView)
+    await flushPromises()
+
+    await wrapper.get('select').setValue('2')
+    await flushPromises()
+    // 難易度2への切り替え(速いレスポンス)が先に反映された後、難易度1(遅いレスポンス)が返ってくる
+    resolveFirst!({ topicSetId: 1, netKpmBest: 999, accuracyBest: 99 })
+    await flushPromises()
+
+    expect(getPersonalBestSpy).toHaveBeenCalledTimes(2)
+    expect(wrapper.text()).toContain('Net KPM 最大: 200')
+    expect(wrapper.text()).not.toContain('999')
+  })
+
   it('ホームへ/ミス分析を見るボタンでそれぞれemitする', async () => {
     vi.spyOn(sessionApi, 'getPersonalBest').mockResolvedValue({ topicSetId: 1, netKpmBest: 100, accuracyBest: 90 })
     const wrapper = mount(HistoryView)

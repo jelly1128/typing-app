@@ -71,6 +71,16 @@ export const useSessionStore = defineStore('session', {
       return (now - this.sessionStartedAt) / 1000 >= this.endConditionValue
     },
 
+    /**
+     * お題文の開始時(最初のお題文を含む)に必ず呼ぶ。`moraIndex`は拍が確定した時にしか増えないため、
+     * 前の文の最後の拍が確定した直後と次の文の最初の拍がまだ未確定の間で同じ値になりうる。
+     * `lastMoraIndex`をリセットし、次の実キー入力を必ず「新しい拍の開始」として検知させる
+     * (class-design.md 2.4、romaji-automaton.md 7.1、CL-023)
+     */
+    startNewSentence() {
+      this.lastMoraIndex = null
+    },
+
     /** `judgment-engine`の`KeystrokeResult`を1キー入力ごとに受け取り集計する(romaji-automaton.md 7.1) */
     recordKeystroke(result: KeystrokeResult) {
       const now = Date.now()

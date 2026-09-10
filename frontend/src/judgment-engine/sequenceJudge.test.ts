@@ -70,3 +70,32 @@ describe('createSequenceJudge (お題文をまたぐ状態)', () => {
     expect(missInSecondSentence.miss?.prevKana).toBe('し')
   })
 })
+
+describe('createSequenceJudge (isSentenceComplete、REV-014 B1/CL-024対応)', () => {
+  it('最後の拍が確定するまではfalse、確定した時点でtrueを返す', () => {
+    const judge = createSequenceJudge()
+    judge.startSentence(['あ', 'い'])
+    expect(judge.isSentenceComplete()).toBe(false)
+
+    judge.handleKeystroke('a')
+    expect(judge.isSentenceComplete()).toBe(false)
+
+    judge.handleKeystroke('i')
+    expect(judge.isSentenceComplete()).toBe(true)
+  })
+
+  it('1キーで2拍同時確定するケース(既知の制限)でもconfirmedMoraの通知数に関わらずtrueを返す', () => {
+    // 「ん」の直後に「ー」が続く場合のみ起こりうる既知の制限(romaji-automaton.md 6.1)。
+    // "n"で「ん」を保留 → "-"で「ん」を確定しつつ「ー」へ押し戻し、同じキーで「ー」も即確定する。
+    // confirmedMoraは1件しか通知されないが、indexInSequenceは正しく末尾まで進む
+    const judge = createSequenceJudge()
+    judge.startSentence(['ん', 'ー'])
+    const r1 = judge.handleKeystroke('n')
+    expect(r1.confirmedMora).toBeNull() // 保留中、まだ確定しない
+    expect(judge.isSentenceComplete()).toBe(false)
+
+    const r2 = judge.handleKeystroke('-')
+    expect(r2.confirmedMora?.kana).toBe('ん') // ーの確定通知は失われる(既知の制限)
+    expect(judge.isSentenceComplete()).toBe(true) // だが内部の拍列位置は正しく末尾まで進んでいる
+  })
+})

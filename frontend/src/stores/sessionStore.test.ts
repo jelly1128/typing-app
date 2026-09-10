@@ -70,6 +70,35 @@ describe('sessionStore', () => {
     expect(missRecords[2].kanaOccurrenceNo).toBe(2)
   })
 
+  it('startNewSentence()を挟むと、moraIndexが変化しなくても新しいお題文の最初の拍として採番し直す(REV-014 A1)', () => {
+    // 前の文の最後の拍(あ)が確定した直後と、次の文の最初の拍(あ)がまだ未確定の間は
+    // moraIndexが同じ値になりうる(class-design.md 2.4、CL-023)。startNewSentence()で
+    // lastMoraIndexをリセットしないと、次の文の最初のミスが前の文の採番を使い回してしまう。
+    const store = useSessionStore()
+    store.startSession(1, 1, 'sentence_count', 2)
+
+    store.recordKeystroke(
+      keystroke({
+        moraIndex: 1,
+        currentKana: 'あ',
+        confirmedMora: { kana: 'あ', charType: '清音', acceptedPattern: 'a', moraIndex: 0 },
+      }),
+    )
+    store.completeSentence()
+
+    store.startNewSentence()
+    store.recordKeystroke(
+      keystroke({
+        moraIndex: 1,
+        currentKana: 'あ',
+        miss: { kana: 'あ', expectedKey: 'a', actualKey: 'x', prevKana: 'あ', charType: '清音' },
+      }),
+    )
+
+    const missRecords = store.buildSubmission().missRecords
+    expect(missRecords[0].kanaOccurrenceNo).toBe(2)
+  })
+
   it('sentence_countモードは確定文数がendConditionValueに達すると終了条件を満たす', () => {
     const store = useSessionStore()
     store.startSession(1, 1, 'sentence_count', 2)
