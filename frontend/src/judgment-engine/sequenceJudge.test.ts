@@ -30,6 +30,31 @@ describe('createSequenceJudge (startSentenceの初期ヒント、CL-022)', () =>
   })
 })
 
+describe('createSequenceJudge (isSentenceComplete、REV-014 B1対応)', () => {
+  it('1キーで2拍が同時に確定するケース(既知の制限)でも、isSentenceCompleteは正しくtrueになる', () => {
+    const judge = createSequenceJudge()
+    judge.startSentence(['ん', 'ー'])
+
+    const afterN = judge.handleKeystroke('n')
+    expect(afterN.isSentenceComplete).toBe(false)
+
+    // "-"は「ん」の"n"/"nn"どちらにも延長できないため押し戻しが発生し、
+    // 押し戻されたキーがそのまま次拍「ー」の唯一の候補("-")と完全一致するため、
+    // 1回のキー入力で「ん」「ー」の両方が確定する(confirmedMoraは「ん」側の1件しか通知されない)
+    const afterHyphen = judge.handleKeystroke('-')
+    expect(afterHyphen.confirmedMora?.kana).toBe('ん')
+    expect(afterHyphen.isSentenceComplete).toBe(true)
+  })
+
+  it('通常の完了(1キー1拍確定)ではお題文の最後の拍が確定した回だけtrueになる', () => {
+    const judge = createSequenceJudge()
+    judge.startSentence(['あ', 'い'])
+
+    expect(judge.handleKeystroke('a').isSentenceComplete).toBe(false)
+    expect(judge.handleKeystroke('i').isSentenceComplete).toBe(true)
+  })
+})
+
 describe('createSequenceJudge (お題文をまたぐ状態)', () => {
   it('UT-024: 累計拍インデックスはお題文をまたいでもリセットされない', () => {
     const judge = createSequenceJudge()

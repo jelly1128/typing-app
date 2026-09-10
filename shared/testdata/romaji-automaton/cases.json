@@ -2,145 +2,850 @@
   {
     "id": "RA-001",
     "description": "「し」をshiで確定する",
-    "input": { "moraList": ["し"], "keystrokes": ["s", "h", "i"] },
+    "input": {
+      "moraList": [
+        "し"
+      ],
+      "keystrokes": [
+        "s",
+        "h",
+        "i"
+      ]
+    },
     "expected": {
       "steps": [
-        { "confirmedText": "", "pendingInput": "s", "nextHint": "i", "missAt": null, "currentKana": "し", "moraIndex": 0, "confirmedMora": null, "miss": null },
-        { "confirmedText": "", "pendingInput": "sh", "nextHint": "i", "missAt": null, "currentKana": "し", "moraIndex": 0, "confirmedMora": null, "miss": null },
-        { "confirmedText": "shi", "pendingInput": "", "nextHint": null, "missAt": null, "currentKana": "し", "moraIndex": 1, "confirmedMora": {"kana": "し", "charType": "清音", "acceptedPattern": "shi", "moraIndex": 0}, "miss": null }
+        {
+          "confirmedText": "",
+          "pendingInput": "s",
+          "nextHint": "i",
+          "missAt": null,
+          "currentKana": "し",
+          "moraIndex": 0,
+          "confirmedMora": null,
+          "miss": null,
+          "isSentenceComplete": false
+        },
+        {
+          "confirmedText": "",
+          "pendingInput": "sh",
+          "nextHint": "i",
+          "missAt": null,
+          "currentKana": "し",
+          "moraIndex": 0,
+          "confirmedMora": null,
+          "miss": null,
+          "isSentenceComplete": false
+        },
+        {
+          "confirmedText": "shi",
+          "pendingInput": "",
+          "nextHint": null,
+          "missAt": null,
+          "currentKana": "し",
+          "moraIndex": 1,
+          "confirmedMora": {
+            "kana": "し",
+            "charType": "清音",
+            "acceptedPattern": "shi",
+            "moraIndex": 0
+          },
+          "miss": null,
+          "isSentenceComplete": true
+        }
       ]
     }
   },
   {
     "id": "RA-002",
     "description": "「し」をsiで確定する(異表記)",
-    "input": { "moraList": ["し"], "keystrokes": ["s", "i"] },
+    "input": {
+      "moraList": [
+        "し"
+      ],
+      "keystrokes": [
+        "s",
+        "i"
+      ]
+    },
     "expected": {
       "steps": [
-        { "confirmedText": "", "pendingInput": "s", "nextHint": "i", "missAt": null, "currentKana": "し", "moraIndex": 0, "confirmedMora": null, "miss": null },
-        { "confirmedText": "si", "pendingInput": "", "nextHint": null, "missAt": null, "currentKana": "し", "moraIndex": 1, "confirmedMora": {"kana": "し", "charType": "清音", "acceptedPattern": "si", "moraIndex": 0}, "miss": null }
+        {
+          "confirmedText": "",
+          "pendingInput": "s",
+          "nextHint": "i",
+          "missAt": null,
+          "currentKana": "し",
+          "moraIndex": 0,
+          "confirmedMora": null,
+          "miss": null,
+          "isSentenceComplete": false
+        },
+        {
+          "confirmedText": "si",
+          "pendingInput": "",
+          "nextHint": null,
+          "missAt": null,
+          "currentKana": "し",
+          "moraIndex": 1,
+          "confirmedMora": {
+            "kana": "し",
+            "charType": "清音",
+            "acceptedPattern": "si",
+            "moraIndex": 0
+          },
+          "miss": null,
+          "isSentenceComplete": true
+        }
       ]
     }
   },
   {
     "id": "RA-003",
     "description": "拗音「しゃ」をshaで確定する",
-    "input": { "moraList": ["しゃ"], "keystrokes": ["s", "h", "a"] },
+    "input": {
+      "moraList": [
+        "しゃ"
+      ],
+      "keystrokes": [
+        "s",
+        "h",
+        "a"
+      ]
+    },
     "expected": {
       "steps": [
-        { "confirmedText": "", "pendingInput": "s", "nextHint": "ha", "missAt": null, "currentKana": "しゃ", "moraIndex": 0, "confirmedMora": null, "miss": null },
-        { "confirmedText": "", "pendingInput": "sh", "nextHint": "a", "missAt": null, "currentKana": "しゃ", "moraIndex": 0, "confirmedMora": null, "miss": null },
-        { "confirmedText": "sha", "pendingInput": "", "nextHint": null, "missAt": null, "currentKana": "しゃ", "moraIndex": 1, "confirmedMora": {"kana": "しゃ", "charType": "拗音", "acceptedPattern": "sha", "moraIndex": 0}, "miss": null }
+        {
+          "confirmedText": "",
+          "pendingInput": "s",
+          "nextHint": "ha",
+          "missAt": null,
+          "currentKana": "しゃ",
+          "moraIndex": 0,
+          "confirmedMora": null,
+          "miss": null,
+          "isSentenceComplete": false
+        },
+        {
+          "confirmedText": "",
+          "pendingInput": "sh",
+          "nextHint": "a",
+          "missAt": null,
+          "currentKana": "しゃ",
+          "moraIndex": 0,
+          "confirmedMora": null,
+          "miss": null,
+          "isSentenceComplete": false
+        },
+        {
+          "confirmedText": "sha",
+          "pendingInput": "",
+          "nextHint": null,
+          "missAt": null,
+          "currentKana": "しゃ",
+          "moraIndex": 1,
+          "confirmedMora": {
+            "kana": "しゃ",
+            "charType": "拗音",
+            "acceptedPattern": "sha",
+            "moraIndex": 0
+          },
+          "miss": null,
+          "isSentenceComplete": true
+        }
       ]
     }
   },
   {
     "id": "RA-004",
     "description": "撥音「ん」を単体nで確定し、次拍(ば)へキーが押し戻される(6.2例3、A2対応)",
-    "input": { "moraList": ["こ", "ん", "ば"], "keystrokes": ["k", "o", "n", "b", "a"] },
+    "input": {
+      "moraList": [
+        "こ",
+        "ん",
+        "ば"
+      ],
+      "keystrokes": [
+        "k",
+        "o",
+        "n",
+        "b",
+        "a"
+      ]
+    },
     "expected": {
       "steps": [
-        { "confirmedText": "", "pendingInput": "k", "nextHint": "o", "missAt": null, "currentKana": "こ", "moraIndex": 0, "confirmedMora": null, "miss": null },
-        { "confirmedText": "ko", "pendingInput": "", "nextHint": "n", "missAt": null, "currentKana": "ん", "moraIndex": 1, "confirmedMora": {"kana": "こ", "charType": "清音", "acceptedPattern": "ko", "moraIndex": 0}, "miss": null },
-        { "confirmedText": "ko", "pendingInput": "n", "nextHint": "", "missAt": null, "currentKana": "ん", "moraIndex": 1, "confirmedMora": null, "miss": null },
-        { "confirmedText": "kon", "pendingInput": "b", "nextHint": "a", "missAt": null, "currentKana": "ば", "moraIndex": 2, "confirmedMora": {"kana": "ん", "charType": "撥音ん", "acceptedPattern": "n", "moraIndex": 1}, "miss": null },
-        { "confirmedText": "konba", "pendingInput": "", "nextHint": null, "missAt": null, "currentKana": "ば", "moraIndex": 3, "confirmedMora": {"kana": "ば", "charType": "清音", "acceptedPattern": "ba", "moraIndex": 2}, "miss": null }
+        {
+          "confirmedText": "",
+          "pendingInput": "k",
+          "nextHint": "o",
+          "missAt": null,
+          "currentKana": "こ",
+          "moraIndex": 0,
+          "confirmedMora": null,
+          "miss": null,
+          "isSentenceComplete": false
+        },
+        {
+          "confirmedText": "ko",
+          "pendingInput": "",
+          "nextHint": "n",
+          "missAt": null,
+          "currentKana": "ん",
+          "moraIndex": 1,
+          "confirmedMora": {
+            "kana": "こ",
+            "charType": "清音",
+            "acceptedPattern": "ko",
+            "moraIndex": 0
+          },
+          "miss": null,
+          "isSentenceComplete": false
+        },
+        {
+          "confirmedText": "ko",
+          "pendingInput": "n",
+          "nextHint": "",
+          "missAt": null,
+          "currentKana": "ん",
+          "moraIndex": 1,
+          "confirmedMora": null,
+          "miss": null,
+          "isSentenceComplete": false
+        },
+        {
+          "confirmedText": "kon",
+          "pendingInput": "b",
+          "nextHint": "a",
+          "missAt": null,
+          "currentKana": "ば",
+          "moraIndex": 2,
+          "confirmedMora": {
+            "kana": "ん",
+            "charType": "撥音ん",
+            "acceptedPattern": "n",
+            "moraIndex": 1
+          },
+          "miss": null,
+          "isSentenceComplete": false
+        },
+        {
+          "confirmedText": "konba",
+          "pendingInput": "",
+          "nextHint": null,
+          "missAt": null,
+          "currentKana": "ば",
+          "moraIndex": 3,
+          "confirmedMora": {
+            "kana": "ば",
+            "charType": "清音",
+            "acceptedPattern": "ba",
+            "moraIndex": 2
+          },
+          "miss": null,
+          "isSentenceComplete": true
+        }
       ]
     }
   },
   {
     "id": "RA-005",
     "description": "撥音「ん」をnnで明示的に伸ばして確定する(6.2例3、押し戻しなし)",
-    "input": { "moraList": ["こ", "ん", "ば"], "keystrokes": ["k", "o", "n", "n", "b", "a"] },
+    "input": {
+      "moraList": [
+        "こ",
+        "ん",
+        "ば"
+      ],
+      "keystrokes": [
+        "k",
+        "o",
+        "n",
+        "n",
+        "b",
+        "a"
+      ]
+    },
     "expected": {
       "steps": [
-        { "confirmedText": "", "pendingInput": "k", "nextHint": "o", "missAt": null, "currentKana": "こ", "moraIndex": 0, "confirmedMora": null, "miss": null },
-        { "confirmedText": "ko", "pendingInput": "", "nextHint": "n", "missAt": null, "currentKana": "ん", "moraIndex": 1, "confirmedMora": {"kana": "こ", "charType": "清音", "acceptedPattern": "ko", "moraIndex": 0}, "miss": null },
-        { "confirmedText": "ko", "pendingInput": "n", "nextHint": "", "missAt": null, "currentKana": "ん", "moraIndex": 1, "confirmedMora": null, "miss": null },
-        { "confirmedText": "konn", "pendingInput": "", "nextHint": "ba", "missAt": null, "currentKana": "ば", "moraIndex": 2, "confirmedMora": {"kana": "ん", "charType": "撥音ん", "acceptedPattern": "nn", "moraIndex": 1}, "miss": null },
-        { "confirmedText": "konn", "pendingInput": "b", "nextHint": "a", "missAt": null, "currentKana": "ば", "moraIndex": 2, "confirmedMora": null, "miss": null },
-        { "confirmedText": "konnba", "pendingInput": "", "nextHint": null, "missAt": null, "currentKana": "ば", "moraIndex": 3, "confirmedMora": {"kana": "ば", "charType": "清音", "acceptedPattern": "ba", "moraIndex": 2}, "miss": null }
+        {
+          "confirmedText": "",
+          "pendingInput": "k",
+          "nextHint": "o",
+          "missAt": null,
+          "currentKana": "こ",
+          "moraIndex": 0,
+          "confirmedMora": null,
+          "miss": null,
+          "isSentenceComplete": false
+        },
+        {
+          "confirmedText": "ko",
+          "pendingInput": "",
+          "nextHint": "n",
+          "missAt": null,
+          "currentKana": "ん",
+          "moraIndex": 1,
+          "confirmedMora": {
+            "kana": "こ",
+            "charType": "清音",
+            "acceptedPattern": "ko",
+            "moraIndex": 0
+          },
+          "miss": null,
+          "isSentenceComplete": false
+        },
+        {
+          "confirmedText": "ko",
+          "pendingInput": "n",
+          "nextHint": "",
+          "missAt": null,
+          "currentKana": "ん",
+          "moraIndex": 1,
+          "confirmedMora": null,
+          "miss": null,
+          "isSentenceComplete": false
+        },
+        {
+          "confirmedText": "konn",
+          "pendingInput": "",
+          "nextHint": "ba",
+          "missAt": null,
+          "currentKana": "ば",
+          "moraIndex": 2,
+          "confirmedMora": {
+            "kana": "ん",
+            "charType": "撥音ん",
+            "acceptedPattern": "nn",
+            "moraIndex": 1
+          },
+          "miss": null,
+          "isSentenceComplete": false
+        },
+        {
+          "confirmedText": "konn",
+          "pendingInput": "b",
+          "nextHint": "a",
+          "missAt": null,
+          "currentKana": "ば",
+          "moraIndex": 2,
+          "confirmedMora": null,
+          "miss": null,
+          "isSentenceComplete": false
+        },
+        {
+          "confirmedText": "konnba",
+          "pendingInput": "",
+          "nextHint": null,
+          "missAt": null,
+          "currentKana": "ば",
+          "moraIndex": 3,
+          "confirmedMora": {
+            "kana": "ば",
+            "charType": "清音",
+            "acceptedPattern": "ba",
+            "moraIndex": 2
+          },
+          "miss": null,
+          "isSentenceComplete": true
+        }
       ]
     }
   },
   {
     "id": "RA-006",
     "description": "撥音「ん」、次拍がな行(に)の場合はnn必須(B6対応)",
-    "input": { "moraList": ["こ", "ん", "に"], "keystrokes": ["k", "o", "n", "n", "n", "i"] },
+    "input": {
+      "moraList": [
+        "こ",
+        "ん",
+        "に"
+      ],
+      "keystrokes": [
+        "k",
+        "o",
+        "n",
+        "n",
+        "n",
+        "i"
+      ]
+    },
     "expected": {
       "steps": [
-        { "confirmedText": "", "pendingInput": "k", "nextHint": "o", "missAt": null, "currentKana": "こ", "moraIndex": 0, "confirmedMora": null, "miss": null },
-        { "confirmedText": "ko", "pendingInput": "", "nextHint": "nn", "missAt": null, "currentKana": "ん", "moraIndex": 1, "confirmedMora": {"kana": "こ", "charType": "清音", "acceptedPattern": "ko", "moraIndex": 0}, "miss": null },
-        { "confirmedText": "ko", "pendingInput": "n", "nextHint": "n", "missAt": null, "currentKana": "ん", "moraIndex": 1, "confirmedMora": null, "miss": null },
-        { "confirmedText": "konn", "pendingInput": "", "nextHint": "ni", "missAt": null, "currentKana": "に", "moraIndex": 2, "confirmedMora": {"kana": "ん", "charType": "撥音ん", "acceptedPattern": "nn", "moraIndex": 1}, "miss": null },
-        { "confirmedText": "konn", "pendingInput": "n", "nextHint": "i", "missAt": null, "currentKana": "に", "moraIndex": 2, "confirmedMora": null, "miss": null },
-        { "confirmedText": "konnni", "pendingInput": "", "nextHint": null, "missAt": null, "currentKana": "に", "moraIndex": 3, "confirmedMora": {"kana": "に", "charType": "清音", "acceptedPattern": "ni", "moraIndex": 2}, "miss": null }
+        {
+          "confirmedText": "",
+          "pendingInput": "k",
+          "nextHint": "o",
+          "missAt": null,
+          "currentKana": "こ",
+          "moraIndex": 0,
+          "confirmedMora": null,
+          "miss": null,
+          "isSentenceComplete": false
+        },
+        {
+          "confirmedText": "ko",
+          "pendingInput": "",
+          "nextHint": "nn",
+          "missAt": null,
+          "currentKana": "ん",
+          "moraIndex": 1,
+          "confirmedMora": {
+            "kana": "こ",
+            "charType": "清音",
+            "acceptedPattern": "ko",
+            "moraIndex": 0
+          },
+          "miss": null,
+          "isSentenceComplete": false
+        },
+        {
+          "confirmedText": "ko",
+          "pendingInput": "n",
+          "nextHint": "n",
+          "missAt": null,
+          "currentKana": "ん",
+          "moraIndex": 1,
+          "confirmedMora": null,
+          "miss": null,
+          "isSentenceComplete": false
+        },
+        {
+          "confirmedText": "konn",
+          "pendingInput": "",
+          "nextHint": "ni",
+          "missAt": null,
+          "currentKana": "に",
+          "moraIndex": 2,
+          "confirmedMora": {
+            "kana": "ん",
+            "charType": "撥音ん",
+            "acceptedPattern": "nn",
+            "moraIndex": 1
+          },
+          "miss": null,
+          "isSentenceComplete": false
+        },
+        {
+          "confirmedText": "konn",
+          "pendingInput": "n",
+          "nextHint": "i",
+          "missAt": null,
+          "currentKana": "に",
+          "moraIndex": 2,
+          "confirmedMora": null,
+          "miss": null,
+          "isSentenceComplete": false
+        },
+        {
+          "confirmedText": "konnni",
+          "pendingInput": "",
+          "nextHint": null,
+          "missAt": null,
+          "currentKana": "に",
+          "moraIndex": 3,
+          "confirmedMora": {
+            "kana": "に",
+            "charType": "清音",
+            "acceptedPattern": "ni",
+            "moraIndex": 2
+          },
+          "miss": null,
+          "isSentenceComplete": true
+        }
       ]
     }
   },
   {
     "id": "RA-007",
     "description": "撥音「ん」が文末の場合はn単体で即確定する",
-    "input": { "moraList": ["こ", "ん"], "keystrokes": ["k", "o", "n"] },
+    "input": {
+      "moraList": [
+        "こ",
+        "ん"
+      ],
+      "keystrokes": [
+        "k",
+        "o",
+        "n"
+      ]
+    },
     "expected": {
       "steps": [
-        { "confirmedText": "", "pendingInput": "k", "nextHint": "o", "missAt": null, "currentKana": "こ", "moraIndex": 0, "confirmedMora": null, "miss": null },
-        { "confirmedText": "ko", "pendingInput": "", "nextHint": "n", "missAt": null, "currentKana": "ん", "moraIndex": 1, "confirmedMora": {"kana": "こ", "charType": "清音", "acceptedPattern": "ko", "moraIndex": 0}, "miss": null },
-        { "confirmedText": "kon", "pendingInput": "", "nextHint": null, "missAt": null, "currentKana": "ん", "moraIndex": 2, "confirmedMora": {"kana": "ん", "charType": "撥音ん", "acceptedPattern": "n", "moraIndex": 1}, "miss": null }
+        {
+          "confirmedText": "",
+          "pendingInput": "k",
+          "nextHint": "o",
+          "missAt": null,
+          "currentKana": "こ",
+          "moraIndex": 0,
+          "confirmedMora": null,
+          "miss": null,
+          "isSentenceComplete": false
+        },
+        {
+          "confirmedText": "ko",
+          "pendingInput": "",
+          "nextHint": "n",
+          "missAt": null,
+          "currentKana": "ん",
+          "moraIndex": 1,
+          "confirmedMora": {
+            "kana": "こ",
+            "charType": "清音",
+            "acceptedPattern": "ko",
+            "moraIndex": 0
+          },
+          "miss": null,
+          "isSentenceComplete": false
+        },
+        {
+          "confirmedText": "kon",
+          "pendingInput": "",
+          "nextHint": null,
+          "missAt": null,
+          "currentKana": "ん",
+          "moraIndex": 2,
+          "confirmedMora": {
+            "kana": "ん",
+            "charType": "撥音ん",
+            "acceptedPattern": "n",
+            "moraIndex": 1
+          },
+          "miss": null,
+          "isSentenceComplete": true
+        }
       ]
     }
   },
   {
     "id": "RA-008",
     "description": "長音「ー」はハイフン1キーで確定する(ADR-004)",
-    "input": { "moraList": ["こ", "ー"], "keystrokes": ["k", "o", "-"] },
+    "input": {
+      "moraList": [
+        "こ",
+        "ー"
+      ],
+      "keystrokes": [
+        "k",
+        "o",
+        "-"
+      ]
+    },
     "expected": {
       "steps": [
-        { "confirmedText": "", "pendingInput": "k", "nextHint": "o", "missAt": null, "currentKana": "こ", "moraIndex": 0, "confirmedMora": null, "miss": null },
-        { "confirmedText": "ko", "pendingInput": "", "nextHint": "-", "missAt": null, "currentKana": "ー", "moraIndex": 1, "confirmedMora": {"kana": "こ", "charType": "清音", "acceptedPattern": "ko", "moraIndex": 0}, "miss": null },
-        { "confirmedText": "ko-", "pendingInput": "", "nextHint": null, "missAt": null, "currentKana": "ー", "moraIndex": 2, "confirmedMora": {"kana": "ー", "charType": "長音", "acceptedPattern": "-", "moraIndex": 1}, "miss": null }
+        {
+          "confirmedText": "",
+          "pendingInput": "k",
+          "nextHint": "o",
+          "missAt": null,
+          "currentKana": "こ",
+          "moraIndex": 0,
+          "confirmedMora": null,
+          "miss": null,
+          "isSentenceComplete": false
+        },
+        {
+          "confirmedText": "ko",
+          "pendingInput": "",
+          "nextHint": "-",
+          "missAt": null,
+          "currentKana": "ー",
+          "moraIndex": 1,
+          "confirmedMora": {
+            "kana": "こ",
+            "charType": "清音",
+            "acceptedPattern": "ko",
+            "moraIndex": 0
+          },
+          "miss": null,
+          "isSentenceComplete": false
+        },
+        {
+          "confirmedText": "ko-",
+          "pendingInput": "",
+          "nextHint": null,
+          "missAt": null,
+          "currentKana": "ー",
+          "moraIndex": 2,
+          "confirmedMora": {
+            "kana": "ー",
+            "charType": "長音",
+            "acceptedPattern": "-",
+            "moraIndex": 1
+          },
+          "miss": null,
+          "isSentenceComplete": true
+        }
       ]
     }
   },
   {
     "id": "RA-009",
     "description": "促音「っ」を子音重ね方式(s)で確定し、次拍(し)の表記がs始まりに絞られる(A3対応)",
-    "input": { "moraList": ["あ", "っ", "し"], "keystrokes": ["a", "s", "s", "h", "i"] },
+    "input": {
+      "moraList": [
+        "あ",
+        "っ",
+        "し"
+      ],
+      "keystrokes": [
+        "a",
+        "s",
+        "s",
+        "h",
+        "i"
+      ]
+    },
     "expected": {
       "steps": [
-        { "confirmedText": "a", "pendingInput": "", "nextHint": "c", "missAt": null, "currentKana": "っ", "moraIndex": 1, "confirmedMora": {"kana": "あ", "charType": "清音", "acceptedPattern": "a", "moraIndex": 0}, "miss": null },
-        { "confirmedText": "as", "pendingInput": "", "nextHint": "si", "missAt": null, "currentKana": "し", "moraIndex": 2, "confirmedMora": {"kana": "っ", "charType": "促音っ", "acceptedPattern": "s", "moraIndex": 1}, "miss": null },
-        { "confirmedText": "as", "pendingInput": "s", "nextHint": "i", "missAt": null, "currentKana": "し", "moraIndex": 2, "confirmedMora": null, "miss": null },
-        { "confirmedText": "as", "pendingInput": "sh", "nextHint": "i", "missAt": null, "currentKana": "し", "moraIndex": 2, "confirmedMora": null, "miss": null },
-        { "confirmedText": "asshi", "pendingInput": "", "nextHint": null, "missAt": null, "currentKana": "し", "moraIndex": 3, "confirmedMora": {"kana": "し", "charType": "清音", "acceptedPattern": "shi", "moraIndex": 2}, "miss": null }
+        {
+          "confirmedText": "a",
+          "pendingInput": "",
+          "nextHint": "c",
+          "missAt": null,
+          "currentKana": "っ",
+          "moraIndex": 1,
+          "confirmedMora": {
+            "kana": "あ",
+            "charType": "清音",
+            "acceptedPattern": "a",
+            "moraIndex": 0
+          },
+          "miss": null,
+          "isSentenceComplete": false
+        },
+        {
+          "confirmedText": "as",
+          "pendingInput": "",
+          "nextHint": "si",
+          "missAt": null,
+          "currentKana": "し",
+          "moraIndex": 2,
+          "confirmedMora": {
+            "kana": "っ",
+            "charType": "促音っ",
+            "acceptedPattern": "s",
+            "moraIndex": 1
+          },
+          "miss": null,
+          "isSentenceComplete": false
+        },
+        {
+          "confirmedText": "as",
+          "pendingInput": "s",
+          "nextHint": "i",
+          "missAt": null,
+          "currentKana": "し",
+          "moraIndex": 2,
+          "confirmedMora": null,
+          "miss": null,
+          "isSentenceComplete": false
+        },
+        {
+          "confirmedText": "as",
+          "pendingInput": "sh",
+          "nextHint": "i",
+          "missAt": null,
+          "currentKana": "し",
+          "moraIndex": 2,
+          "confirmedMora": null,
+          "miss": null,
+          "isSentenceComplete": false
+        },
+        {
+          "confirmedText": "asshi",
+          "pendingInput": "",
+          "nextHint": null,
+          "missAt": null,
+          "currentKana": "し",
+          "moraIndex": 3,
+          "confirmedMora": {
+            "kana": "し",
+            "charType": "清音",
+            "acceptedPattern": "shi",
+            "moraIndex": 2
+          },
+          "miss": null,
+          "isSentenceComplete": true
+        }
       ]
     }
   },
   {
     "id": "RA-010",
     "description": "促音「っ」を独立表記方式(xtu)で確定し、次拍(し)は絞り込まれない(A3対応)",
-    "input": { "moraList": ["あ", "っ", "し"], "keystrokes": ["a", "x", "t", "u", "s", "i"] },
+    "input": {
+      "moraList": [
+        "あ",
+        "っ",
+        "し"
+      ],
+      "keystrokes": [
+        "a",
+        "x",
+        "t",
+        "u",
+        "s",
+        "i"
+      ]
+    },
     "expected": {
       "steps": [
-        { "confirmedText": "a", "pendingInput": "", "nextHint": "c", "missAt": null, "currentKana": "っ", "moraIndex": 1, "confirmedMora": {"kana": "あ", "charType": "清音", "acceptedPattern": "a", "moraIndex": 0}, "miss": null },
-        { "confirmedText": "a", "pendingInput": "x", "nextHint": "tu", "missAt": null, "currentKana": "っ", "moraIndex": 1, "confirmedMora": null, "miss": null },
-        { "confirmedText": "a", "pendingInput": "xt", "nextHint": "u", "missAt": null, "currentKana": "っ", "moraIndex": 1, "confirmedMora": null, "miss": null },
-        { "confirmedText": "axtu", "pendingInput": "", "nextHint": "ci", "missAt": null, "currentKana": "し", "moraIndex": 2, "confirmedMora": {"kana": "っ", "charType": "促音っ", "acceptedPattern": "xtu", "moraIndex": 1}, "miss": null },
-        { "confirmedText": "axtu", "pendingInput": "s", "nextHint": "i", "missAt": null, "currentKana": "し", "moraIndex": 2, "confirmedMora": null, "miss": null },
-        { "confirmedText": "axtusi", "pendingInput": "", "nextHint": null, "missAt": null, "currentKana": "し", "moraIndex": 3, "confirmedMora": {"kana": "し", "charType": "清音", "acceptedPattern": "si", "moraIndex": 2}, "miss": null }
+        {
+          "confirmedText": "a",
+          "pendingInput": "",
+          "nextHint": "c",
+          "missAt": null,
+          "currentKana": "っ",
+          "moraIndex": 1,
+          "confirmedMora": {
+            "kana": "あ",
+            "charType": "清音",
+            "acceptedPattern": "a",
+            "moraIndex": 0
+          },
+          "miss": null,
+          "isSentenceComplete": false
+        },
+        {
+          "confirmedText": "a",
+          "pendingInput": "x",
+          "nextHint": "tu",
+          "missAt": null,
+          "currentKana": "っ",
+          "moraIndex": 1,
+          "confirmedMora": null,
+          "miss": null,
+          "isSentenceComplete": false
+        },
+        {
+          "confirmedText": "a",
+          "pendingInput": "xt",
+          "nextHint": "u",
+          "missAt": null,
+          "currentKana": "っ",
+          "moraIndex": 1,
+          "confirmedMora": null,
+          "miss": null,
+          "isSentenceComplete": false
+        },
+        {
+          "confirmedText": "axtu",
+          "pendingInput": "",
+          "nextHint": "ci",
+          "missAt": null,
+          "currentKana": "し",
+          "moraIndex": 2,
+          "confirmedMora": {
+            "kana": "っ",
+            "charType": "促音っ",
+            "acceptedPattern": "xtu",
+            "moraIndex": 1
+          },
+          "miss": null,
+          "isSentenceComplete": false
+        },
+        {
+          "confirmedText": "axtu",
+          "pendingInput": "s",
+          "nextHint": "i",
+          "missAt": null,
+          "currentKana": "し",
+          "moraIndex": 2,
+          "confirmedMora": null,
+          "miss": null,
+          "isSentenceComplete": false
+        },
+        {
+          "confirmedText": "axtusi",
+          "pendingInput": "",
+          "nextHint": null,
+          "missAt": null,
+          "currentKana": "し",
+          "moraIndex": 3,
+          "confirmedMora": {
+            "kana": "し",
+            "charType": "清音",
+            "acceptedPattern": "si",
+            "moraIndex": 2
+          },
+          "miss": null,
+          "isSentenceComplete": true
+        }
       ]
     }
   },
   {
     "id": "RA-011",
     "description": "誤入力はミスとして記録され、正しいキーが入力されるまで進まない",
-    "input": { "moraList": ["し"], "keystrokes": ["x", "s", "h", "i"] },
+    "input": {
+      "moraList": [
+        "し"
+      ],
+      "keystrokes": [
+        "x",
+        "s",
+        "h",
+        "i"
+      ]
+    },
     "expected": {
       "steps": [
-        { "confirmedText": "", "pendingInput": "", "nextHint": "ci", "missAt": "し", "currentKana": "し", "moraIndex": 0, "confirmedMora": null, "miss": {"kana": "し", "expectedKey": "c,s", "actualKey": "x", "prevKana": null, "charType": "清音"} },
-        { "confirmedText": "", "pendingInput": "s", "nextHint": "i", "missAt": null, "currentKana": "し", "moraIndex": 0, "confirmedMora": null, "miss": null },
-        { "confirmedText": "", "pendingInput": "sh", "nextHint": "i", "missAt": null, "currentKana": "し", "moraIndex": 0, "confirmedMora": null, "miss": null },
-        { "confirmedText": "shi", "pendingInput": "", "nextHint": null, "missAt": null, "currentKana": "し", "moraIndex": 1, "confirmedMora": {"kana": "し", "charType": "清音", "acceptedPattern": "shi", "moraIndex": 0}, "miss": null }
+        {
+          "confirmedText": "",
+          "pendingInput": "",
+          "nextHint": "ci",
+          "missAt": "し",
+          "currentKana": "し",
+          "moraIndex": 0,
+          "confirmedMora": null,
+          "miss": {
+            "kana": "し",
+            "expectedKey": "c,s",
+            "actualKey": "x",
+            "prevKana": null,
+            "charType": "清音"
+          },
+          "isSentenceComplete": false
+        },
+        {
+          "confirmedText": "",
+          "pendingInput": "s",
+          "nextHint": "i",
+          "missAt": null,
+          "currentKana": "し",
+          "moraIndex": 0,
+          "confirmedMora": null,
+          "miss": null,
+          "isSentenceComplete": false
+        },
+        {
+          "confirmedText": "",
+          "pendingInput": "sh",
+          "nextHint": "i",
+          "missAt": null,
+          "currentKana": "し",
+          "moraIndex": 0,
+          "confirmedMora": null,
+          "miss": null,
+          "isSentenceComplete": false
+        },
+        {
+          "confirmedText": "shi",
+          "pendingInput": "",
+          "nextHint": null,
+          "missAt": null,
+          "currentKana": "し",
+          "moraIndex": 1,
+          "confirmedMora": {
+            "kana": "し",
+            "charType": "清音",
+            "acceptedPattern": "shi",
+            "moraIndex": 0
+          },
+          "miss": null,
+          "isSentenceComplete": true
+        }
       ]
     }
   }

@@ -32,8 +32,7 @@ const currentSentenceIndex = ref(0)
 const keystroke = ref<KeystrokeResult | null>(null)
 const remainingSeconds = ref<number | null>(null)
 
-// 画面の再描画とは無関係な内部カウンタ・タイマーIDなので、refにせずただの変数で持つ
-let confirmedMoraCountInSentence = 0
+// 画面の再描画とは無関係なタイマーIDなので、refにせずただの変数で持つ
 let timerId: number | undefined
 let isFinished = false
 
@@ -47,7 +46,6 @@ const currentSentence = computed(() => topicStore.sentences[currentSentenceIndex
  */
 function beginSentence(index: number) {
   currentSentenceIndex.value = index
-  confirmedMoraCountInSentence = 0
   // お題文の境界でkanaOccurrenceNoの採番状態をリセットする(REV-014 A1対応、class-design.md 2.4)
   sessionStore.startNewSentence()
   // startSentenceの戻り値はお題文表示直後(1打鍵目より前)のヒント(CL-022)
@@ -96,10 +94,9 @@ async function handleKeydown(event: KeyboardEvent) {
   keystroke.value = result
   sessionStore.recordKeystroke(result)
 
-  if (result.confirmedMora !== null) {
-    confirmedMoraCountInSentence += 1
-  }
-  if (confirmedMoraCountInSentence >= currentSentence.value.moraList.length) {
+  // isSentenceCompleteはsequenceJudge内部の拍列位置を直接見るため、1キーで2拍が同時に確定する
+  // ケース(既知の制限、romaji-automaton.md 6.1末尾)でもお題文完了を正しく検知できる(REV-014 B1対応)
+  if (result.isSentenceComplete) {
     await advance()
   }
 }

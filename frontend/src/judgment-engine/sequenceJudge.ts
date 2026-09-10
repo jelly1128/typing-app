@@ -119,6 +119,9 @@ export function createSequenceJudge() {
       moraIndex: cumulativeMoraIndex,
       confirmedMora,
       miss,
+      // `mora`がnull = indexInSequenceが拍列の末尾に達した = お題文完了(REV-014 B1対応)。
+      // 1キーで2拍が同時に確定する既知の制限(6.1末尾)が起きても、この判定は内部の拍列位置を直接見るため正しい値になる
+      isSentenceComplete: mora === null,
     }
   }
 

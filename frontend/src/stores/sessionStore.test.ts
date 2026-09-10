@@ -15,6 +15,7 @@ function keystroke(overrides: Partial<KeystrokeResult>): KeystrokeResult {
     moraIndex: 0,
     confirmedMora: null,
     miss: null,
+    isSentenceComplete: false,
     ...overrides,
   }
 }

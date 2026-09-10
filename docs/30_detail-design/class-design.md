@@ -213,10 +213,13 @@ frontend/src/
 | `moraIndex` | セッション開始からの累計拍インデックス(0始まり、お題文をまたいでも増え続ける)。**この値が直前の`KeystrokeResult`から変化したら、新しい拍の判定が始まったことを表す**(同じかなが連続する場合でも区別できる)。`sessionStore`はこの変化を検知して`kanaOccurrenceNo`を採番する(`romaji-automaton.md` 7.1) |
 | `confirmedMora` | このキー入力で拍が確定した場合、その内容(`かな`・`文字種`・`採用パターン`・`moraIndex`)。確定しなければ`null` |
 | `miss` | このキー入力でミスが発生した場合、その内容(`kana`・`expectedKey`(カンマ区切り整形済み)・`actualKey`・`prevKana`・`charType`)。ミスでなければ`null` |
+| `isSentenceComplete` | このキー入力の結果、お題文の全ての拍が確定済みかどうか(2026-09-10、REV-014 B1対応)。`sequenceJudge`内部の拍列位置(`indexInSequence >= sequence.length`)を直接見て判定するため、1キーで2拍が同時に確定する場合(6.1末尾「既知の制限」参照)で`confirmedMora`通知が1件失われても正しい値を返す。`TypingView`はお題文完了の判定にこのフィールドを使う(下記「お題文完了判定」参照) |
 
 `sessionStore`は`confirmedMora`から`correctKeyCount`・`kanaCounts`を、`miss`から`missRecords[]`(`kanaOccurrenceNo`は現在保持している採番値を付与)を組み立てる(`romaji-automaton.md` 7.1)。
 
 `sequenceJudge.ts` が唯一の外部公開インターフェースとなり、`TypingView.vue`(S-03)はこれ以外の内部モジュールを直接呼ばない。
+
+**お題文完了判定(2026-09-10、REV-014 B1対応):** 当初`TypingView`は`confirmedMora !== null`の発生回数を自前でカウントし、お題文の拍数と一致した時点で完了と判定していた。しかし6.1末尾「既知の制限」(1キーで2拍が同時に確定するケース)では`confirmedMora`が1件しか通知されないため、このカウンタが1つ足りなくなり`advance()`が呼ばれず、次のキー入力で`handleKeystroke`が例外(`拍列の判定が既に終了しています`)を投げて未捕捉のままセッションが固まる欠陥があった。`TypingView`の自前カウンタを廃止し、`KeystrokeResult.isSentenceComplete`(上記)を直接見る方式に変更した。なお`confirmedMora`通知が1件失われること自体(押し戻された側の拍が`sessionStore`の`correctKeyCount`/`kanaCounts`に計上されない)は、6.1末尾の既知の制限として引き続き対応不要のまま残る(発生条件が「んの直後にー」に限られ実在データで発生しないと合意済みのため)。
 
 **`startSentence`の戻り値(2026-09-10、CL-022対応):** `startSentence`は`void`ではなく、最初の拍(お題文の1文字目)の初期状態を表す`KeystrokeResult`を返す(`confirmedText: ''`・`pendingInput: ''`・`nextHint`は最初の拍の受理パターンから選んだヒント・`missAt: null`・`currentKana`は最初の拍のかな・`confirmedMora: null`・`miss: null`)。1打鍵もしていない時点(お題文表示直後)でも`TypingView`が「次に打つべき文字」を表示できるようにするための戻り値であり、**`sessionStore.recordKeystroke`には渡さない**(実際のキー入力によるものではないため、集計対象にしない)。以降の`handleKeystroke`の呼び出し結果のみを`recordKeystroke`に渡す。
 

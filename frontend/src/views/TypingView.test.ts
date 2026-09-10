@@ -103,6 +103,25 @@ describe('TypingView', () => {
     wrapper.unmount()
   })
 
+  it('1キーで2拍が同時に確定するケース(既知の制限)でもセッションが固まらず完了する(REV-014 B1)', async () => {
+    vi.spyOn(topicSetApi, 'listSentences').mockResolvedValue([{ id: 3, text: 'んー', moraList: ['ん', 'ー'] }])
+    const wrapper = mount(TypingView, {
+      props: { topicSetId: 1, endConditionType: 'sentence_count', endConditionValue: 1 },
+      attachTo: document.body,
+    })
+    await flushPromises()
+
+    // "-"で「ん」「ー」の両方が1キーで確定し(旧実装ではconfirmedMoraカウンタが1つ足りず、
+    // 次のキー入力でsequenceJudgeが例外を投げて未捕捉のままセッションが固まっていた)
+    pressKey('n')
+    pressKey('-')
+    await flushPromises()
+
+    expect(sessionApi.submitSession).toHaveBeenCalledOnce()
+    expect(wrapper.emitted('finished')).toHaveLength(1)
+    wrapper.unmount()
+  })
+
   it('time_limit終了条件は制限時間到達で自動的にセッションを終了する(FR-05)', async () => {
     vi.useFakeTimers()
     const wrapper = mount(TypingView, {

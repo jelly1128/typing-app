@@ -44,4 +44,6 @@ export interface KeystrokeResult {
   moraIndex: number
   confirmedMora: ConfirmedMora | null
   miss: MissRecord | null
+  /** お題文の全ての拍が確定済みかどうか(REV-014 B1対応、`class-design.md` 2.2参照) */
+  isSentenceComplete: boolean
 }
