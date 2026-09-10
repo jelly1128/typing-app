@@ -1,15 +1,12 @@
 <script setup lang="ts">
 import { onMounted, ref, watch } from 'vue'
+import { useRouter } from 'vue-router'
 import { useTopicStore } from '../stores/topicStore'
 import { useUserStore } from '../stores/userStore'
 import { getPersonalBest, listSessionHistory } from '../api/sessionApi'
 import type { PersonalBest, SessionSummary } from '../types/api'
 
-const emit = defineEmits<{
-  home: []
-  missAnalysis: []
-}>()
-
+const router = useRouter()
 const topicStore = useTopicStore()
 const userStore = useUserStore()
 
@@ -72,7 +69,7 @@ onMounted(async () => {
 
 <template>
   <header>
-    <button type="button" @click="emit('home')">ホームへ</button>
+    <button type="button" @click="router.push({ name: 'home' })">ホームへ</button>
   </header>
 
   <section>
@@ -107,5 +104,5 @@ onMounted(async () => {
     </ul>
   </section>
 
-  <button type="button" @click="emit('missAnalysis')">ミス分析を見る</button>
+  <button type="button" @click="router.push({ name: 'miss-analysis' })">ミス分析を見る</button>
 </template>

@@ -1,14 +1,11 @@
 <script setup lang="ts">
+import { useRouter } from 'vue-router'
 import { useSessionStore } from '../stores/sessionStore'
 import SessionMetricsSummary from '../components/SessionMetricsSummary.vue'
 
-const emit = defineEmits<{
-  playAgain: []
-  history: []
-}>()
-
-// このコンポーネントはpropsを受け取らない。TypingViewが`endSession()`を呼んだ後に`finished`をemitして
-// このViewへ切り替わる想定で、その時点で結果は既にsessionStoreに入っているため直接読む
+// このコンポーネントはpropsを受け取らない。TypingViewが`endSession()`を呼んだ後にrouter.pushで
+// このViewへ遷移する想定で、その時点で結果は既にsessionStoreに入っているため直接読む
+const router = useRouter()
 const sessionStore = useSessionStore()
 
 /**
@@ -36,7 +33,7 @@ function retry() {
       :is-net-kpm-best="sessionStore.result.isNetKpmBest"
       :is-accuracy-best="sessionStore.result.isAccuracyBest"
     />
-    <button type="button" @click="emit('playAgain')">もう一度</button>
-    <button type="button" @click="emit('history')">履歴を見る</button>
+    <button type="button" @click="router.push({ name: 'home' })">もう一度</button>
+    <button type="button" @click="router.push({ name: 'history' })">履歴を見る</button>
   </template>
 </template>

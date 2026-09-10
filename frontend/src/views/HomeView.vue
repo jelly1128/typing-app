@@ -1,16 +1,11 @@
 <script setup lang="ts">
 import { computed, onMounted, ref } from 'vue'
+import { useRouter } from 'vue-router'
 import { useTopicStore } from '../stores/topicStore'
 import { useUserStore } from '../stores/userStore'
 import type { EndConditionType } from '../types/api'
 
-const emit = defineEmits<{
-  start: [payload: { topicSetId: number; endConditionType: EndConditionType; endConditionValue: number }]
-  history: []
-  missAnalysis: []
-  changeName: []
-}>()
-
+const router = useRouter()
 const userStore = useUserStore()
 const topicStore = useTopicStore()
 
@@ -44,24 +39,28 @@ const canStart = computed(
 
 function handleStart() {
   if (!canStart.value || selectedTopicSetId.value === null) return
-  emit('start', {
-    topicSetId: selectedTopicSetId.value,
-    endConditionType: endConditionType.value,
-    endConditionValue: endConditionValue.value,
+  router.push({
+    name: 'typing',
+    // route.propsのpropsファンクション(router/index.ts)がクエリ文字列をTypingViewの型付きpropsに変換する
+    query: {
+      topicSetId: String(selectedTopicSetId.value),
+      endConditionType: endConditionType.value,
+      endConditionValue: String(endConditionValue.value),
+    },
   })
 }
 
 function handleChangeName() {
   userStore.clearUser()
-  emit('changeName')
+  router.push({ name: 'name-input' })
 }
 </script>
 
 <template>
   <header>
     <p>{{ userStore.name }}</p>
-    <button type="button" @click="emit('history')">履歴</button>
-    <button type="button" @click="emit('missAnalysis')">ミス分析</button>
+    <button type="button" @click="router.push({ name: 'history' })">履歴</button>
+    <button type="button" @click="router.push({ name: 'miss-analysis' })">ミス分析</button>
     <button type="button" @click="handleChangeName">別の名前で始める</button>
   </header>
 

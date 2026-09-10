@@ -1,26 +1,37 @@
 import { createPinia, setActivePinia } from 'pinia'
 import { flushPromises, mount } from '@vue/test-utils'
 import { beforeEach, describe, expect, it, vi } from 'vitest'
+import { createMemoryHistory } from 'vue-router'
 import NameInputView from './NameInputView.vue'
+import { createAppRouter } from '../router'
 import { useUserStore } from '../stores/userStore'
 import * as userApi from '../api/userApi'
 
 describe('NameInputView', () => {
+  let router: ReturnType<typeof createAppRouter>
+
+  // router/index.tsのuseRouter()がinject()で取れるよう、テストでもmountのたびに同じrouterを注入する
+  function mountView() {
+    return mount(NameInputView, { global: { plugins: [router] } })
+  }
+
   beforeEach(() => {
     setActivePinia(createPinia())
     localStorage.clear()
+    router = createAppRouter(createMemoryHistory())
   })
 
   it('空欄では「はじめる」ボタンが無効化される', () => {
-    const wrapper = mount(NameInputView)
+    const wrapper = mountView()
     const button = wrapper.get('button[type="submit"]')
 
     expect((button.element as HTMLButtonElement).disabled).toBe(true)
   })
 
-  it('名前を入力して送信するとidentifyUserを呼びidentifiedをemitする', async () => {
+  it('名前を入力して送信するとidentifyUserを呼びホーム画面へ遷移する', async () => {
     vi.spyOn(userApi, 'identifyUser').mockResolvedValue({ id: 1, name: 'kazuki' })
-    const wrapper = mount(NameInputView)
+    const pushSpy = vi.spyOn(router, 'push')
+    const wrapper = mountView()
 
     await wrapper.get('input#name').setValue('kazuki')
     await wrapper.get('form').trigger('submit')
@@ -28,18 +39,19 @@ describe('NameInputView', () => {
 
     const userStore = useUserStore()
     expect(userStore.userId).toBe(1)
-    expect(wrapper.emitted('identified')).toHaveLength(1)
+    expect(pushSpy).toHaveBeenCalledWith({ name: 'home' })
   })
 
-  it('identifyUser失敗時はエラーメッセージを表示しidentifiedをemitしない', async () => {
+  it('identifyUser失敗時はエラーメッセージを表示し遷移しない', async () => {
     vi.spyOn(userApi, 'identifyUser').mockRejectedValue(new Error('network error'))
-    const wrapper = mount(NameInputView)
+    const pushSpy = vi.spyOn(router, 'push')
+    const wrapper = mountView()
 
     await wrapper.get('input#name').setValue('kazuki')
     await wrapper.get('form').trigger('submit')
     await flushPromises()
 
     expect(wrapper.get('[role="alert"]').text()).toBe('読み込みに失敗しました')
-    expect(wrapper.emitted('identified')).toBeUndefined()
+    expect(pushSpy).not.toHaveBeenCalled()
   })
 })

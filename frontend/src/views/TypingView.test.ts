@@ -1,7 +1,9 @@
 import { createPinia, setActivePinia } from 'pinia'
 import { flushPromises, mount } from '@vue/test-utils'
 import { beforeEach, describe, expect, it, vi } from 'vitest'
+import { createMemoryHistory } from 'vue-router'
 import TypingView from './TypingView.vue'
+import { createAppRouter } from '../router'
 import { useUserStore } from '../stores/userStore'
 import * as topicSetApi from '../api/topicSetApi'
 import * as sessionApi from '../api/sessionApi'
@@ -30,16 +32,26 @@ function pressKey(key: string) {
 }
 
 describe('TypingView', () => {
+  let router: ReturnType<typeof createAppRouter>
+
+  function mountView(options: {
+    props: { topicSetId: number; endConditionType: 'sentence_count' | 'time_limit'; endConditionValue: number }
+    attachTo?: Element
+  }) {
+    return mount(TypingView, { ...options, global: { plugins: [router] } })
+  }
+
   beforeEach(() => {
     setActivePinia(createPinia())
     localStorage.clear()
+    router = createAppRouter(createMemoryHistory())
     useUserStore().setUser({ id: 1, name: 'kazuki' })
     vi.spyOn(topicSetApi, 'listSentences').mockResolvedValue(SENTENCES)
     vi.spyOn(sessionApi, 'submitSession').mockResolvedValue(FAKE_RESULT)
   })
 
   it('マウント時に最初のお題文と1打鍵目のヒントを表示する(CL-022)', async () => {
-    const wrapper = mount(TypingView, {
+    const wrapper = mountView({
       props: { topicSetId: 1, endConditionType: 'sentence_count', endConditionValue: 2 },
     })
     await flushPromises()
@@ -51,7 +63,7 @@ describe('TypingView', () => {
 
   it('お題文取得失敗時は汎用エラー表示に切り替える(NFR-09)', async () => {
     vi.spyOn(topicSetApi, 'listSentences').mockRejectedValue(new Error('server error'))
-    const wrapper = mount(TypingView, {
+    const wrapper = mountView({
       props: { topicSetId: 1, endConditionType: 'sentence_count', endConditionValue: 2 },
     })
     await flushPromises()
@@ -60,7 +72,7 @@ describe('TypingView', () => {
   })
 
   it('正しいキー入力で確定済み文字が更新される(FR-02, FR-03)', async () => {
-    const wrapper = mount(TypingView, {
+    const wrapper = mountView({
       props: { topicSetId: 1, endConditionType: 'sentence_count', endConditionValue: 2 },
       attachTo: document.body,
     })
@@ -74,7 +86,7 @@ describe('TypingView', () => {
   })
 
   it('誤入力時はミス位置を表示する(FR-04)', async () => {
-    const wrapper = mount(TypingView, {
+    const wrapper = mountView({
       props: { topicSetId: 1, endConditionType: 'sentence_count', endConditionValue: 2 },
       attachTo: document.body,
     })
@@ -87,8 +99,9 @@ describe('TypingView', () => {
     wrapper.unmount()
   })
 
-  it('sentence_count終了条件を満たすとセッションを送信しfinishedをemitする(FR-05)', async () => {
-    const wrapper = mount(TypingView, {
+  it('sentence_count終了条件を満たすとセッションを送信しresultへ遷移する(FR-05)', async () => {
+    const pushSpy = vi.spyOn(router, 'push')
+    const wrapper = mountView({
       props: { topicSetId: 1, endConditionType: 'sentence_count', endConditionValue: 1 },
       attachTo: document.body,
     })
@@ -99,13 +112,14 @@ describe('TypingView', () => {
     await flushPromises()
 
     expect(sessionApi.submitSession).toHaveBeenCalledOnce()
-    expect(wrapper.emitted('finished')).toHaveLength(1)
+    expect(pushSpy).toHaveBeenCalledWith({ name: 'result' })
     wrapper.unmount()
   })
 
   it('time_limit終了条件は制限時間到達で自動的にセッションを終了する(FR-05)', async () => {
     vi.useFakeTimers()
-    const wrapper = mount(TypingView, {
+    const pushSpy = vi.spyOn(router, 'push')
+    const wrapper = mountView({
       props: { topicSetId: 1, endConditionType: 'time_limit', endConditionValue: 10 },
       attachTo: document.body,
     })
@@ -115,7 +129,7 @@ describe('TypingView', () => {
     await flushPromises()
 
     expect(sessionApi.submitSession).toHaveBeenCalledOnce()
-    expect(wrapper.emitted('finished')).toHaveLength(1)
+    expect(pushSpy).toHaveBeenCalledWith({ name: 'result' })
     wrapper.unmount()
     vi.useRealTimers()
   })

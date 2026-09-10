@@ -1,7 +1,9 @@
 import { createPinia, setActivePinia } from 'pinia'
 import { flushPromises, mount } from '@vue/test-utils'
 import { beforeEach, describe, expect, it, vi } from 'vitest'
+import { createMemoryHistory } from 'vue-router'
 import HistoryView from './HistoryView.vue'
+import { createAppRouter } from '../router'
 import { useUserStore } from '../stores/userStore'
 import * as topicSetApi from '../api/topicSetApi'
 import * as sessionApi from '../api/sessionApi'
@@ -26,8 +28,15 @@ const HISTORY: SessionSummary[] = [
 ]
 
 describe('HistoryView', () => {
+  let router: ReturnType<typeof createAppRouter>
+
+  function mountView() {
+    return mount(HistoryView, { global: { plugins: [router] } })
+  }
+
   beforeEach(() => {
     setActivePinia(createPinia())
+    router = createAppRouter(createMemoryHistory())
     useUserStore().setUser({ id: 1, name: 'kazuki' })
     vi.spyOn(topicSetApi, 'listTopicSets').mockResolvedValue(TOPIC_SETS)
     vi.spyOn(sessionApi, 'listSessionHistory').mockResolvedValue(HISTORY)
@@ -36,7 +45,7 @@ describe('HistoryView', () => {
   it('マウント時に先頭の難易度の自己ベストと履歴一覧を表示する(FR-08, FR-09)', async () => {
     const best: PersonalBest = { topicSetId: 1, netKpmBest: 130, accuracyBest: 96 }
     vi.spyOn(sessionApi, 'getPersonalBest').mockResolvedValue(best)
-    const wrapper = mount(HistoryView)
+    const wrapper = mountView()
     await flushPromises()
 
     expect(sessionApi.getPersonalBest).toHaveBeenCalledWith(1, 1)
@@ -47,7 +56,7 @@ describe('HistoryView', () => {
   it('選んだ難易度に自己ベストが無い場合は初回記録メッセージを出す(screen-design.md 4章 B2)', async () => {
     const empty: PersonalBest = { topicSetId: 1, netKpmBest: null, accuracyBest: null }
     vi.spyOn(sessionApi, 'getPersonalBest').mockResolvedValue(empty)
-    const wrapper = mount(HistoryView)
+    const wrapper = mountView()
     await flushPromises()
 
     expect(wrapper.text()).toContain('まだ記録がありません。練習を始めましょう')
@@ -56,7 +65,7 @@ describe('HistoryView', () => {
   it('履歴が0件の場合は空状態メッセージを出す(screen-design.md 4章 B2)', async () => {
     vi.spyOn(sessionApi, 'getPersonalBest').mockResolvedValue({ topicSetId: 1, netKpmBest: 100, accuracyBest: 90 })
     vi.spyOn(sessionApi, 'listSessionHistory').mockResolvedValue([])
-    const wrapper = mount(HistoryView)
+    const wrapper = mountView()
     await flushPromises()
 
     expect(wrapper.text()).toContain('まだ記録がありません')
@@ -64,7 +73,7 @@ describe('HistoryView', () => {
 
   it('難易度の選択を変えると自己ベストを取り直す', async () => {
     vi.spyOn(sessionApi, 'getPersonalBest').mockResolvedValue({ topicSetId: 1, netKpmBest: 100, accuracyBest: 90 })
-    const wrapper = mount(HistoryView)
+    const wrapper = mountView()
     await flushPromises()
 
     await wrapper.get('select').setValue('2')
@@ -77,7 +86,7 @@ describe('HistoryView', () => {
     const getPersonalBestSpy = vi
       .spyOn(sessionApi, 'getPersonalBest')
       .mockRejectedValueOnce(new Error('timeout'))
-    const wrapper = mount(HistoryView)
+    const wrapper = mountView()
     await flushPromises()
 
     expect(wrapper.find('select').exists()).toBe(true)
@@ -100,7 +109,7 @@ describe('HistoryView', () => {
       .spyOn(sessionApi, 'getPersonalBest')
       .mockReturnValueOnce(firstPending)
       .mockResolvedValueOnce({ topicSetId: 2, netKpmBest: 200, accuracyBest: 80 })
-    const wrapper = mount(HistoryView)
+    const wrapper = mountView()
     await flushPromises()
 
     await wrapper.get('select').setValue('2')
@@ -114,16 +123,17 @@ describe('HistoryView', () => {
     expect(wrapper.text()).not.toContain('999')
   })
 
-  it('ホームへ/ミス分析を見るボタンでそれぞれemitする', async () => {
+  it('ホームへ/ミス分析を見るボタンでそれぞれの画面へ遷移する', async () => {
     vi.spyOn(sessionApi, 'getPersonalBest').mockResolvedValue({ topicSetId: 1, netKpmBest: 100, accuracyBest: 90 })
-    const wrapper = mount(HistoryView)
+    const pushSpy = vi.spyOn(router, 'push')
+    const wrapper = mountView()
     await flushPromises()
 
     await wrapper.get('header button').trigger('click')
     const buttons = wrapper.findAll('button')
     await buttons.find((b) => b.text() === 'ミス分析を見る')!.trigger('click')
 
-    expect(wrapper.emitted('home')).toHaveLength(1)
-    expect(wrapper.emitted('missAnalysis')).toHaveLength(1)
+    expect(pushSpy).toHaveBeenCalledWith({ name: 'home' })
+    expect(pushSpy).toHaveBeenCalledWith({ name: 'miss-analysis' })
   })
 })

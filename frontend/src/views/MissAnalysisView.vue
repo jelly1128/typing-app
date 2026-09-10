@@ -1,10 +1,12 @@
 <script setup lang="ts">
 import { computed, onMounted, ref } from 'vue'
+import { useRouter } from 'vue-router'
 import { useUserStore } from '../stores/userStore'
 import { getMissAnalysis } from '../api/missAnalysisApi'
 import type { MissAnalysis } from '../types/api'
 import MissAnalysisSection from '../components/MissAnalysisSection.vue'
 
+const router = useRouter()
 const userStore = useUserStore()
 
 const loadError = ref(false)
@@ -35,6 +37,10 @@ onMounted(async () => {
 </script>
 
 <template>
+  <header>
+    <button type="button" @click="router.push({ name: 'home' })">ホームへ</button>
+  </header>
+
   <p v-if="loadError" role="alert">読み込みに失敗しました</p>
   <template v-else-if="missAnalysis">
     <MissAnalysisSection title="かな別ミス" :items="byKana" />

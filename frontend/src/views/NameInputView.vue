@@ -1,9 +1,9 @@
 <script setup lang="ts">
 import { ref } from 'vue'
+import { useRouter } from 'vue-router'
 import { useUserStore } from '../stores/userStore'
 
-const emit = defineEmits<{ identified: [] }>()
-
+const router = useRouter()
 const userStore = useUserStore()
 const name = ref('')
 const errorMessage = ref<string | null>(null)
@@ -17,7 +17,7 @@ async function handleSubmit() {
   errorMessage.value = null
   try {
     await userStore.identifyUser(trimmed)
-    emit('identified')
+    router.push({ name: 'home' })
   } catch {
     errorMessage.value = '読み込みに失敗しました'
   } finally {

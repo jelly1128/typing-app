@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import { computed, onMounted, onUnmounted, ref } from 'vue'
+import { useRouter } from 'vue-router'
 import { useTopicStore } from '../stores/topicStore'
 import { useSessionStore } from '../stores/sessionStore'
 import { useUserStore } from '../stores/userStore'
@@ -8,16 +9,15 @@ import type { KeystrokeResult } from '../judgment-engine/types'
 import type { EndConditionType } from '../types/api'
 import TypingDisplay from '../components/TypingDisplay.vue'
 
-// HomeView の `start` イベントのペイロードをそのまま受け取る想定(router配線前提。P5-18でルートから渡す形に置き換わる)
+// HomeView の `start` 押下でrouterが/typingへ渡すクエリを、router/index.tsのpropsファンクションが
+// この型に変換して渡す(router経由でない直接マウント時はテストがそのままpropsを渡す)
 const props = defineProps<{
   topicSetId: number
   endConditionType: EndConditionType
   endConditionValue: number
 }>()
 
-const emit = defineEmits<{
-  finished: []
-}>()
+const router = useRouter()
 
 // useXxxStore() は Pinia の作法: 呼ぶたびに同じストアのインスタンスを返す(シングルトン)。
 // judgment-engine は Vue に依存しないただの関数なので、コンポーネントの外の変数と同じ感覚で1つ作って使い回す
@@ -54,7 +54,7 @@ function beginSentence(index: number) {
 
 /**
  * セッションを終える(終了条件達成時に1回だけ呼ばれる)
- * @returns なし(sessionStore.endSession()の完了を待ってから'finished'をemitする)
+ * @returns なし(sessionStore.endSession()の完了を待ってからS-04(結果画面)へ遷移する)
  */
 async function finish() {
   if (isFinished) return // タイマーとキー入力の両方から呼ばれうるため、二重終了を防ぐ
@@ -62,7 +62,7 @@ async function finish() {
   if (timerId !== undefined) window.clearInterval(timerId)
   window.removeEventListener('keydown', handleKeydown)
   await sessionStore.endSession() // 内部でAPI送信まで行う(失敗してもエラー状態を保持したままResultViewへ進む設計)
-  emit('finished')
+  router.push({ name: 'result' })
 }
 
 /**
