@@ -117,6 +117,16 @@ export const useSessionStore = defineStore('session', {
       this.confirmedSentenceCount += 1
     },
 
+    /**
+     * `TypingView`が新しいお題文を開始する直前(`sequenceJudge.startSentence`を呼ぶのと同じタイミング)に呼ぶ。
+     * `moraIndex`はお題文の境界をまたいで同じ値になりうる(拍が確定した時にしか増えないため)ので、
+     * `lastMoraIndex`を明示的にリセットし、次の拍で必ず新しい`kanaOccurrenceNo`が採番されるようにする
+     * (`class-design.md` 2.4「startNewSentence()アクション」、REV-014 A1対応)。
+     */
+    startNewSentence() {
+      this.lastMoraIndex = null
+    },
+
     /** 終了条件達成時にTypingViewが呼ぶ。結果を組み立てて送信する */
     async endSession(now: number = Date.now()): Promise<void> {
       this.endedAt = now

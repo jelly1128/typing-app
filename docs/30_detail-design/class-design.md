@@ -220,6 +220,8 @@ frontend/src/
 
 **`startSentence`の戻り値(2026-09-10、CL-022対応):** `startSentence`は`void`ではなく、最初の拍(お題文の1文字目)の初期状態を表す`KeystrokeResult`を返す(`confirmedText: ''`・`pendingInput: ''`・`nextHint`は最初の拍の受理パターンから選んだヒント・`missAt: null`・`currentKana`は最初の拍のかな・`confirmedMora: null`・`miss: null`)。1打鍵もしていない時点(お題文表示直後)でも`TypingView`が「次に打つべき文字」を表示できるようにするための戻り値であり、**`sessionStore.recordKeystroke`には渡さない**(実際のキー入力によるものではないため、集計対象にしない)。以降の`handleKeystroke`の呼び出し結果のみを`recordKeystroke`に渡す。
 
+**お題文境界での`kanaOccurrenceNo`誤採番(2026-09-10、REV-014 A1対応):** 上記`moraIndex`のフィールド定義は「変化を検知すれば新しい拍の開始が分かる」としているが、これはお題文の境界では成り立たない場合がある。`cumulativeMoraIndex`(=`moraIndex`)は拍が**確定した時にしか**増えないため、あるお題文の最後の拍が確定した直後の`moraIndex`(=次に来るはずの拍の番号)と、次のお題文の最初の拍がまだ未確定のまま判定中の`moraIndex`は**数値として同じ**になりうる。この状態で2文目以降の最初の拍をミスすると、`sessionStore`は「`moraIndex`が変化していない」と誤認し、前の文の最後の拍の`kanaOccurrenceNo`を使い回してしまう(FR-10のミス分析データが壊れる)。これは`sequenceJudge`側の状態だけでは検知できないため、`sessionStore`が`startNewSentence()`アクションを持ち、`TypingView`が`sequenceJudge.startSentence`を呼ぶ直前に必ず呼ぶ(2.4参照)。
+
 ### 2.3 `api/` と `types/`
 
 | モジュール | 責務 |
@@ -252,6 +254,8 @@ frontend/src/
 | 制限時間モードで打鍵途中の拍 | 破棄する。`correctKeyCount`・`kanaCounts`・ミス記録のいずれにも計上しない |
 
 **送信失敗時の再送(2026-08-29、ops-reviewer A1対応で確定):** `POST /api/sessions`が失敗(タイムアウト・500等)した場合、`sessionStore`の一時ログは**破棄せず**保持したまま`ResultView`にエラー表示+「もう一度送信」ボタンを出す(`sequence.md` 5.1)。同じ`SessionSubmission`を再送し、201が返って初めて一時ログを破棄する。送信中は二重送信防止のためボタンを無効化する。
+
+**`startNewSentence()`アクション(2026-09-10、REV-014 A1対応):** `sessionStore`は`kanaOccurrenceNo`採番のための「直前の`moraIndex`」を保持している(`lastMoraIndex`)。`TypingView`は新しいお題文を開始する直前(`sequenceJudge.startSentence`を呼ぶのと同じタイミング、`beginSentence()`内)に、必ず`sessionStore.startNewSentence()`を呼ぶ。このアクションは`lastMoraIndex`を`null`にリセットするだけで、これにより次に`recordKeystroke`が呼ばれた時点で(`moraIndex`の値がたまたま前の文の最後と同じ数値であっても)必ず新しい`kanaOccurrenceNo`が採番される(2.2「お題文境界での`kanaOccurrenceNo`誤採番」参照)。`kanaOccurrenceCounters`(かなの種類ごとの累計カウンタ)自体はリセットしない(7.1の規則どおり、お題文をまたいでも通し番号を維持する)。
 
 ### 2.5 `views/`(画面、`screen-design.md` 1章と1:1対応)
 

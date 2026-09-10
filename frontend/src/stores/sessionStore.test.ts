@@ -70,6 +70,45 @@ describe('sessionStore', () => {
     expect(missRecords[2].kanaOccurrenceNo).toBe(2)
   })
 
+  it('startNewSentenceを呼ばずにお題文をまたぐと、境目でkanaOccurrenceNoが誤って使い回される(REV-014 A1の再現)', () => {
+    const store = useSessionStore()
+    store.startSession(1, 1, 'sentence_count', 2)
+
+    // 文A「あ」を確定(moraIndexは確定後の値0→1になる)
+    store.recordKeystroke(
+      keystroke({ moraIndex: 1, currentKana: 'あ', confirmedMora: { kana: 'あ', charType: '清音', acceptedPattern: 'a', moraIndex: 0 } }),
+    )
+    // startNewSentence()を挟まずに文Bへ(実装ミスを再現するため意図的に省略)。
+    // 文Bの1文字目「あ」をミス。まだ未確定なのでmoraIndexは文Aの確定後と同じ1のまま
+    store.recordKeystroke(
+      keystroke({ moraIndex: 1, currentKana: 'あ', miss: { kana: 'あ', expectedKey: 'a', actualKey: 'x', prevKana: 'あ', charType: '清音' } }),
+    )
+
+    // 誤って文Aの「あ」のoccurrenceNo(1)を使い回してしまう
+    expect(store.buildSubmission().missRecords[0].kanaOccurrenceNo).toBe(1)
+  })
+
+  it('startNewSentenceを呼ぶと、お題文の境目でも新しいkanaOccurrenceNoが採番される', () => {
+    const store = useSessionStore()
+    store.startSession(1, 1, 'sentence_count', 2)
+
+    // 文A「あ」を確定
+    store.recordKeystroke(
+      keystroke({ moraIndex: 1, currentKana: 'あ', confirmedMora: { kana: 'あ', charType: '清音', acceptedPattern: 'a', moraIndex: 0 } }),
+    )
+
+    // TypingView.beginSentence()が文Bの開始直前に呼ぶ
+    store.startNewSentence()
+
+    // 文Bの1文字目「あ」をミス(moraIndexは文Aの確定後と同じ1のまま)
+    store.recordKeystroke(
+      keystroke({ moraIndex: 1, currentKana: 'あ', miss: { kana: 'あ', expectedKey: 'a', actualKey: 'x', prevKana: 'あ', charType: '清音' } }),
+    )
+
+    // 文Aの「あ」(occurrence 1)とは別に、正しく2番目として採番される
+    expect(store.buildSubmission().missRecords[0].kanaOccurrenceNo).toBe(2)
+  })
+
   it('sentence_countモードは確定文数がendConditionValueに達すると終了条件を満たす', () => {
     const store = useSessionStore()
     store.startSession(1, 1, 'sentence_count', 2)

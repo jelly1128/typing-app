@@ -48,6 +48,8 @@ const currentSentence = computed(() => topicStore.sentences[currentSentenceIndex
 function beginSentence(index: number) {
   currentSentenceIndex.value = index
   confirmedMoraCountInSentence = 0
+  // お題文の境界でkanaOccurrenceNoの採番状態をリセットする(REV-014 A1対応、class-design.md 2.4)
+  sessionStore.startNewSentence()
   // startSentenceの戻り値はお題文表示直後(1打鍵目より前)のヒント(CL-022)
   keystroke.value = judge.startSentence(topicStore.sentences[index].moraList)
 }
