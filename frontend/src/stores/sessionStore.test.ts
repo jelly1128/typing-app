@@ -1,7 +1,12 @@
 import { createPinia, setActivePinia } from 'pinia'
+import { flushPromises } from '@vue/test-utils'
 import { beforeEach, describe, expect, it, vi } from 'vitest'
+import { createMemoryHistory } from 'vue-router'
 import { useSessionStore } from './sessionStore'
+import { useUserStore } from './userStore'
+import { createAppRouter } from '../router'
 import * as sessionApi from '../api/sessionApi'
+import { ApiError } from '../api/client'
 import type { KeystrokeResult } from '../judgment-engine/types'
 import type { SessionResult } from '../types/api'
 
@@ -20,8 +25,11 @@ function keystroke(overrides: Partial<KeystrokeResult>): KeystrokeResult {
 }
 
 describe('sessionStore', () => {
+  let router: ReturnType<typeof createAppRouter>
+
   beforeEach(() => {
     setActivePinia(createPinia())
+    router = createAppRouter(createMemoryHistory())
   })
 
   it('拍が確定するとcorrectKeyCountとkanaCountsが積み上がる', () => {
@@ -143,7 +151,7 @@ describe('sessionStore', () => {
     }
     vi.spyOn(sessionApi, 'submitSession').mockResolvedValue(fakeResult)
 
-    await store.endSession()
+    await store.endSession(router)
 
     expect(store.result).toEqual(fakeResult)
     expect(store.submitError).toBe(false)
@@ -159,7 +167,7 @@ describe('sessionStore', () => {
     )
 
     const submitSpy = vi.spyOn(sessionApi, 'submitSession').mockRejectedValueOnce(new Error('timeout'))
-    await store.endSession()
+    await store.endSession(router)
 
     expect(store.submitError).toBe(true)
     expect(store.lastSubmission).not.toBeNull()
@@ -178,10 +186,31 @@ describe('sessionStore', () => {
       isAccuracyBest: true,
     }
     submitSpy.mockResolvedValueOnce(fakeResult)
-    await store.submit()
+    await store.submit(router)
 
     expect(store.result).toEqual(fakeResult)
     expect(store.submitError).toBe(false)
     expect(store.lastSubmission).toBeNull()
+  })
+
+  it('送信時にuserId失効(404 USER_NOT_FOUND)を検知した場合はuserIdをクリアしS-01へ強制遷移する。submitErrorは立てない(sequence.md 5.2)', async () => {
+    const store = useSessionStore()
+    store.startSession(1, 1, 'sentence_count', 1)
+    store.recordKeystroke(
+      keystroke({ moraIndex: 0, confirmedMora: { kana: 'あ', charType: '清音', acceptedPattern: 'a', moraIndex: 0 } }),
+    )
+    useUserStore().setUser({ id: 1, name: 'kazuki' })
+
+    vi.spyOn(sessionApi, 'submitSession').mockRejectedValue(
+      new ApiError({ timestamp: '2026-09-12T00:00:00Z', status: 404, code: 'USER_NOT_FOUND', message: 'not found', traceId: 't1' }),
+    )
+
+    const handled = await store.endSession(router)
+    await flushPromises() // handleUserNotFoundのrouter.push()はawaitされない設計のため、遷移完了を待つ
+
+    expect(handled).toBe(true)
+    expect(store.submitError).toBe(false)
+    expect(useUserStore().userId).toBeNull()
+    expect(router.currentRoute.value.name).toBe('name-input')
   })
 })

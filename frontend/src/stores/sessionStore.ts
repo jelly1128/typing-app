@@ -1,5 +1,7 @@
 import { defineStore } from 'pinia'
+import type { Router } from 'vue-router'
 import { submitSession } from '../api/sessionApi'
+import { handleUserNotFound } from '../api/errorHandling'
 import type {
   EndConditionType,
   KanaCountInput,
@@ -127,11 +129,16 @@ export const useSessionStore = defineStore('session', {
       this.confirmedSentenceCount += 1
     },
 
-    /** 終了条件達成時にTypingViewが呼ぶ。結果を組み立てて送信する */
-    async endSession(now: number = Date.now()): Promise<void> {
+    /**
+     * 終了条件達成時にTypingViewが呼ぶ。結果を組み立てて送信する
+     * @param router 呼び出し元Viewのrouterインスタンス(userId失効時、sequence.md 5.2の共通処理でS-01へ強制遷移するために使う)
+     * @param now 終了時刻(テスト用の差し替え引数。省略時は現在時刻)
+     * @returns userId失効(404 USER_NOT_FOUND)として処理し強制遷移した場合はtrue。呼び出し元はtrueの時、続けて別の画面へ遷移してはいけない
+     */
+    async endSession(router: Router, now: number = Date.now()): Promise<boolean> {
       this.endedAt = now
       this.lastSubmission = this.buildSubmission()
-      await this.submit()
+      return this.submit(router)
     },
 
     buildSubmission(): SessionSubmission {
@@ -151,20 +158,27 @@ export const useSessionStore = defineStore('session', {
       }
     },
 
-    /** 送信・再送の両方から呼ぶ。成功時のみ一時ログを破棄する(class-design.md 2.4「送信失敗時の再送」) */
-    async submit(): Promise<void> {
-      if (this.lastSubmission === null) return
+    /**
+     * 送信・再送の両方から呼ぶ。成功時のみ一時ログを破棄する(class-design.md 2.4「送信失敗時の再送」)。
+     * userId失効(404 USER_NOT_FOUND)時はerrorHandling.tsの共通処理でuserIdをクリアしS-01へ強制遷移する(sequence.md 5.2)
+     * @param router 呼び出し元Viewのrouterインスタンス(userId失効時の強制遷移に使う)
+     * @returns userId失効として処理し強制遷移した場合はtrue。呼び出し元はtrueの時、続けて別の画面へ遷移してはいけない
+     */
+    async submit(router: Router): Promise<boolean> {
+      if (this.lastSubmission === null) return false
       this.isSubmitting = true
       this.submitError = false
       try {
         this.result = await submitSession(this.lastSubmission)
         this.lastSubmission = null
         this.clearLog()
-      } catch {
+      } catch (e) {
+        if (handleUserNotFound(e, router)) return true
         this.submitError = true
       } finally {
         this.isSubmitting = false
       }
+      return false
     },
 
     clearLog() {

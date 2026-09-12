@@ -189,3 +189,5 @@ sequenceDiagram
 ## 6. 未決事項
 
 なし。共通エラーハンドラ(5.2)の物理的な実装配置は、P5では見送られたままP6-04(ST-010着手時)まで気づかれず未実装だったため、P6-04で解決した(CL-028)。`frontend/src/api/errorHandling.ts`の`handleUserNotFound(error, router)`を各View(`HistoryView`/`MissAnalysisView`)のcatchブロックから呼ぶ方式。
+
+**2026-09-12追記(P6完了確認時の`/code-review`で発見・修正、CL-029):** CL-028時点ではS-04(ResultView)がAPI呼び出し元ではなく`sessionStore.submit()`(Piniaストア)経由でAPIを呼ぶ構造だったため対応が漏れていた(`sequence.md`の対象Viewには元々S-04も明記されていたが、実装時に見落とされた)。`sessionStore.submit()`/`endSession()`が`router`を引数に取り、内部で`handleUserNotFound`を呼ぶ方式に変更して解決。ストアがuserId失効を処理した場合は`true`を返し、呼び出し元View(`TypingView`/`ResultView`)はtrueの間は続けて別画面へ遷移しない(S-01への強制遷移を上書きしないため)。

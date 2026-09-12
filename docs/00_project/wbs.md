@@ -28,7 +28,7 @@ updated: 2026-09-12
 | P3 詳細設計 | 2〜3 | 10.5(確定) | 完了 |
 | P4 テスト設計 | 1〜2 | 3.75(確定) | 完了 |
 | P5 実装 | 6〜10(暫定、実質約18セッション見込み) | 15〜25(タスク積み上げ後45.0) | 進行中(タスク分解済み) |
-| P6 テスト実施 | 2〜3 | 5〜7.5 | 未着手 |
+| P6 テスト実施 | 2〜3 | 5〜7.5(実績合計は`estimate-actual.md`参照) | 完了 |
 | P7 リリース | 1〜2 | 2.5〜5 | 未着手 |
 | P8 振り返り | 1 | 2.5 | 未着手 |
 | **小計(MVP完走)** | **23.5〜33** | **58.75〜81.25** | |
@@ -333,8 +333,8 @@ P5-01のみ、環境構築(pom.xml/record定義/shared testdata作成)は既にK
 | P6-03 | ST-001〜009(主要シナリオ)のPlaywrightテスト作成・実行 | 9件実装・PASS | 0.75 | 2.0 | **2.0** | 完了(`frontend/e2e/main-scenarios.spec.ts`。ST-004〜009はAPI直接呼び出しでのデータ投入方式。9件全PASS、アプリ側不具合0件) |
 | P6-04 | ST-010〜013(異常系・遷移制御)のPlaywrightテスト作成・実行 | 4件実装・PASS | 1.0 | 1.0 | **1.0** | 完了(`sequence.md`5.2の共通404ハンドラ`errorHandling.ts`を新規実装(CL-028)。`frontend/e2e/error-and-navigation.spec.ts`。4件全PASS) |
 | P6-05 | ST-014〜015(NFR-01/02計測)のPlaywrightテスト作成・実行 | 2件実装・計測ログ取得(目安確認) | 記録漏れ(見積もり手順を飛ばして実装。estimate-actual.md参照) | 記録漏れ | 記録漏れ | 完了(`frontend/e2e/nfr-performance.spec.ts`。NFR-01平均29.6ms・NFR-02は88ms/52ms、いずれも目標値以内。2件PASS) |
-| P6-06 | バグ対応(発見都度、件数未知) | 起票したバグが全て解消 or 残課題として明記 | | | | 未着手 |
-| P6-07 | test-results.md/bug-list.md確定・P6完了確認 | workflow.mdのP6完了条件(ST全件PASS、未解決バグ0)を満たす | | | | 未着手 |
+| P6-06 | バグ対応(発見都度、件数未知) | 起票したバグが全て解消 or 残課題として明記 | 0.5 | 0.5 | **0.5** | 完了(P6-02〜05を通じてアプリ本体のバグ0件と確認。`bug-list.md`(TST-007)新規作成)。**P6-07着手時に`/code-review`でBUG-001(sessionStore/S-04のuserId失効未対応)・BUG-002を追加検出、対応した(下記P6-07参照)** |
+| P6-07 | test-results.md/bug-list.md確定・P6完了確認 | workflow.mdのP6完了条件(ST全件PASS、未解決バグ0)を満たす | 0.5 | 0.75 | **0.5** | 完了。着手時、P6-04の新規コード(`errorHandling.ts`周り)が未レビューだったため`/code-review`(medium/high並列)を実施し2件検出。BUG-001(`sessionStore.submit()`がS-04のuserId失効を処理せず無限ループになる)を修正(CL-029、`sequence.md`5.2追記、単体テスト2件追加、Vitest99件全Green、ST-001〜013再実行13件PASS)。BUG-002は実害なしと確認のうえ残課題として明記。`test-results.md`を`status: fixed`に更新しP6完了確認セクション追記。**P6完了** |
 
 ### P7 リリース — 1〜2 セッション
 本番デプロイ / リリースノート / 運用手順 / README / PreToolUse hook

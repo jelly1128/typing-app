@@ -5,7 +5,9 @@ import { createMemoryHistory } from 'vue-router'
 import ResultView from './ResultView.vue'
 import { createAppRouter } from '../router'
 import { useSessionStore } from '../stores/sessionStore'
+import { useUserStore } from '../stores/userStore'
 import * as sessionApi from '../api/sessionApi'
+import { ApiError } from '../api/client'
 import type { SessionResult } from '../types/api'
 
 const FAKE_RESULT: SessionResult = {
@@ -21,7 +23,7 @@ const FAKE_RESULT: SessionResult = {
   isAccuracyBest: false,
 }
 
-async function endSessionWith(result: SessionResult | Error) {
+async function endSessionWith(result: SessionResult | Error, router: ReturnType<typeof createAppRouter>) {
   const sessionStore = useSessionStore()
   sessionStore.startSession(1, 1, 'sentence_count', 1)
   if (result instanceof Error) {
@@ -29,7 +31,7 @@ async function endSessionWith(result: SessionResult | Error) {
   } else {
     vi.spyOn(sessionApi, 'submitSession').mockResolvedValue(result)
   }
-  await sessionStore.endSession()
+  await sessionStore.endSession(router)
 }
 
 describe('ResultView', () => {
@@ -45,7 +47,7 @@ describe('ResultView', () => {
   })
 
   it('送信成功時は結果と自己ベスト更新の強調表示をする(FR-06, FR-09)', async () => {
-    await endSessionWith(FAKE_RESULT)
+    await endSessionWith(FAKE_RESULT, router)
     const wrapper = mountView()
     await flushPromises()
 
@@ -54,7 +56,7 @@ describe('ResultView', () => {
   })
 
   it('送信失敗時はエラー表示と再送ボタンを出す(class-design.md 2.4 送信失敗時の再送)', async () => {
-    await endSessionWith(new Error('network error'))
+    await endSessionWith(new Error('network error'), router)
     const wrapper = mountView()
     await flushPromises()
 
@@ -63,7 +65,7 @@ describe('ResultView', () => {
   })
 
   it('再送ボタン押下で同じ内容を再送し、成功すれば結果表示に切り替わる', async () => {
-    await endSessionWith(new Error('network error'))
+    await endSessionWith(new Error('network error'), router)
     const wrapper = mountView()
     await flushPromises()
 
@@ -76,7 +78,7 @@ describe('ResultView', () => {
   })
 
   it('もう一度/履歴を見るボタンでそれぞれhome/historyへ遷移する', async () => {
-    await endSessionWith(FAKE_RESULT)
+    await endSessionWith(FAKE_RESULT, router)
     const pushSpy = vi.spyOn(router, 'push')
     const wrapper = mountView()
     await flushPromises()
@@ -87,5 +89,21 @@ describe('ResultView', () => {
 
     expect(pushSpy).toHaveBeenCalledWith({ name: 'home' })
     expect(pushSpy).toHaveBeenCalledWith({ name: 'history' })
+  })
+
+  it('再送でuserId失効(404 USER_NOT_FOUND)を検知した場合はuserIdをクリアしS-01へ強制遷移する(sequence.md 5.2)', async () => {
+    await endSessionWith(new Error('network error'), router)
+    const wrapper = mountView()
+    await flushPromises()
+
+    useUserStore().setUser({ id: 1, name: 'kazuki' })
+    vi.spyOn(sessionApi, 'submitSession').mockRejectedValue(
+      new ApiError({ timestamp: '2026-09-12T00:00:00Z', status: 404, code: 'USER_NOT_FOUND', message: 'not found', traceId: 't1' }),
+    )
+    await wrapper.get('button').trigger('click')
+    await flushPromises()
+
+    expect(useUserStore().userId).toBeNull()
+    expect(router.currentRoute.value.name).toBe('name-input')
   })
 })

@@ -54,15 +54,17 @@ function beginSentence(index: number) {
 
 /**
  * セッションを終える(終了条件達成時に1回だけ呼ばれる)
- * @returns なし(sessionStore.endSession()の完了を待ってからS-04(結果画面)へ遷移する)
+ * @returns なし(sessionStore.endSession()の完了を待ってからS-04(結果画面)へ遷移する。ただしuserId失効時は
+ * sessionStore内部でS-01へ既に強制遷移済みのため、その場合はresultへ進まない)
  */
 async function finish() {
   if (isFinished) return // タイマーとキー入力の両方から呼ばれうるため、二重終了を防ぐ
   isFinished = true
   if (timerId !== undefined) window.clearInterval(timerId)
   window.removeEventListener('keydown', handleKeydown)
-  await sessionStore.endSession() // 内部でAPI送信まで行う(失敗してもエラー状態を保持したままResultViewへ進む設計)
-  router.push({ name: 'result' })
+  // 内部でAPI送信まで行う(通常の失敗はエラー状態を保持したままResultViewへ進む設計。userId失効(404)は別扱い)
+  const handledAsUserNotFound = await sessionStore.endSession(router)
+  if (!handledAsUserNotFound) router.push({ name: 'result' })
 }
 
 /**

@@ -11,10 +11,11 @@ const sessionStore = useSessionStore()
 /**
  * 「もう一度送信」ボタン押下時に呼ぶ。送信内容(lastSubmission)はsessionStore側が保持しており、
  * 同じ内容をそのまま再送する
- * @returns なし(sessionStore.result/submitErrorを更新する副作用のみ)
+ * @returns なし(sessionStore.result/submitErrorを更新する副作用のみ。userId失効時はsessionStore内部で
+ * S-01へ強制遷移する)
  */
 function retry() {
-  sessionStore.submit()
+  sessionStore.submit(router)
 }
 </script>
 

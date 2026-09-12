@@ -1,6 +1,6 @@
 ---
 doc_id: TST-006
-status: draft
+status: fixed
 updated: 2026-09-12
 ---
 
@@ -82,3 +82,14 @@ P6(テスト実施)の実行記録。UT/ITは`mvn test`/`npm run test`(Vitest)�
 **2件、全件PASS。目標値も実測で満たしている。**
 
 これでST-001〜015、全15件実装・PASSが完了(P6-03〜05)。
+
+## P6完了確認(P6-07、2026-09-12)
+
+P6-06着手時点(ST全件PASS確認直後)では不具合0件だったが、着手時にP6-04の新規コード(`errorHandling.ts`周り)が一度もコードレビューされていないことに気づき`/code-review`(medium/high並列)を実施した結果、`sessionStore.submit()`(S-04)がuserId失効時の共通処理から漏れているバグ(BUG-001)が見つかった。`sequence.md`5.2への追記・修正(CL-029)を行い、単体テスト追加(`sessionStore.test.ts`/`ResultView.test.ts`、99件全件Green)・ST-001〜013再実行(13件全件PASS)で退行が無いことを確認した。
+
+workflow.mdのP6完了条件「ST全件PASS、未解決バグ0(または残課題として明記)」を以下のとおり満たした。
+
+- **ST全件PASS:** ST-001〜015、15/15件PASS(内訳は上記各節。BUG-001修正後もST-001〜013再実行で13/13件PASSを再確認)
+- **未解決バグ0:** [bug-list.md](./bug-list.md)のとおり、起票2件(BUG-001解決済み・BUG-002は実害なしと確認のうえ残課題として明記)、未解決0件
+
+**P6(テスト実施)完了。**
