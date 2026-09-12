@@ -332,7 +332,7 @@ P5-01のみ、環境構築(pom.xml/record定義/shared testdata作成)は既にK
 | P6-02 | UT/IT全件再実行・記録 | `mvn test`/Vitest全件Green確認、test-results.mdに記録 | 0.5 | 0.5 | **0.5** | 完了(backend 60件+frontend 97件、全件Green。`test-results.md`(TST-006)新規作成) |
 | P6-03 | ST-001〜009(主要シナリオ)のPlaywrightテスト作成・実行 | 9件実装・PASS | 0.75 | 2.0 | **2.0** | 完了(`frontend/e2e/main-scenarios.spec.ts`。ST-004〜009はAPI直接呼び出しでのデータ投入方式。9件全PASS、アプリ側不具合0件) |
 | P6-04 | ST-010〜013(異常系・遷移制御)のPlaywrightテスト作成・実行 | 4件実装・PASS | 1.0 | 1.0 | **1.0** | 完了(`sequence.md`5.2の共通404ハンドラ`errorHandling.ts`を新規実装(CL-028)。`frontend/e2e/error-and-navigation.spec.ts`。4件全PASS) |
-| P6-05 | ST-014〜015(NFR-01/02計測)のPlaywrightテスト作成・実行 | 2件実装・計測ログ取得(目安確認) | | | | 未着手 |
+| P6-05 | ST-014〜015(NFR-01/02計測)のPlaywrightテスト作成・実行 | 2件実装・計測ログ取得(目安確認) | 記録漏れ(見積もり手順を飛ばして実装。estimate-actual.md参照) | 記録漏れ | 記録漏れ | 完了(`frontend/e2e/nfr-performance.spec.ts`。NFR-01平均29.6ms・NFR-02は88ms/52ms、いずれも目標値以内。2件PASS) |
 | P6-06 | バグ対応(発見都度、件数未知) | 起票したバグが全て解消 or 残課題として明記 | | | | 未着手 |
 | P6-07 | test-results.md/bug-list.md確定・P6完了確認 | workflow.mdのP6完了条件(ST全件PASS、未解決バグ0)を満たす | | | | 未着手 |
 
