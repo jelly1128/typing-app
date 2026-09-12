@@ -1,0 +1,122 @@
+<!--
+doc_id: PRJ-005
+status: fixed
+updated: 2026-09-12
+-->
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<title>振り返り(P8)</title>
+<style>
+  :root {
+    color-scheme: light dark;
+    --bg: #ffffff;
+    --fg: #1a1a1a;
+    --muted: #5a5a5a;
+    --border: #d8d8d8;
+    --accent: #2f6f4f;
+    --table-head: #f0f4f2;
+    --code-bg: #f5f5f5;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root {
+      --bg: #1a1a1a;
+      --fg: #e8e8e8;
+      --muted: #a0a0a0;
+      --border: #3a3a3a;
+      --accent: #6fbf95;
+      --table-head: #242c28;
+      --code-bg: #262626;
+    }
+  }
+  body {
+    background: var(--bg);
+    color: var(--fg);
+    font-family: "Hiragino Kaku Gothic ProN", "Yu Gothic", "Segoe UI", sans-serif;
+    line-height: 1.75;
+    max-width: 880px;
+    margin: 0 auto;
+    padding: 2.5rem 1.5rem 4rem;
+  }
+  h1 { font-size: 1.6rem; border-bottom: 3px solid var(--accent); padding-bottom: 0.4rem; }
+  h2 { font-size: 1.25rem; margin-top: 2.2rem; color: var(--accent); }
+  h3 { font-size: 1.05rem; margin-top: 1.5rem; }
+  table { border-collapse: collapse; width: 100%; margin: 1rem 0; font-size: 0.92rem; }
+  th, td { border: 1px solid var(--border); padding: 0.5rem 0.7rem; text-align: left; vertical-align: top; }
+  th { background: var(--table-head); }
+  code { background: var(--code-bg); padding: 0.1rem 0.35rem; border-radius: 3px; font-size: 0.9em; }
+  blockquote {
+    border-left: 4px solid var(--accent);
+    margin: 1rem 0; padding: 0.4rem 1rem;
+    color: var(--muted); background: var(--table-head);
+  }
+  ol, ul { padding-left: 1.4rem; }
+  .lead { color: var(--muted); font-size: 0.95rem; }
+</style>
+</head>
+<body>
+
+<h1>振り返り(P8)</h1>
+
+<p class="lead"><code>estimate-actual.md</code>(P0〜P7、全87行)を「往復の有無」を軸に再分類し、補正係数を算出した記録。P8-01(分類)の結果を土台にしている。</p>
+
+<h2>分類とタスク性質</h2>
+
+<p>タスクの所要時間は「ボリューム」「複雑度」「新規設計判断の有無」ではなく、<strong>実装・作業中にKazukiとの質問・相談・報告の往復が発生するかどうか</strong>で最もよく説明できることが、P6〜P7を通じて実証された。この軸で全タスクを6分類する。</p>
+
+<table>
+<thead>
+<tr><th>分類</th><th>件数</th><th>平均ズレ率</th><th>補正係数</th></tr>
+</thead>
+<tbody>
+<tr><td>① 往復ゼロ(Claude単独完結、Kazukiは意思決定・確認のみ)</td><td>21</td><td>-63.5%</td><td><strong>約0.37倍</strong></td></tr>
+<tr><td>② 統合・結合系(結合対象のレビュー済み度合いが効く)</td><td>2</td><td>-71%</td><td><strong>約0.29倍</strong></td></tr>
+<tr><td>③ 設計確定済み・機械的翻訳(往復ありでも設計に迷いなし)</td><td>約20</td><td>ほぼ0%</td><td><strong>1.0倍(補正不要)</strong></td></tr>
+<tr><td>④ 手戻り型(指摘対応で実際に複数ファイルを書き直す)</td><td>3</td><td>符号が割れる(+172%/-37%/+100%)</td><td><strong>算出対象外</strong></td></tr>
+<tr><td>⑤ 誤差範囲内(±30%未満)</td><td>2</td><td>-25%/-20%</td><td>補正不要</td></tr>
+<tr><td>⑥ 算出不能・参考値(記録漏れ/発見都度/合算)</td><td>約15</td><td>—</td><td>対象外</td></tr>
+</tbody>
+</table>
+
+<h3>① 往復ゼロ — 補正係数 0.37倍</h3>
+<p>Claudeが選択肢・ドラフト・コードを単独で用意し、Kazukiが意思決定・確認のみ行うタスク。P1-07, P2-05, P2-06b, P2-07, P2.5-06, P3-01, P3-03, P5-02, P5-03, P5-11, P5-13, P5-18, P6-00a, P6-00b, P6-01, P6-02, P6-03, P6-04, P7-00a+00b, P7-01, P7-03(平均-63.5%)。</p>
+<p>同じ「Claudeドラフト・Kazuki意思決定のみ」という枠でも、<strong>説明の往復が1回でも発生するか</strong>でさらに細分できる可能性があったが(P6-02〜04で「往復ゼロはさらに一段低い」という仮説が立った)、P7でも0.3〜0.4倍の範囲に収まり続けており、実務上はこの1分類で十分な精度が出ている。</p>
+
+<h3>② 統合・結合系 — 補正係数 0.29倍</h3>
+<p>P5-19、P7-06。「初めて結合するか」ではなく「結合対象が既に複数回のコードレビューで潰し込み済みか」が下振れの主因。レビュー未実施の初結合であれば、この係数は適用せず素直な見積もりに戻すべき。</p>
+
+<h3>③ 設計確定済み・機械的翻訳 — 補正不要</h3>
+<p>設計書(class-design.md / db-access.md / romaji-automaton.md 等)に未解決の判断が残っていないタスクは、複雑度に関わらずほぼ0%で着地する。P3-04〜08(再見積後)・P5-05〜10/12/14/16/17・REV-014 B1〜B3・P7-02/04/05/07 など約20件。<strong>「設計書に迷う余地が残っているか」を見積もり前に確認する運用が最も効果の高い補正</strong>であり、標準倍率の掛け算より優先して適用すべき。</p>
+
+<h3>④ 手戻り型 — 補正対象外(個別判断)</h3>
+<p>指摘対応で実際に複数ファイルを書き直すタスクは符号が割れる(P2-06a +172%、P3-09指摘対応 -37%、P6-07 +100%)。ズレの正体は「往復の有無」ではなく「作業内容が事前に確定しているか、実施結果次第で分量が変わるか」という別軸。<strong>対策は倍率補正ではなく分離見積もり</strong>(文書更新は定量、レビュー対応は発見都度・合意値なしで実績のみ記録)。P7-07で実際に機能し、P6-07のような超過が再発しなかった。</p>
+
+<h2>総合補正係数</h2>
+
+<p>工程を横断して単一の「自分の見積もりは平均N倍」を出すなら、①・②が大半を占め③がほぼ0%(=見積もりどおり)であることを踏まえ、</p>
+
+<blockquote><strong>タスク性質を分類できた場合は分類別の係数(0.37倍 / 0.29倍 / 1.0倍)を使う。分類が付けられない・急ぎで一括判断が必要な場合の目安は約0.4倍。</strong></blockquote>
+
+<h2>恒久化してよい運用(P8時点で3セッション以上の再現性あり)</h2>
+
+<ol>
+<li><strong>見積もり前に「往復が発生する見込みか」を自問する</strong>(①の判定)。発生しないなら0.3〜0.4倍を先に適用する</li>
+<li><strong>見積もり前に「設計書に未解決の判断が残っているか」を確認する</strong>(③の判定)。残っていなければ複雑度に関わらず標準倍率、残っていれば素直な見積もりに戻す</li>
+<li><strong>「まとめ・完了確認」系タスクは文書更新(定量)とレビュー対応(不定量)を必ず分離する</strong>。後者は発見都度・合意値なしで実績のみ記録</li>
+<li><strong>統合・結合系は「結合対象のレビュー済み度合い」を先に確認する</strong>(②の判定)</li>
+<li><strong>工程完了前に、その工程で追加した本番コードの未レビュー区間がないか確認する</strong>(P6-07・P7-07で実際にバグを検出)</li>
+<li><strong>集約ドキュメント(wbs.mdのB/C振り分け表等)で転記漏れを1件見つけたら、同じ文書内の類似箇所を横展開監査する</strong></li>
+</ol>
+
+<h2>つまずき・気づきログからのVault投下候補(P8-03用メモ)</h2>
+
+<ul>
+<li>「Claudeドラフトタスクの所要時間は複雑度でなく設計書の曖昧さの有無で決まる」(P3-01〜03 vs P3-04〜08、P5-13の2件で裏付け)</li>
+<li>「往復ゼロタスクは標準倍率よりさらに一段低い」(P6-02〜04、P7-01/03で裏付け)</li>
+<li>「レビューの重要度分類は鵜呑みにせず自分でも再評価する価値がある」(P3中間レビューB6の実例)</li>
+<li>「1件の転記漏れを見つけたら同じ文書内を横展開監査すべき」(P7-04a→04bの実例)</li>
+</ul>
+
+</body>
+</html>

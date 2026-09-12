@@ -123,7 +123,7 @@ P9 (任意)多言語移植
 
 ### P8 振り返り
 - **目的:** 見積もり精度の補正係数を出す
-- **成果物:** `00_project/retrospective.md` / Obsidian `30_Literature/` へ投下
+- **成果物:** `00_project/retrospective.html` / Obsidian `30_Literature/` へ投下
 - **完了条件:** 工程別ズレ率が数値化され「次回の補正係数は N 倍」が1行で書かれた状態
 - **見積もり:** 1 セッション
 

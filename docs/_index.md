@@ -1,7 +1,7 @@
 ---
 doc_id: IDX-001
 status: fixed
-updated: 2026-09-10
+updated: 2026-09-12
 ---
 
 # 文書管理台帳
@@ -18,6 +18,8 @@ updated: 2026-09-10
 | PRJ-002 | [wbs.md](./00_project/wbs.md) — WBS と見積もり | draft | — |
 | PRJ-003 | [estimate-actual.md](./00_project/estimate-actual.md) — 見積もり/実績記録 | fixed | — |
 | PRJ-004 | [change-log.md](./00_project/change-log.md) — 変更管理票 | fixed | — |
+| PRJ-005 | [retrospective.html](./00_project/retrospective.html) — 振り返り(P8、補正係数) | fixed | — |
+| PRJ-006 | [follow-ups.md](./00_project/follow-ups.md) — 先送り事項台帳 | fixed | — |
 
 ## 10_requirements — 要件定義(P1)
 

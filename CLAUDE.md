@@ -19,7 +19,14 @@
 ### 成果物のトレーサビリティ
 - 要件は `FR-xx` / `NFR-xx`、テーブルは `TBL-xx`、テストケースは `UT-xxx` / `IT-xxx` / `ST-xxx` の ID で管理する
 - 設計書の各項目には、それが実現する **FR-ID を必ず併記**する
-- `docs/` 配下の文書は frontmatter に `doc_id` / `status`(draft / review / fixed) / `updated` を持つ
+- `docs/` 配下の文書は `doc_id` / `status`(draft / review / fixed) / `updated` を持つ(Markdownはfrontmatter、HTMLは`<head>`直後のHTMLコメントに同じ3項目を書く)
+
+### 文書のファイル形式(2026-09-12確定、P8振り返り)
+文書を「誰が読むか」ではなく**「継続的に機械的編集(ID参照・行追記・grep検索)が入るか、一度確定して終わりか」**で形式を分ける。
+- **継続的に機械編集される文書 → Markdownのまま。** 例: `wbs.md` / `progress.md` / `estimate-actual.md` / `follow-ups.md` / `change-log.md` / `docs/_index.md`。Claudeのコマンド駆動編集(正確な文字列置換・表への行追加)がMarkdownのプレーンテキスト性に依存している
+- **一度書き上げたら滅多に触らない完成成果物 → HTML。** 例: `retrospective.md`のような振り返り文書、レビュー報告書、ADR、要件定義・設計書等の確定文書。Kazukiの可読性を優先する
+- 対象は**今後新規作成する文書から**。P0〜P7で既に`status: fixed`の既存文書(約40本)は遡及変換しない(変換作業自体のリスク・工数が見合わない)
+- 既存の doc_id / FR-ID トレーサビリティの仕組みは形式に関わらず維持する
 
 ### 技術スタック
 - フロント: Vue 3 + Vite + TypeScript + Pinia
