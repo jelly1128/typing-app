@@ -1,6 +1,6 @@
 ---
 doc_id: REL-002
-status: draft
+status: fixed
 updated: 2026-09-12
 ---
 

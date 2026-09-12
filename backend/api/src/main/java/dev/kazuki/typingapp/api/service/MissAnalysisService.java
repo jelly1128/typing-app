@@ -182,8 +182,12 @@ public class MissAnalysisService {
                         .toList());
     }
 
-    // missRate/accuracyRateの丸めは出口(この呼び出し元)で1回だけ行う(P3ゲート③検証レビューverify-B4対応)。
-    // session-metrics.mdのSessionMetricsCalculator.round()と同じ小数第2位HALF_UP方式に揃えている
+    /**
+     * missRate/accuracyRateの丸めは出口(この呼び出し元)で1回だけ行う(P3ゲート③検証レビューverify-B4対応)。
+     * session-metrics.mdのSessionMetricsCalculator.round()と同じ小数第2位HALF_UP方式に揃えている
+     * @param value 丸め前の値
+     * @return 小数第2位でHALF_UP丸めした値
+     */
     private static double round(double value) {
         return BigDecimal.valueOf(value).setScale(2, RoundingMode.HALF_UP).doubleValue();
     }

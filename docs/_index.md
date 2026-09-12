@@ -66,8 +66,8 @@ updated: 2026-09-10
 
 | doc_id | 文書 | status | レビュー |
 |---|---|---|---|
-| REL-001 | [release-note.md](./50_release/release-note.md) — リリースノート | draft | — |
-| REL-002 | [operation.md](./50_release/operation.md) — 運用手順 | draft | — |
+| REL-001 | [release-note.md](./50_release/release-note.md) — リリースノート | fixed | — |
+| REL-002 | [operation.md](./50_release/operation.md) — 運用手順 | fixed | — |
 
 ## 90_review — レビュー指摘票
 

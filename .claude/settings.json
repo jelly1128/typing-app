@@ -30,6 +30,7 @@
       "Bash(git clean -f*)",
       "Bash(git branch -D*)",
       "Bash(git checkout -- *)",
+      "Bash(git restore*)",
       "Bash(gh repo delete*)",
       "Bash(rm -rf*)"
     ]

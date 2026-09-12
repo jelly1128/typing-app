@@ -28,31 +28,36 @@ process.stdin.on('end', () => {
 });
 
 function hasFlag(command, shortLetter, longName) {
-  const shortPattern = new RegExp('-[a-zA-Z]*' + shortLetter + '[a-zA-Z]*');
-  const longPattern = new RegExp('--' + longName);
+  // 大文字フラグ(rmの-Rf等)も検知できるよう大文字小文字を区別しない(code-review指摘)
+  const shortPattern = new RegExp('-[a-zA-Z]*' + shortLetter + '[a-zA-Z]*', 'i');
+  const longPattern = new RegExp('--' + longName, 'i');
   return shortPattern.test(command) || longPattern.test(command);
 }
 
 function isDestructive(command) {
-  if (/rm\s/.test(command) && hasFlag(command, 'r', 'recursive') && hasFlag(command, 'f', 'force')) {
+  if (/rm\s/i.test(command) && hasFlag(command, 'r', 'recursive') && hasFlag(command, 'f', 'force')) {
     return true;
   }
-  if (/git\s+reset\s/.test(command) && /--hard/.test(command)) {
+  if (/git\s+reset\s/i.test(command) && /--hard/i.test(command)) {
     return true;
   }
-  if (/git\s+clean\s/.test(command) && hasFlag(command, 'f', 'force')) {
+  if (/git\s+clean\s/i.test(command) && hasFlag(command, 'f', 'force')) {
     return true;
   }
-  if (/git\s+push\s/.test(command) && (/--force/.test(command) || /(^|\s)-f(\s|$)/.test(command))) {
+  if (/git\s+push\s/i.test(command) && (/--force/i.test(command) || /(^|\s)-f(\s|$)/i.test(command))) {
     return true;
   }
   if (
-    /git\s+branch\s/.test(command) &&
-    (/-D(\s|$)/.test(command) || (/--delete/.test(command) && (/--force/.test(command) || /(^|\s)-f(\s|$)/.test(command))))
+    /git\s+branch\s/i.test(command) &&
+    (/-D(\s|$)/.test(command) || (/--delete/i.test(command) && (/--force/i.test(command) || /(^|\s)-f(\s|$)/i.test(command))))
   ) {
     return true;
   }
-  if (/git\s+checkout\s/.test(command) && /--\s/.test(command)) {
+  if (/git\s+checkout\s/i.test(command) && /--\s/.test(command)) {
+    return true;
+  }
+  // git restoreは git checkout -- と同じく未コミットの変更を破棄する(code-review指摘)
+  if (/git\s+restore\s/i.test(command)) {
     return true;
   }
   return false;
