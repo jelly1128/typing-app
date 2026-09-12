@@ -151,10 +151,14 @@ onUnmounted(() => {
 </script>
 
 <template>
-  <p v-if="loadError" role="alert">読み込みに失敗しました</p>
-  <template v-else-if="keystroke">
-    <p v-if="endConditionType === 'sentence_count'">{{ sessionStore.confirmedSentenceCount + 1 }} / {{ endConditionValue }}</p>
-    <p v-else>残り {{ remainingSeconds }}秒</p>
-    <TypingDisplay :sentence-text="currentSentence.text" :keystroke="keystroke" />
-  </template>
+  <div class="page items-center">
+    <p v-if="loadError" role="alert" class="text-sm text-red-600 dark:text-red-400">読み込みに失敗しました</p>
+    <template v-else-if="keystroke">
+      <p v-if="endConditionType === 'sentence_count'" class="text-sm font-medium text-slate-500 dark:text-slate-400">
+        {{ sessionStore.confirmedSentenceCount + 1 }} / {{ endConditionValue }}
+      </p>
+      <p v-else class="text-sm font-medium text-slate-500 dark:text-slate-400">残り {{ remainingSeconds }}秒</p>
+      <TypingDisplay :sentence-text="currentSentence.text" :keystroke="keystroke" />
+    </template>
+  </div>
 </template>

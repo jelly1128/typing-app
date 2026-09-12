@@ -9,10 +9,12 @@ defineProps<{
 </script>
 
 <template>
-  <section>
-    <h2>{{ title }}</h2>
-    <p v-if="items.length === 0">分析にはある程度の練習記録が必要です</p>
-    <ul v-else>
+  <section class="card space-y-2">
+    <h2 class="text-sm font-semibold text-slate-700 dark:text-slate-200">{{ title }}</h2>
+    <p v-if="items.length === 0" class="text-sm text-slate-500 dark:text-slate-400">
+      分析にはある程度の練習記録が必要です
+    </p>
+    <ul v-else class="space-y-1 text-sm text-slate-700 dark:text-slate-200">
       <li v-for="item in items" :key="item">{{ item }}</li>
     </ul>
   </section>

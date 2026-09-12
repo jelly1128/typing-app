@@ -20,21 +20,25 @@ function retry() {
 </script>
 
 <template>
-  <template v-if="sessionStore.submitError">
-    <p role="alert">結果の保存に失敗しました</p>
-    <button type="button" :disabled="sessionStore.isSubmitting" @click="retry">もう一度送信</button>
-  </template>
-  <template v-else-if="sessionStore.result">
-    <SessionMetricsSummary
-      :net-kpm="sessionStore.result.netKpm"
-      :raw-kpm="sessionStore.result.rawKpm"
-      :accuracy="sessionStore.result.accuracy"
-      :consistency="sessionStore.result.consistency"
-      :duration-seconds="sessionStore.result.durationSeconds"
-      :is-net-kpm-best="sessionStore.result.isNetKpmBest"
-      :is-accuracy-best="sessionStore.result.isAccuracyBest"
-    />
-    <button type="button" @click="router.push({ name: 'home' })">もう一度</button>
-    <button type="button" @click="router.push({ name: 'history' })">履歴を見る</button>
-  </template>
+  <div class="page items-center">
+    <template v-if="sessionStore.submitError">
+      <p role="alert" class="text-sm text-red-600 dark:text-red-400">結果の保存に失敗しました</p>
+      <button type="button" class="btn btn-primary" :disabled="sessionStore.isSubmitting" @click="retry">もう一度送信</button>
+    </template>
+    <template v-else-if="sessionStore.result">
+      <SessionMetricsSummary
+        :net-kpm="sessionStore.result.netKpm"
+        :raw-kpm="sessionStore.result.rawKpm"
+        :accuracy="sessionStore.result.accuracy"
+        :consistency="sessionStore.result.consistency"
+        :duration-seconds="sessionStore.result.durationSeconds"
+        :is-net-kpm-best="sessionStore.result.isNetKpmBest"
+        :is-accuracy-best="sessionStore.result.isAccuracyBest"
+      />
+      <div class="flex gap-3">
+        <button type="button" class="btn btn-primary" @click="router.push({ name: 'home' })">もう一度</button>
+        <button type="button" class="btn btn-secondary" @click="router.push({ name: 'history' })">履歴を見る</button>
+      </div>
+    </template>
+  </div>
 </template>

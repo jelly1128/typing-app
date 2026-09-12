@@ -38,21 +38,26 @@ onMounted(async () => {
 </script>
 
 <template>
-  <header>
-    <button type="button" @click="router.push({ name: 'home' })">ホームへ</button>
-  </header>
+  <div class="page">
+    <header class="flex items-center justify-between border-b border-slate-200 pb-4 dark:border-slate-700">
+      <h1 class="text-lg font-semibold text-slate-900 dark:text-slate-50">ミス分析</h1>
+      <button type="button" class="btn btn-secondary" @click="router.push({ name: 'home' })">ホームへ</button>
+    </header>
 
-  <p v-if="loadError" role="alert">読み込みに失敗しました</p>
-  <template v-else-if="missAnalysis">
-    <MissAnalysisSection title="かな別ミス" :items="byKana" />
-    <MissAnalysisSection title="誤りパターン別" :items="byErrorPattern" />
-    <MissAnalysisSection title="直前のかな別ミス率" :items="byPrevKana" />
-    <MissAnalysisSection title="文字種別正解率" :items="byCharType" />
-    <section v-if="advice.length > 0">
-      <h2>改善アドバイス</h2>
-      <ul>
-        <li v-for="item in advice" :key="item">{{ item }}</li>
-      </ul>
-    </section>
-  </template>
+    <p v-if="loadError" role="alert" class="text-sm text-red-600 dark:text-red-400">読み込みに失敗しました</p>
+    <template v-else-if="missAnalysis">
+      <div class="grid gap-4 sm:grid-cols-2">
+        <MissAnalysisSection title="かな別ミス" :items="byKana" />
+        <MissAnalysisSection title="誤りパターン別" :items="byErrorPattern" />
+        <MissAnalysisSection title="直前のかな別ミス率" :items="byPrevKana" />
+        <MissAnalysisSection title="文字種別正解率" :items="byCharType" />
+      </div>
+      <section v-if="advice.length > 0" class="card space-y-2">
+        <h2 class="text-base font-semibold text-slate-800 dark:text-slate-100">改善アドバイス</h2>
+        <ul class="list-disc space-y-1 pl-5 text-sm text-slate-700 dark:text-slate-200">
+          <li v-for="item in advice" :key="item">{{ item }}</li>
+        </ul>
+      </section>
+    </template>
+  </div>
 </template>

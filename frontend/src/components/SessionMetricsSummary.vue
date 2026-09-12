@@ -13,16 +13,26 @@ defineProps<{
 </script>
 
 <template>
-  <dl>
-    <dt>Net KPM</dt>
-    <dd :class="{ best: isNetKpmBest }">{{ netKpm }}<span v-if="isNetKpmBest">(自己ベスト更新)</span></dd>
-    <dt>Raw KPM</dt>
-    <dd>{{ rawKpm }}</dd>
-    <dt>正確率</dt>
-    <dd :class="{ best: isAccuracyBest }">{{ accuracy }}%<span v-if="isAccuracyBest">(自己ベスト更新)</span></dd>
-    <dt>Consistency</dt>
-    <dd>{{ consistency }}</dd>
-    <dt>所要時間</dt>
-    <dd>{{ durationSeconds }}秒</dd>
+  <dl class="card grid w-full max-w-md grid-cols-2 gap-x-6 gap-y-3">
+    <dt class="text-sm text-slate-500 dark:text-slate-400">Net KPM</dt>
+    <dd
+      class="text-right text-lg font-semibold"
+      :class="isNetKpmBest ? 'text-indigo-600 dark:text-indigo-400' : 'text-slate-900 dark:text-slate-50'"
+    >
+      {{ netKpm }}<span v-if="isNetKpmBest" class="ml-1 text-xs font-normal">(自己ベスト更新)</span>
+    </dd>
+    <dt class="text-sm text-slate-500 dark:text-slate-400">Raw KPM</dt>
+    <dd class="text-right text-lg font-semibold text-slate-900 dark:text-slate-50">{{ rawKpm }}</dd>
+    <dt class="text-sm text-slate-500 dark:text-slate-400">正確率</dt>
+    <dd
+      class="text-right text-lg font-semibold"
+      :class="isAccuracyBest ? 'text-indigo-600 dark:text-indigo-400' : 'text-slate-900 dark:text-slate-50'"
+    >
+      {{ accuracy }}%<span v-if="isAccuracyBest" class="ml-1 text-xs font-normal">(自己ベスト更新)</span>
+    </dd>
+    <dt class="text-sm text-slate-500 dark:text-slate-400">Consistency</dt>
+    <dd class="text-right text-lg font-semibold text-slate-900 dark:text-slate-50">{{ consistency }}</dd>
+    <dt class="text-sm text-slate-500 dark:text-slate-400">所要時間</dt>
+    <dd class="text-right text-lg font-semibold text-slate-900 dark:text-slate-50">{{ durationSeconds }}秒</dd>
   </dl>
 </template>

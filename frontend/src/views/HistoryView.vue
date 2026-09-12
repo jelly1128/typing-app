@@ -69,41 +69,56 @@ onMounted(async () => {
 </script>
 
 <template>
-  <header>
-    <button type="button" @click="router.push({ name: 'home' })">ホームへ</button>
-  </header>
+  <div class="page">
+    <header class="flex items-center justify-between border-b border-slate-200 pb-4 dark:border-slate-700">
+      <h1 class="text-lg font-semibold text-slate-900 dark:text-slate-50">履歴</h1>
+      <button type="button" class="btn btn-secondary" @click="router.push({ name: 'home' })">ホームへ</button>
+    </header>
 
-  <section>
-    <h2>自己ベスト</h2>
-    <p v-if="topicSetLoadError" role="alert">読み込みに失敗しました</p>
-    <template v-else>
-      <select v-model="selectedTopicSetId">
-        <option v-for="topicSet in topicStore.topicSets" :key="topicSet.id" :value="topicSet.id">
-          {{ topicSet.name }}
-        </option>
-      </select>
-      <p v-if="personalBestError" role="alert">
-        読み込みに失敗しました
-        <button type="button" @click="selectedTopicSetId !== null && loadPersonalBest(selectedTopicSetId)">再試行</button>
-      </p>
-      <template v-else-if="personalBest">
-        <p v-if="personalBest.netKpmBest === null">まだ記録がありません。練習を始めましょう</p>
-        <p v-else>Net KPM 最大: {{ personalBest.netKpmBest }} / 正確率最大: {{ personalBest.accuracyBest }}%</p>
+    <section class="card space-y-3">
+      <h2 class="text-base font-semibold text-slate-800 dark:text-slate-100">自己ベスト</h2>
+      <p v-if="topicSetLoadError" role="alert" class="text-sm text-red-600 dark:text-red-400">読み込みに失敗しました</p>
+      <template v-else>
+        <select v-model="selectedTopicSetId" class="field-input w-48">
+          <option v-for="topicSet in topicStore.topicSets" :key="topicSet.id" :value="topicSet.id">
+            {{ topicSet.name }}
+          </option>
+        </select>
+        <p v-if="personalBestError" role="alert" class="flex items-center gap-2 text-sm text-red-600 dark:text-red-400">
+          読み込みに失敗しました
+          <button
+            type="button"
+            class="btn btn-secondary"
+            @click="selectedTopicSetId !== null && loadPersonalBest(selectedTopicSetId)"
+          >
+            再試行
+          </button>
+        </p>
+        <template v-else-if="personalBest">
+          <p v-if="personalBest.netKpmBest === null" class="text-sm text-slate-500 dark:text-slate-400">
+            まだ記録がありません。練習を始めましょう
+          </p>
+          <p v-else class="text-sm text-slate-700 dark:text-slate-200">Net KPM 最大: {{ personalBest.netKpmBest }} / 正確率最大: {{ personalBest.accuracyBest }}%</p>
+        </template>
       </template>
-    </template>
-  </section>
+    </section>
 
-  <section>
-    <h2>履歴一覧</h2>
-    <p v-if="historyLoadError" role="alert">読み込みに失敗しました</p>
-    <p v-else-if="sessionHistory && sessionHistory.length === 0">まだ記録がありません</p>
-    <ul v-else-if="sessionHistory">
-      <li v-for="session in sessionHistory" :key="session.id">
-        {{ session.playedAt }} / {{ session.topicSetName }} / {{ session.endConditionType }}:{{ session.endConditionValue }} /
-        {{ session.netKpm }}KPM / {{ session.accuracy }}% / {{ session.durationSeconds }}秒
-      </li>
-    </ul>
-  </section>
+    <section class="card space-y-3">
+      <h2 class="text-base font-semibold text-slate-800 dark:text-slate-100">履歴一覧</h2>
+      <p v-if="historyLoadError" role="alert" class="text-sm text-red-600 dark:text-red-400">読み込みに失敗しました</p>
+      <p v-else-if="sessionHistory && sessionHistory.length === 0" class="text-sm text-slate-500 dark:text-slate-400">
+        まだ記録がありません
+      </p>
+      <ul v-else-if="sessionHistory" class="divide-y divide-slate-200 text-sm text-slate-700 dark:divide-slate-700 dark:text-slate-200">
+        <li v-for="session in sessionHistory" :key="session.id" class="py-2">
+          {{ session.playedAt }} / {{ session.topicSetName }} / {{ session.endConditionType }}:{{ session.endConditionValue }} /
+          {{ session.netKpm }}KPM / {{ session.accuracy }}% / {{ session.durationSeconds }}秒
+        </li>
+      </ul>
+    </section>
 
-  <button type="button" @click="router.push({ name: 'miss-analysis' })">ミス分析を見る</button>
+    <button type="button" class="btn btn-primary self-start" @click="router.push({ name: 'miss-analysis' })">
+      ミス分析を見る
+    </button>
+  </div>
 </template>

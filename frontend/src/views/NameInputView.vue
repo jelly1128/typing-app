@@ -27,10 +27,18 @@ async function handleSubmit() {
 </script>
 
 <template>
-  <form @submit.prevent="handleSubmit">
-    <label for="name">名前</label>
-    <input id="name" v-model="name" type="text" maxlength="100" required />
-    <button type="submit" :disabled="name.trim() === '' || isSubmitting">はじめる</button>
-    <p v-if="errorMessage" role="alert">{{ errorMessage }}</p>
-  </form>
+  <div class="page items-center justify-center">
+    <form class="card w-full max-w-sm space-y-4" @submit.prevent="handleSubmit">
+      <div class="space-y-1">
+        <h1 class="text-xl font-semibold text-slate-900 dark:text-slate-50">タイピング練習</h1>
+        <p class="text-sm text-slate-500 dark:text-slate-400">名前を入力してはじめましょう</p>
+      </div>
+      <div>
+        <label for="name" class="mb-1 block text-sm font-medium text-slate-700 dark:text-slate-200">名前</label>
+        <input id="name" v-model="name" type="text" maxlength="100" required class="field-input" />
+      </div>
+      <button type="submit" class="btn btn-primary w-full" :disabled="name.trim() === '' || isSubmitting">はじめる</button>
+      <p v-if="errorMessage" role="alert" class="text-sm text-red-600 dark:text-red-400">{{ errorMessage }}</p>
+    </form>
+  </div>
 </template>
