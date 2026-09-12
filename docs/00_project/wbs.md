@@ -1,7 +1,7 @@
 ---
 doc_id: PRJ-002
 status: draft
-updated: 2026-09-11
+updated: 2026-09-12
 ---
 
 # WBS(作業分解構成図)と見積もり
@@ -316,8 +316,25 @@ P5-01のみ、環境構築(pom.xml/record定義/shared testdata作成)は既にK
 
 **縮小判断: 8 セッション超過で履歴画面を切って P6 へ**
 
-### P6 テスト実施 — 2〜3 セッション
-UT / IT / ST 実施 / バグ起票・修正・再テスト
+### P6 テスト実施(確定・2026-09-12分解)
+
+**目的:** 設計どおりに動くことを証明する。
+
+**方針(2026-09-12、P6-00aで確定):** ST実施はPlaywright(実務でも代表的なE2Eツール)を導入して自動化する。E2Eフレームワーク選定・NFR-01/02計測方法(Playwrightテストコード内`performance.now()`)の詳細はCL-027参照。
+
+依存順: P6-01(Playwrightセットアップ)→ P6-02(UT/IT再実行)→ P6-03〜05(ST実装、並行可)→ P6-06(バグ対応)→ P6-07(まとめ・P6完了条件確認)
+
+| タスクID | 内容 | 完了条件 | Kazuki見積 | Claude見積 | 合意値 | 状態 |
+|---|---|---|---|---|---|---|
+| P6-00a | 未決事項解決(E2Eフレームワーク・NFR計測方法) | test-plan.md/st-cases.mdの未決事項が解決済みになった状態 | 1.5 | 1.0 | **1.5** | 完了(Playwright確定、CL-027) |
+| P6-00b | P6タスク分解 | 本表がタスク単位まで分解された状態 | 2.0 | 1.0 | **1.0** | 完了 |
+| P6-01 | Playwrightセットアップ(導入・設定・ディレクトリ構成) | `npx playwright test`で最低1件実行できる状態 | 1.0 | 1.0 | **1.0** | 完了(`@playwright/test`導入。バンドルChromiumのダウンロードがこの環境からタイムアウトしたため、OS既存のGoogle Chromeを使う`channel: 'chrome'`方式に変更(`playwright.config.ts`)。`e2e/smoke.spec.ts`(S-01表示確認)で疎通確認、PASS。Vitestの対象から`e2e/`を除外(`vite.config.ts`)、`package.json`に`test:e2e`スクリプト追加、`.gitignore`にPlaywright出力先を追加) |
+| P6-02 | UT/IT全件再実行・記録 | `mvn test`/Vitest全件Green確認、test-results.mdに記録 | | | | 未着手 |
+| P6-03 | ST-001〜009(主要シナリオ)のPlaywrightテスト作成・実行 | 9件実装・PASS | | | | 未着手 |
+| P6-04 | ST-010〜013(異常系・遷移制御)のPlaywrightテスト作成・実行 | 4件実装・PASS | | | | 未着手 |
+| P6-05 | ST-014〜015(NFR-01/02計測)のPlaywrightテスト作成・実行 | 2件実装・計測ログ取得(目安確認) | | | | 未着手 |
+| P6-06 | バグ対応(発見都度、件数未知) | 起票したバグが全て解消 or 残課題として明記 | | | | 未着手 |
+| P6-07 | test-results.md/bug-list.md確定・P6完了確認 | workflow.mdのP6完了条件(ST全件PASS、未解決バグ0)を満たす | | | | 未着手 |
 
 ### P7 リリース — 1〜2 セッション
 本番デプロイ / リリースノート / 運用手順 / README / PreToolUse hook

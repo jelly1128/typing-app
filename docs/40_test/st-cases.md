@@ -1,7 +1,7 @@
 ---
 doc_id: TST-004
 status: fixed
-updated: 2026-08-30
+updated: 2026-09-12
 ---
 
 # 総合テストケース(ST)
@@ -40,5 +40,4 @@ updated: 2026-08-30
 
 ## 未決事項
 
-- E2Eフレームワーク(Playwright等)の選定はP5着手時に行う(2026-08-30訂正、`test-plan.md`6章参照)。本一覧はシナリオレベルの設計であり、実装コード(`.spec.ts`等)はP5〜P6で書く
-- ST-014/015の計測ログをどう実装に仕込むか(`performance.now()`挿入箇所の具体的なコード)はP5実装時に確定する
+なし。E2Eフレームワーク(Playwright)・ST-014/015の計測方法(Playwrightテストコード内`performance.now()`)はP6-00aで確定済み(`test-plan.md`2.3節/6章、CL-027)。本一覧はシナリオレベルの設計であり、実装コード(`.spec.ts`等)はP6の実行タスクで書く

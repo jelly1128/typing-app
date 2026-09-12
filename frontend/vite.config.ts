@@ -11,5 +11,8 @@ export default defineConfig({
   },
   test: {
     environment: 'jsdom',
+    // e2e/はPlaywright(`npm run test:e2e`)専用。Vitestの対象に混ぜると`@playwright/test`のtest/expectが
+    // Vitest側と衝突して実行時エラーになる
+    exclude: ['e2e/**', 'node_modules/**'],
   },
 })
