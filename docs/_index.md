@@ -59,7 +59,7 @@ updated: 2026-09-10
 | TST-003 | [it-cases.md](./40_test/it-cases.md) — 結合テストケース | fixed | — |
 | TST-004 | [st-cases.md](./40_test/st-cases.md) — 総合テストケース | fixed | — |
 | TST-005 | [traceability-matrix.md](./40_test/traceability-matrix.md) — トレーサビリティマトリクス | fixed | — |
-| TST-006 | test-results.md — テスト結果 | 未着手 | — |
+| TST-006 | [test-results.md](./40_test/test-results.md) — テスト結果 | draft | — |
 | TST-007 | bug-list.md — バグ一覧 | 未着手 | — |
 
 ## 50_release — リリース(P7)

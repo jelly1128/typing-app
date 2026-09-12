@@ -329,7 +329,7 @@ P5-01のみ、環境構築(pom.xml/record定義/shared testdata作成)は既にK
 | P6-00a | 未決事項解決(E2Eフレームワーク・NFR計測方法) | test-plan.md/st-cases.mdの未決事項が解決済みになった状態 | 1.5 | 1.0 | **1.5** | 完了(Playwright確定、CL-027) |
 | P6-00b | P6タスク分解 | 本表がタスク単位まで分解された状態 | 2.0 | 1.0 | **1.0** | 完了 |
 | P6-01 | Playwrightセットアップ(導入・設定・ディレクトリ構成) | `npx playwright test`で最低1件実行できる状態 | 1.0 | 1.0 | **1.0** | 完了(`@playwright/test`導入。バンドルChromiumのダウンロードがこの環境からタイムアウトしたため、OS既存のGoogle Chromeを使う`channel: 'chrome'`方式に変更(`playwright.config.ts`)。`e2e/smoke.spec.ts`(S-01表示確認)で疎通確認、PASS。Vitestの対象から`e2e/`を除外(`vite.config.ts`)、`package.json`に`test:e2e`スクリプト追加、`.gitignore`にPlaywright出力先を追加) |
-| P6-02 | UT/IT全件再実行・記録 | `mvn test`/Vitest全件Green確認、test-results.mdに記録 | | | | 未着手 |
+| P6-02 | UT/IT全件再実行・記録 | `mvn test`/Vitest全件Green確認、test-results.mdに記録 | 0.5 | 0.5 | **0.5** | 完了(backend 60件+frontend 97件、全件Green。`test-results.md`(TST-006)新規作成) |
 | P6-03 | ST-001〜009(主要シナリオ)のPlaywrightテスト作成・実行 | 9件実装・PASS | | | | 未着手 |
 | P6-04 | ST-010〜013(異常系・遷移制御)のPlaywrightテスト作成・実行 | 4件実装・PASS | | | | 未着手 |
 | P6-05 | ST-014〜015(NFR-01/02計測)のPlaywrightテスト作成・実行 | 2件実装・計測ログ取得(目安確認) | | | | 未着手 |
