@@ -3,6 +3,7 @@ import { computed, onMounted, ref } from 'vue'
 import { useRouter } from 'vue-router'
 import { useUserStore } from '../stores/userStore'
 import { getMissAnalysis } from '../api/missAnalysisApi'
+import { handleUserNotFound } from '../api/errorHandling'
 import type { MissAnalysis } from '../types/api'
 import MissAnalysisSection from '../components/MissAnalysisSection.vue'
 
@@ -30,8 +31,8 @@ onMounted(async () => {
   if (userStore.userId === null) return
   try {
     missAnalysis.value = await getMissAnalysis(userStore.userId)
-  } catch {
-    loadError.value = true
+  } catch (e) {
+    if (!handleUserNotFound(e, router)) loadError.value = true
   }
 })
 </script>

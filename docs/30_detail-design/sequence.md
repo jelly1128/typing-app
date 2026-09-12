@@ -188,4 +188,4 @@ sequenceDiagram
 
 ## 6. 未決事項
 
-- 共通エラーハンドラ(5.2)の物理的な実装配置はP5で決める(ブロッカーではない)
+なし。共通エラーハンドラ(5.2)の物理的な実装配置は、P5では見送られたままP6-04(ST-010着手時)まで気づかれず未実装だったため、P6-04で解決した(CL-028)。`frontend/src/api/errorHandling.ts`の`handleUserNotFound(error, router)`を各View(`HistoryView`/`MissAnalysisView`)のcatchブロックから呼ぶ方式。

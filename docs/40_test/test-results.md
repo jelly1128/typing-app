@@ -55,6 +55,21 @@ P6(テスト実施)の実行記録。UT/ITは`mvn test`/`npm run test`(Vitest)�
 
 **9件、全件PASS。** 実装中に1件、ST-001で`/typing`遷移直後(TypingViewの`onMounted`完了前)にキー入力を送ってしまい打鍵が失われ`/result`へ遷移しないバグ(テストコード側の不具合)を発見・修正した。アプリケーション本体の不具合は0件。
 
-## ST-010〜015(P6-04・P6-05で実装後に追記)
+## P6-04: ST-010〜013(異常系・遷移制御、2026-09-12)
+
+着手時、`sequence.md`5.2(userId失効時にuserStoreをクリアしS-01へ強制遷移する共通処理)が「物理的な実装配置はP5で決める」という未決事項のまま、実装されていないことが判明した。Kazukiと相談し、`frontend/src/api/errorHandling.ts`(`handleUserNotFound`)を実装してから`HistoryView`/`MissAnalysisView`のcatchブロックに組み込み、テストを書いた(CL-028)。
+
+`frontend/e2e/error-and-navigation.spec.ts`に実装。ST-013は実タイピングだと`durationSeconds`が丸めで0になり`netKpm=0`扱いになる(session-metrics.md 2.2)ため、最初のキー入力から1秒以上経過させてから打ち終える調整を入れた。
+
+| ID | 概要 | 結果 |
+|---|---|---|
+| ST-010 | userId失効時、404後にlocalStorageクリア→S-01強制遷移 | PASS |
+| ST-011 | 起動時ガード、userId未設定で保護ルートへ直接アクセス→S-01 | PASS |
+| ST-012 | 送信失敗(500)→エラー表示→再送→成功 | PASS |
+| ST-013 | 自己ベスト更新直後、isNetKpmBestで新記録が示される | PASS |
+
+**4件、全件PASS。** 実装した機能自体(共通404ハンドラ)は今回追加したものであり、P5完了時点では未実装だった(既存の不具合ではなく、未着手のまま埋もれていた設計項目)。
+
+## ST-014〜015(P6-05で実装後に追記)
 
 未着手。

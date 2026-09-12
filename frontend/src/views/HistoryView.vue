@@ -4,6 +4,7 @@ import { useRouter } from 'vue-router'
 import { useTopicStore } from '../stores/topicStore'
 import { useUserStore } from '../stores/userStore'
 import { getPersonalBest, listSessionHistory } from '../api/sessionApi'
+import { handleUserNotFound } from '../api/errorHandling'
 import type { PersonalBest, SessionSummary } from '../types/api'
 
 const router = useRouter()
@@ -35,9 +36,9 @@ async function loadPersonalBest(topicSetId: number) {
     const result = await getPersonalBest(userStore.userId, topicSetId)
     if (requestId !== personalBestRequestId) return // より新しいリクエストが発行済みなら古い結果は破棄する
     personalBest.value = result
-  } catch {
+  } catch (e) {
     if (requestId !== personalBestRequestId) return
-    personalBestError.value = true
+    if (!handleUserNotFound(e, router)) personalBestError.value = true
   }
 }
 
@@ -60,8 +61,8 @@ onMounted(async () => {
   if (userStore.userId !== null) {
     try {
       sessionHistory.value = await listSessionHistory(userStore.userId)
-    } catch {
-      historyLoadError.value = true
+    } catch (e) {
+      if (!handleUserNotFound(e, router)) historyLoadError.value = true
     }
   }
 })
