@@ -104,6 +104,39 @@ class MissAnalysisServiceTest {
     }
 
     @Test
+    void getMissAnalysis_roundsMissRateAndAccuracyRateToTwoDecimalPlaces() {
+        // 割り切れない分数(1/3)になるようoccurrenceCountを3にする(P3ゲート③検証レビューverify-B4対応)
+        Long userId = createUser("分析三郎");
+
+        sessionService.submitSession(
+                new SessionSubmissionRequest(
+                        userId,
+                        BEGINNER_TOPIC_SET_ID,
+                        EndConditionType.sentence_count,
+                        10,
+                        10,
+                        30,
+                        List.of(100, 100),
+                        List.of(new MissRecordInputDto(1, "し", "shi", "x", null, CharType.清音)),
+                        List.of(new KanaCountInputDto("し", CharType.清音, 3))));
+
+        MissAnalysisResponse analysis = missAnalysisService.getMissAnalysis(userId);
+
+        KanaMissStatDto shiStat =
+                analysis.byKana().stream().filter(k -> k.kana().equals("し")).findFirst().orElseThrow();
+        // 1/3*100 = 33.333...ではなく小数第2位HALF_UPで33.33に丸められていること
+        assertThat(shiStat.missRate()).isEqualTo(33.33);
+
+        CharTypeStatDto seiOnStat =
+                analysis.byCharType().stream()
+                        .filter(c -> c.charType() == CharType.清音)
+                        .findFirst()
+                        .orElseThrow();
+        // (3-1)/3*100 = 66.666...ではなく66.67に丸められていること
+        assertThat(seiOnStat.accuracyRate()).isEqualTo(66.67);
+    }
+
+    @Test
     void getMissAnalysis_returnsEmptyListsWhenNoData() {
         Long userId = createUser("分析次郎");
 

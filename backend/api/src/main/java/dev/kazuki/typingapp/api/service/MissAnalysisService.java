@@ -19,6 +19,8 @@ import dev.kazuki.typingapp.core.CharTypeStat;
 import dev.kazuki.typingapp.core.ErrorPatternStat;
 import dev.kazuki.typingapp.core.KanaMissStat;
 import dev.kazuki.typingapp.core.MissAnalysisInput;
+import java.math.BigDecimal;
+import java.math.RoundingMode;
 import java.util.Comparator;
 import java.util.List;
 import java.util.Map;
@@ -84,7 +86,8 @@ public class MissAnalysisService {
                             String kana = e.getKey();
                             int missCount = e.getValue().intValue();
                             int occurrenceCount = kanaTotals.getOrDefault(kana, 0L).intValue();
-                            double missRate = occurrenceCount == 0 ? 0.0 : (double) missCount / occurrenceCount * 100;
+                            double missRate =
+                                    occurrenceCount == 0 ? 0.0 : round((double) missCount / occurrenceCount * 100);
                             return new KanaMissStatDto(kana, missCount, occurrenceCount, missRate);
                         })
                 .sorted(
@@ -127,7 +130,7 @@ public class MissAnalysisService {
                             String prevKana = e.getKey();
                             long missCount = e.getValue();
                             long total = kanaTotals.getOrDefault(prevKana, 0L);
-                            double missRate = total == 0 ? 0.0 : (double) missCount / total * 100;
+                            double missRate = total == 0 ? 0.0 : round((double) missCount / total * 100);
                             return new PrevKanaStatDto(prevKana, missRate);
                         })
                 .sorted(
@@ -155,7 +158,7 @@ public class MissAnalysisService {
                             CharType charType = e.getKey();
                             long occurrenceCount = e.getValue();
                             long missCount = missCounts.getOrDefault(charType, 0L);
-                            double accuracyRate = (double) (occurrenceCount - missCount) / occurrenceCount * 100;
+                            double accuracyRate = round((double) (occurrenceCount - missCount) / occurrenceCount * 100);
                             return new CharTypeStatDto(charType, (int) occurrenceCount, accuracyRate);
                         })
                 .sorted(Comparator.comparingInt(c -> c.charType().ordinal()))
@@ -177,5 +180,11 @@ public class MissAnalysisService {
                                         new CharTypeStat(
                                                 c.charType().name(), c.occurrenceCount(), c.accuracyRate()))
                         .toList());
+    }
+
+    // missRate/accuracyRateの丸めは出口(この呼び出し元)で1回だけ行う(P3ゲート③検証レビューverify-B4対応)。
+    // session-metrics.mdのSessionMetricsCalculator.round()と同じ小数第2位HALF_UP方式に揃えている
+    private static double round(double value) {
+        return BigDecimal.valueOf(value).setScale(2, RoundingMode.HALF_UP).doubleValue();
     }
 }

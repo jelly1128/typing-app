@@ -4,7 +4,7 @@ import { useRouter } from 'vue-router'
 import { useTopicStore } from '../stores/topicStore'
 import { useUserStore } from '../stores/userStore'
 import { getPersonalBest, listSessionHistory } from '../api/sessionApi'
-import { handleUserNotFound } from '../api/errorHandling'
+import { getTraceId, handleUserNotFound } from '../api/errorHandling'
 import type { PersonalBest, SessionSummary } from '../types/api'
 
 const router = useRouter()
@@ -12,11 +12,14 @@ const topicStore = useTopicStore()
 const userStore = useUserStore()
 
 const topicSetLoadError = ref(false)
+const topicSetLoadErrorTraceId = ref<string | null>(null)
 const selectedTopicSetId = ref<number | null>(null)
 const personalBest = ref<PersonalBest | null>(null)
 const personalBestError = ref(false)
+const personalBestErrorTraceId = ref<string | null>(null)
 
 const historyLoadError = ref(false)
+const historyLoadErrorTraceId = ref<string | null>(null)
 const sessionHistory = ref<SessionSummary[] | null>(null)
 
 // 直近に発行したリクエストの番号(REV-014 B3対応)。難易度を素早く切り替えた時、後から発行した
@@ -38,7 +41,10 @@ async function loadPersonalBest(topicSetId: number) {
     personalBest.value = result
   } catch (e) {
     if (requestId !== personalBestRequestId) return
-    if (!handleUserNotFound(e, router)) personalBestError.value = true
+    if (!handleUserNotFound(e, router)) {
+      personalBestError.value = true
+      personalBestErrorTraceId.value = getTraceId(e)
+    }
   }
 }
 
@@ -54,15 +60,19 @@ onMounted(async () => {
     if (topicStore.topicSets.length > 0) {
       selectedTopicSetId.value = topicStore.topicSets[0].id
     }
-  } catch {
+  } catch (e) {
     topicSetLoadError.value = true
+    topicSetLoadErrorTraceId.value = getTraceId(e)
   }
 
   if (userStore.userId !== null) {
     try {
       sessionHistory.value = await listSessionHistory(userStore.userId)
     } catch (e) {
-      if (!handleUserNotFound(e, router)) historyLoadError.value = true
+      if (!handleUserNotFound(e, router)) {
+        historyLoadError.value = true
+        historyLoadErrorTraceId.value = getTraceId(e)
+      }
     }
   }
 })
@@ -77,7 +87,9 @@ onMounted(async () => {
 
     <section class="card space-y-3">
       <h2 class="text-base font-semibold text-slate-800 dark:text-slate-100">自己ベスト</h2>
-      <p v-if="topicSetLoadError" role="alert" class="text-sm text-red-600 dark:text-red-400">読み込みに失敗しました</p>
+      <p v-if="topicSetLoadError" role="alert" class="text-sm text-red-600 dark:text-red-400">
+        読み込みに失敗しました<span v-if="topicSetLoadErrorTraceId" class="text-xs opacity-75">(エラーコード: {{ topicSetLoadErrorTraceId }})</span>
+      </p>
       <template v-else>
         <select v-model="selectedTopicSetId" class="field-input w-48">
           <option v-for="topicSet in topicStore.topicSets" :key="topicSet.id" :value="topicSet.id">
@@ -85,7 +97,7 @@ onMounted(async () => {
           </option>
         </select>
         <p v-if="personalBestError" role="alert" class="flex items-center gap-2 text-sm text-red-600 dark:text-red-400">
-          読み込みに失敗しました
+          読み込みに失敗しました<span v-if="personalBestErrorTraceId" class="text-xs opacity-75">(エラーコード: {{ personalBestErrorTraceId }})</span>
           <button
             type="button"
             class="btn btn-secondary"
@@ -105,7 +117,9 @@ onMounted(async () => {
 
     <section class="card space-y-3">
       <h2 class="text-base font-semibold text-slate-800 dark:text-slate-100">履歴一覧</h2>
-      <p v-if="historyLoadError" role="alert" class="text-sm text-red-600 dark:text-red-400">読み込みに失敗しました</p>
+      <p v-if="historyLoadError" role="alert" class="text-sm text-red-600 dark:text-red-400">
+        読み込みに失敗しました<span v-if="historyLoadErrorTraceId" class="text-xs opacity-75">(エラーコード: {{ historyLoadErrorTraceId }})</span>
+      </p>
       <p v-else-if="sessionHistory && sessionHistory.length === 0" class="text-sm text-slate-500 dark:text-slate-400">
         まだ記録がありません
       </p>

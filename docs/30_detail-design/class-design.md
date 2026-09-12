@@ -156,6 +156,8 @@ Controller → Service → Repository の3層構成。例外→HTTP応答の変�
 | FR-ID | typing-core | api |
 |---|---|---|
 | FR-01 | — | `TopicSetController`/`TopicSetService`/`SentenceRepository` |
+| FR-02 | — | —(フロントエンド完結、ADR-002。2.2 `judgment-engine`参照) |
+| FR-03 | — | —(フロントエンド完結、ADR-002。2.2 `judgment-engine`参照) |
 | FR-04 | — | `SessionService`/`MissRecordRepository` |
 | FR-05 | — | `SessionController`/`SessionService`/`SessionRepository` |
 | FR-06 | `SessionMetricsCalculator` | `SessionService` |
@@ -229,7 +231,7 @@ frontend/src/
 
 | モジュール | 責務 |
 |---|---|
-| `client.ts` | fetchラッパー。baseURL・共通ヘッダー・`ErrorResponse`のパースを一元化。**baseURLは`/api`固定(相対パス)とし、環境変数で切り替えない**(環境差の吸収は本番=Renderの Rewrite、local=Viteのproxyが担う。`deployment.md` 3章)。タイムアウトは**90秒**(Renderのコールドスタート復帰時間、約1分を考慮。`nonfunctional-design.md` NFR-03) |
+| `client.ts` | fetchラッパー。baseURL・共通ヘッダー・`ErrorResponse`のパースを一元化。**baseURLは`/api`固定(相対パス)とし、環境変数で切り替えない**(環境差の吸収は本番=Renderの Rewrite、local=Viteのproxyが担う。`deployment.md` 3章)。タイムアウトは**90秒**(P3で新規に決定した値。`nonfunctional-design.md` NFR-03はコールドスタート遅延を「数十秒程度」許容するとのみ定めており、具体的な秒数は上流に無い。数十秒+通信・処理時間の余裕を見て90秒とした。P3ゲート③検証レビューverify-C2対応) |
 | `userApi.ts` | `POST /api/users` | 
 | `topicSetApi.ts` | `GET /api/topic-sets`, `GET /api/topic-sets/{id}/sentences` |
 | `sessionApi.ts` | `POST /api/sessions`, `GET /api/users/{id}/sessions`, `GET /api/users/{id}/best` |

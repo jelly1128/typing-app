@@ -198,11 +198,19 @@ Kazuki は全タスク一律 0.67h(40分)の直感値(根拠なし、と本人�
 **P7(リリース)着手時に確認:**
 - ops-C4(Renderのログ保持期間・DB接続タイムアウトの前提を`operation.md`に記録)
 - **フロントエンドのビジュアルデザイン対応(2026-09-12追記)。** P5-19結合確認時、Kazukiから「デザインがダサすぎる」との指摘。`screen-design.md`にビジュアルデザインは元々スコープ外(FR/NFRどちらにも見た目の受け入れ条件なし)と明記されており、P6のST合否には影響しないため、P6着手前の対応は不要と判断。ただしP7の完了条件「公開URLを他人にそのまま渡せる状態」の実質的な前提になるため、P7着手時にタスク化する(スタイリング方針・CSSフレームワーク使用有無をKazukiと相談してから着手)
+- **(2026-09-12発見・追記)本表に記載漏れがあったopsレビュー指摘。** `review-20260829_p3-gate3-ops.md` C3(エラー画面に`traceId`を併記する)が「P5実装時の申し送りで足りる」とされたまま本表のどのフェーズにも割り当てられておらず、P5完了時点でも未実装だった。P7-04(operation.md作成)着手前に気づき、その場でP7スコープとして実装した(CL-030)。CL-027/CL-028に続き「担当タスクIDが無い先送りは自然消滅する」パターンの3件目
 
 **対象外(次にP1文書を触る機会に反映):**
 - doc-C8(`requirements.md` NFR-08の記述が古い。P3の対象文書ではないため今回は見送り)
 
 **追記(2026-08-29、修正後の検証レビューREV-013より):** A7件を修正し、うちB3・B6・B7は修正のついでに解消済み。残りのB4件(verify-B1/B2/B4/B5)・C7件(verify-C1〜C7)はP5着手時の確認に追加する(いずれも実装の瞬間に決めれば足りる軽微な項目のため)。
+
+**追記(2026-09-12、P7-04発見の「転記漏れ」を機に全件監査):** 上記verify-B1/B2/B4/B5・verify-C1〜C7の計11件が、実際には「P5(実装)着手時に確認」の一覧に一度も転記されず、P5完了まで放置されていたことが判明した(ops-C3=traceId表示の転記漏れ発覚がきっかけ)。11件全てを確認し対応した。
+- verify-B4: `occurrenceCount`逆算問題はCL-016で解決済みだったが、`missRate`/`accuracyRate`の丸め処理は未実装のままだった(既存テストがキリのいい数字のみ使用していたため発覚せず)。`MissAnalysisService`に小数第2位HALF_UP丸めを追加(CL-031)
+- verify-B5: `expectedKey`のカンマ区切り表示は未対応のままだった。中黒(「・」)区切りに整形する処理を`AdviceGenerator`(Java)・`MissAnalysisView.vue`(TS)の両方に追加(CL-031)
+- verify-B1/B2: `sequence.md`図2〜4にapi/クライアント層のparticipantを追加、図4にuserId存在確認ステップを追加
+- verify-C1/C2/C3/C5/C6/C7: `romaji-automaton.md`(用語更新・keystrokeIntervalsMsの仕様明記)、`class-design.md`(90秒根拠の訂正、FR-02/FR-03のトレーサビリティ行追加)、`db-access.md`(R__冪等性の注意書き追加)、`sequence.md`5.3(userIdあり×S-01遷移のケース注記)を修正
+- ついでに、振り分け表自体には載っていなかったが実際には既に解決済みと確認できたもの: ops-C1(DISTINCT ON非決定性)・doc-C1(章参照誤り)・doc-C3(同上)・doc-C7(status draft)。いずれも2026-08-29当時に本体作業のついでに直っており、コード・文書側の追加対応は不要だった
 
 ### 見積もり突き合わせの記録(2026-08-29、続き)
 
@@ -349,6 +357,8 @@ P5-01のみ、環境構築(pom.xml/record定義/shared testdata作成)は既にK
 | P7-01 | Tailwind CSS導入 + 全画面(S-01〜S-06)へのスタイリング適用 | ADR-005の方針で全画面の見た目が整い、ボタン/入力欄のフォーカス状態等の基本アクセシビリティが確認できる状態 | 1.5 | 2.0 | **1.75** | 完了(Tailwind CSS v4(`@tailwindcss/vite`)導入。全6画面+関連コンポーネント(TypingDisplay/SessionMetricsSummary/MissAnalysisSection)にスタイリング適用、共通部品クラス(`.btn`/`.card`/`.field-input`等)を`style.css`に集約。未使用だったP2.5 scaffold残骸(HelloWorld.vue/hero.png/vite.svg/vue.svg)を削除、index.htmlのtitleも変更。Vitest全99件Green・`vue-tsc -b && vite build`成功、ブラウザ実機で全画面(ダークモード・確定/入力中/ヒントの色分け・ミス表示・自己ベスト表示)を確認) |
 | P7-02 | `README.md`作成 | プロジェクト概要・技術スタック・ローカル起動手順・公開URLが1つのファイルで読める状態 | 0.5 | 0.5 | **0.5** | 完了(概要・技術スタック・ローカル起動手順・テスト実行方法・公開URLに加え、目次・スクリーンショット2枚(`docs/assets/`)・「このプロジェクトについて」節を追加) |
 | P7-03 | `release-note.md`作成(REL-001) | MVPで実現したFR一覧・既知の制約(スコープ外事項)が読める状態 | 0.5 | 0.5 | **0.5** | 完了(FR-01〜13一覧、既知の制約・受入リスク(ADR-001/ADR-003/NFR-08/BUG-002)、動作環境を記録) |
+| P7-04a | (計画外)traceId表示対応(opsレビューC3、CL-030) | 全画面のエラー表示に`traceId`(取得できる場合)が併記される状態 | 発見都度・合意値なし | 発見都度・合意値なし | 発見都度・合意値なし | 完了(`errorHandling.ts`に`getTraceId`新設、`sessionStore.submitErrorTraceId`追加、6View(NameInput/Home/Typing/Result/History/MissAnalysis)のエラー表示に追加。単体テスト2件追加、Vitest101件Green、ビルド成功) |
+| P7-04b | (計画外)REV-013 B/C転記漏れ11件の監査・対応(CL-031) | 転記漏れ11件(verify-B1/B2/B4/B5・verify-C1〜C7)を全件確認し、対応または既解決を確認した状態 | 発見都度・合意値なし | 発見都度・合意値なし | 発見都度・合意値なし | 完了(実質バグ2件(丸め処理未実装・カンマ区切り表示)を修正、ドキュメント齟齬7件を修正、既に解決済みと確認できたもの4件(ops-C1/doc-C1/doc-C3/doc-C7)。バックエンド新規テスト2件+フロントエンド期待値更新1件、backend48件・frontend101件Green、ビルド成功) |
 | P7-04 | `operation.md`作成(REL-002) | 障害対応手順・Renderのログ保持期間/DB接続タイムアウトの前提(ops-C4)・NFR-08受入リスクの運用対応が記録された状態 | | | | 未着手 |
 | P7-05 | PreToolUse hook整備(破壊的コマンドのガード) | 破壊的コマンド(`git push --force`等)実行前に確認が入る状態。Claude Code機能整備状況の該当欄が埋まる状態 | | | | 未着手 |
 | P7-06 | 本番デプロイ最終確認 | Renderの公開URL上でP5-19相当の一連の流れ(S-01〜S-06)がP7-01の見た目で動く状態 | | | | 未着手 |

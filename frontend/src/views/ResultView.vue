@@ -22,7 +22,9 @@ function retry() {
 <template>
   <div class="page items-center">
     <template v-if="sessionStore.submitError">
-      <p role="alert" class="text-sm text-red-600 dark:text-red-400">結果の保存に失敗しました</p>
+      <p role="alert" class="text-sm text-red-600 dark:text-red-400">
+        結果の保存に失敗しました<span v-if="sessionStore.submitErrorTraceId" class="text-xs opacity-75">(エラーコード: {{ sessionStore.submitErrorTraceId }})</span>
+      </p>
       <button type="button" class="btn btn-primary" :disabled="sessionStore.isSubmitting" @click="retry">もう一度送信</button>
     </template>
     <template v-else-if="sessionStore.result">

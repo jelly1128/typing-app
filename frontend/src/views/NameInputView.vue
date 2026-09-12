@@ -2,11 +2,13 @@
 import { ref } from 'vue'
 import { useRouter } from 'vue-router'
 import { useUserStore } from '../stores/userStore'
+import { getTraceId } from '../api/errorHandling'
 
 const router = useRouter()
 const userStore = useUserStore()
 const name = ref('')
 const errorMessage = ref<string | null>(null)
+const errorTraceId = ref<string | null>(null)
 const isSubmitting = ref(false)
 
 async function handleSubmit() {
@@ -18,8 +20,9 @@ async function handleSubmit() {
   try {
     await userStore.identifyUser(trimmed)
     router.push({ name: 'home' })
-  } catch {
+  } catch (e) {
     errorMessage.value = '読み込みに失敗しました'
+    errorTraceId.value = getTraceId(e)
   } finally {
     isSubmitting.value = false
   }
@@ -38,7 +41,9 @@ async function handleSubmit() {
         <input id="name" v-model="name" type="text" maxlength="100" required class="field-input" />
       </div>
       <button type="submit" class="btn btn-primary w-full" :disabled="name.trim() === '' || isSubmitting">はじめる</button>
-      <p v-if="errorMessage" role="alert" class="text-sm text-red-600 dark:text-red-400">{{ errorMessage }}</p>
+      <p v-if="errorMessage" role="alert" class="text-sm text-red-600 dark:text-red-400">
+        {{ errorMessage }}<span v-if="errorTraceId" class="text-xs opacity-75">(エラーコード: {{ errorTraceId }})</span>
+      </p>
     </form>
   </div>
 </template>

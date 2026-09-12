@@ -57,18 +57,21 @@ sequenceDiagram
 ```mermaid
 sequenceDiagram
     participant View as HistoryView
+    participant Api as sessionApi
     participant Ctrl as SessionController
     participant Svc as SessionService
     participant Repo as SessionRepository
 
-    View->>Ctrl: GET /api/users/{userId}/sessions
+    View->>Api: listSessionHistory(userId)
+    Api->>Ctrl: GET /api/users/{userId}/sessions
     Ctrl->>Svc: listSessionHistory(userId)
     Svc->>Svc: userId存在確認(404対象)
     Svc->>Repo: findSummariesByUserIdOrderByPlayedAtDesc(userId)
     Repo-->>Svc: List<SessionSummaryProjection>(0件も可、topicSetName込みでJOIN済み)
     Svc->>Svc: SessionSummaryへ変換
     Svc-->>Ctrl: List<SessionSummary>
-    Ctrl-->>View: 200 List<SessionSummary>
+    Ctrl-->>Api: 200 List<SessionSummary>
+    Api-->>View: List<SessionSummary>
 ```
 
 ## 3. 自己ベスト取得(FR-09)
@@ -76,17 +79,20 @@ sequenceDiagram
 ```mermaid
 sequenceDiagram
     participant View as HistoryView
+    participant Api as sessionApi
     participant Ctrl as SessionController
     participant Svc as SessionService
     participant Repo as SessionRepository
 
-    View->>Ctrl: GET /api/users/{userId}/best?topicSetId=...
+    View->>Api: getPersonalBest(userId, topicSetId)
+    Api->>Ctrl: GET /api/users/{userId}/best?topicSetId=...
     Ctrl->>Svc: getPersonalBest(userId, topicSetId)
     Svc->>Svc: userId/topicSetId存在確認(404対象。0件と不存在を区別するため、MAXクエリとは別に確認する)
     Svc->>Repo: MAX(netKpm), MAX(accuracy)(db-access.md 4.2)
     Repo-->>Svc: netKpmBest/accuracyBest(0件ならnull)
     Svc-->>Ctrl: PersonalBest
-    Ctrl-->>View: 200 PersonalBest
+    Ctrl-->>Api: 200 PersonalBest
+    Api-->>View: PersonalBest
 ```
 
 ## 4. ミス分析・改善アドバイス取得(FR-10, FR-11)
@@ -94,13 +100,16 @@ sequenceDiagram
 ```mermaid
 sequenceDiagram
     participant View as MissAnalysisView
+    participant Api as missAnalysisApi
     participant Ctrl as MissAnalysisController
     participant Svc as MissAnalysisService
     participant Repo as MissRecordRepository/SessionKanaCountRepository
     participant Advice as AdviceGenerator(typing-core)
 
-    View->>Ctrl: GET /api/users/{userId}/miss-analysis
+    View->>Api: getMissAnalysis(userId)
+    Api->>Ctrl: GET /api/users/{userId}/miss-analysis
     Ctrl->>Svc: getMissAnalysis(userId)
+    Svc->>Svc: userId存在確認(404対象、class-design.md 1.4)
     Svc->>Repo: 拍単位ミス集合(DISTINCT ON)取得(db-access.md 4.3)
     Svc->>Repo: 誤りパターン別カウント取得
     Svc->>Repo: かな/文字種別 出現回数合計取得
@@ -109,7 +118,8 @@ sequenceDiagram
     Svc->>Advice: generate(MissAnalysisInput)
     Advice-->>Svc: advice(0〜3件)
     Svc-->>Ctrl: MissAnalysis(4観点+advice)
-    Ctrl-->>View: 200 MissAnalysis
+    Ctrl-->>Api: 200 MissAnalysis
+    Api-->>View: MissAnalysis
 ```
 
 ---
@@ -183,6 +193,8 @@ sequenceDiagram
         Router->>View: S-01(NameInputView)へリダイレクト
     end
 ```
+
+**userIdあり かつ 遷移先がS-01の場合(P3ゲート③検証レビューverify-C4対応):** このガードは「userIdが無ければS-01へ送る」動作のみを行い、逆方向(userIdがあるのにS-01への遷移を止める)は行わない。そのため「別の名前で始める」(`handleChangeName`、`userStore.clearUser()`実行後にS-01へ`push`)経由でのS-01遷移はuserIdが既にクリアされた後なので通常どおりガードを通過する。ルート(`/`)への直接アクセス時にuserIdがある状態でS-02へ送り返す挙動は、このガードの対象外であり実装していない(MVPでは`/`にnameInputViewを直接割り当てているため、再訪問時も名前入力画面が表示されるが、実害は「名前を入力し直すだけ」で軽微と判断)。
 
 ---
 

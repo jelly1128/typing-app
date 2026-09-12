@@ -5,6 +5,7 @@ import { useTopicStore } from '../stores/topicStore'
 import { useSessionStore } from '../stores/sessionStore'
 import { useUserStore } from '../stores/userStore'
 import { createSequenceJudge } from '../judgment-engine/sequenceJudge'
+import { getTraceId } from '../api/errorHandling'
 import type { KeystrokeResult } from '../judgment-engine/types'
 import type { EndConditionType } from '../types/api'
 import TypingDisplay from '../components/TypingDisplay.vue'
@@ -28,6 +29,7 @@ const judge = createSequenceJudge()
 
 // ref() は「値が変わったら画面を自動で再描画してほしいデータ」に使う(テンプレート側で参照する値はこちらに置く)
 const loadError = ref(false)
+const loadErrorTraceId = ref<string | null>(null)
 const currentSentenceIndex = ref(0)
 const keystroke = ref<KeystrokeResult | null>(null)
 const remainingSeconds = ref<number | null>(null)
@@ -125,8 +127,9 @@ onMounted(async () => {
   sessionStore.startSession(userStore.userId!, props.topicSetId, props.endConditionType, props.endConditionValue)
   try {
     await topicStore.selectTopicSet(props.topicSetId)
-  } catch {
+  } catch (e) {
     loadError.value = true
+    loadErrorTraceId.value = getTraceId(e)
     return
   }
   if (topicStore.sentences.length === 0) {
@@ -152,7 +155,9 @@ onUnmounted(() => {
 
 <template>
   <div class="page items-center">
-    <p v-if="loadError" role="alert" class="text-sm text-red-600 dark:text-red-400">読み込みに失敗しました</p>
+    <p v-if="loadError" role="alert" class="text-sm text-red-600 dark:text-red-400">
+      読み込みに失敗しました<span v-if="loadErrorTraceId" class="text-xs opacity-75">(エラーコード: {{ loadErrorTraceId }})</span>
+    </p>
     <template v-else-if="keystroke">
       <p v-if="endConditionType === 'sentence_count'" class="text-sm font-medium text-slate-500 dark:text-slate-400">
         {{ sessionStore.confirmedSentenceCount + 1 }} / {{ endConditionValue }}

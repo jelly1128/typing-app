@@ -6,6 +6,7 @@ import NameInputView from './NameInputView.vue'
 import { createAppRouter } from '../router'
 import { useUserStore } from '../stores/userStore'
 import * as userApi from '../api/userApi'
+import { ApiError } from '../api/client'
 
 describe('NameInputView', () => {
   let router: ReturnType<typeof createAppRouter>
@@ -53,5 +54,18 @@ describe('NameInputView', () => {
 
     expect(wrapper.get('[role="alert"]').text()).toBe('読み込みに失敗しました')
     expect(pushSpy).not.toHaveBeenCalled()
+  })
+
+  it('identifyUser失敗がApiErrorの場合、traceIdをエラーコードとして併記する(P3ゲート③ opsレビューC3対応)', async () => {
+    vi.spyOn(userApi, 'identifyUser').mockRejectedValue(
+      new ApiError({ timestamp: '2026-09-12T00:00:00Z', status: 500, code: 'INTERNAL_ERROR', message: 'boom', traceId: 'trace-123' }),
+    )
+    const wrapper = mountView()
+
+    await wrapper.get('input#name').setValue('kazuki')
+    await wrapper.get('form').trigger('submit')
+    await flushPromises()
+
+    expect(wrapper.get('[role="alert"]').text()).toContain('trace-123')
   })
 })

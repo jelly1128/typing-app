@@ -1,7 +1,7 @@
 import { defineStore } from 'pinia'
 import type { Router } from 'vue-router'
 import { submitSession } from '../api/sessionApi'
-import { handleUserNotFound } from '../api/errorHandling'
+import { getTraceId, handleUserNotFound } from '../api/errorHandling'
 import type {
   EndConditionType,
   KanaCountInput,
@@ -39,6 +39,7 @@ export const useSessionStore = defineStore('session', {
     result: null as SessionResult | null,
     isSubmitting: false,
     submitError: false,
+    submitErrorTraceId: null as string | null,
   }),
   getters: {
     durationSeconds(state): number {
@@ -62,6 +63,7 @@ export const useSessionStore = defineStore('session', {
       this.clearLog()
       this.result = null
       this.submitError = false
+      this.submitErrorTraceId = null
       this.sessionStartedAt = Date.now()
     },
 
@@ -168,6 +170,7 @@ export const useSessionStore = defineStore('session', {
       if (this.lastSubmission === null) return false
       this.isSubmitting = true
       this.submitError = false
+      this.submitErrorTraceId = null
       try {
         this.result = await submitSession(this.lastSubmission)
         this.lastSubmission = null
@@ -175,6 +178,7 @@ export const useSessionStore = defineStore('session', {
       } catch (e) {
         if (handleUserNotFound(e, router)) return true
         this.submitError = true
+        this.submitErrorTraceId = getTraceId(e)
       } finally {
         this.isSubmitting = false
       }

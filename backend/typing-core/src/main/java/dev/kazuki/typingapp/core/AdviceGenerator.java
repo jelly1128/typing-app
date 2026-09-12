@@ -29,7 +29,7 @@ public final class AdviceGenerator {
                 result.add(
                     ("\"%s\"を\"%s\"と入力してしまうミスが目立ちます(直近の集計で%d回)。"
                         + "次にこの組み合わせが出たら意識してみましょう。")
-                        .formatted(top.expectedKey(), top.actualKey(), top.count())
+                        .formatted(formatKeyChoices(top.expectedKey()), top.actualKey(), top.count())
                 );
             }
         }
@@ -75,5 +75,16 @@ public final class AdviceGenerator {
         }
 
         return result;
+    }
+
+    /**
+     * `expectedKey`はDB上カンマ区切りの複合値(例: "c,s")で保存されている(db-access.md、CL-010)。
+     * アドバイス文にそのまま出すと不自然なため、日本語の選択肢列挙で使う中黒区切りに変換する
+     * (P3ゲート③検証レビューverify-B5対応)
+     * @param expectedKey カンマ区切りの期待キー(単一候補ならカンマなし、そのまま返る)
+     * @return 中黒("・")区切りに変換した文字列
+     */
+    private static String formatKeyChoices(String expectedKey) {
+        return expectedKey.replace(",", "・");
     }
 }

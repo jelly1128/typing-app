@@ -3,14 +3,26 @@ import { computed, onMounted, ref } from 'vue'
 import { useRouter } from 'vue-router'
 import { useUserStore } from '../stores/userStore'
 import { getMissAnalysis } from '../api/missAnalysisApi'
-import { handleUserNotFound } from '../api/errorHandling'
+import { getTraceId, handleUserNotFound } from '../api/errorHandling'
 import type { MissAnalysis } from '../types/api'
 import MissAnalysisSection from '../components/MissAnalysisSection.vue'
 
 const router = useRouter()
 const userStore = useUserStore()
 
+/**
+ * `expectedKey`はAPI上カンマ区切りの複合値(例: "c,s")で返る(db-access.md、CL-010)。
+ * 表示にそのまま出すと不自然なため、日本語の選択肢列挙で使う中黒区切りに変換する
+ * (P3ゲート③検証レビューverify-B5対応。backend/typing-core/AdviceGenerator.formatKeyChoicesと同じ規則)
+ * @param expectedKey カンマ区切りの期待キー(単一候補ならカンマなし、そのまま返る)
+ * @returns 中黒(「・」)区切りに変換した文字列
+ */
+function formatKeyChoices(expectedKey: string): string {
+  return expectedKey.replaceAll(',', '・')
+}
+
 const loadError = ref(false)
+const loadErrorTraceId = ref<string | null>(null)
 const missAnalysis = ref<MissAnalysis | null>(null)
 
 // 各観点の生データ(数値)を、画面にそのまま出せる1行の文字列に整形する。並び順はAPIが返した順のまま
@@ -19,7 +31,10 @@ const byKana = computed(
   () => missAnalysis.value?.byKana.map((m) => `${m.kana}: ${m.missRate}%(${m.missCount}/${m.occurrenceCount}回)`) ?? [],
 )
 const byErrorPattern = computed(
-  () => missAnalysis.value?.byErrorPattern.map((e) => `${e.expectedKey} → ${e.actualKey}: ${e.count}回`) ?? [],
+  () =>
+    missAnalysis.value?.byErrorPattern.map(
+      (e) => `${formatKeyChoices(e.expectedKey)} → ${e.actualKey}: ${e.count}回`,
+    ) ?? [],
 )
 const byPrevKana = computed(() => missAnalysis.value?.byPrevKana.map((p) => `直前が${p.prevKana}: ${p.missRate}%`) ?? [])
 const byCharType = computed(() => missAnalysis.value?.byCharType.map((c) => `${c.charType}: ${c.accuracyRate}%`) ?? [])
@@ -32,7 +47,10 @@ onMounted(async () => {
   try {
     missAnalysis.value = await getMissAnalysis(userStore.userId)
   } catch (e) {
-    if (!handleUserNotFound(e, router)) loadError.value = true
+    if (!handleUserNotFound(e, router)) {
+      loadError.value = true
+      loadErrorTraceId.value = getTraceId(e)
+    }
   }
 })
 </script>
@@ -44,7 +62,9 @@ onMounted(async () => {
       <button type="button" class="btn btn-secondary" @click="router.push({ name: 'home' })">ホームへ</button>
     </header>
 
-    <p v-if="loadError" role="alert" class="text-sm text-red-600 dark:text-red-400">読み込みに失敗しました</p>
+    <p v-if="loadError" role="alert" class="text-sm text-red-600 dark:text-red-400">
+      読み込みに失敗しました<span v-if="loadErrorTraceId" class="text-xs opacity-75">(エラーコード: {{ loadErrorTraceId }})</span>
+    </p>
     <template v-else-if="missAnalysis">
       <div class="grid gap-4 sm:grid-cols-2">
         <MissAnalysisSection title="かな別ミス" :items="byKana" />

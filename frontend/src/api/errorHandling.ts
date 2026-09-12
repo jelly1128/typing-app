@@ -18,3 +18,13 @@ export function handleUserNotFound(error: unknown, router: Router): boolean {
   }
   return false
 }
+
+/**
+ * エラーがtraceId(NFR-07: レスポンスとログの双方に同じ値を出す)を持つApiErrorであれば取り出す
+ * (P3ゲート③ opsレビューC3対応: 問い合わせ時にログと突き合わせる鍵として画面に併記する)
+ * @param error catchブロックで受け取ったエラー
+ * @returns traceId。ApiErrorでない(ネットワークエラー等)場合はnull
+ */
+export function getTraceId(error: unknown): string | null {
+  return error instanceof ApiError ? error.response.traceId : null
+}

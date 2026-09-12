@@ -54,7 +54,7 @@ describe('MissAnalysisView', () => {
     await flushPromises()
 
     expect(wrapper.text()).toContain('し: 30%(3/10回)')
-    expect(wrapper.text()).toContain('s,sh,c → x: 2回')
+    expect(wrapper.text()).toContain('s・sh・c → x: 2回')
     expect(wrapper.text()).toContain('直前があ: 25%')
     expect(wrapper.text()).toContain('清音: 70%')
     expect(wrapper.text()).toContain('「し」を間違えやすい傾向があります。')

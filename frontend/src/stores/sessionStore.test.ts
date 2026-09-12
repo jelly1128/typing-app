@@ -193,6 +193,22 @@ describe('sessionStore', () => {
     expect(store.lastSubmission).toBeNull()
   })
 
+  it('送信失敗がApiErrorの場合、submitErrorTraceIdにtraceIdを保持する(P3ゲート③ opsレビューC3対応)', async () => {
+    const store = useSessionStore()
+    store.startSession(1, 1, 'sentence_count', 1)
+    store.recordKeystroke(
+      keystroke({ moraIndex: 0, confirmedMora: { kana: 'あ', charType: '清音', acceptedPattern: 'a', moraIndex: 0 } }),
+    )
+
+    vi.spyOn(sessionApi, 'submitSession').mockRejectedValueOnce(
+      new ApiError({ timestamp: '2026-09-12T00:00:00Z', status: 500, code: 'INTERNAL_ERROR', message: 'boom', traceId: 'trace-456' }),
+    )
+    await store.endSession(router)
+
+    expect(store.submitError).toBe(true)
+    expect(store.submitErrorTraceId).toBe('trace-456')
+  })
+
   it('送信時にuserId失効(404 USER_NOT_FOUND)を検知した場合はuserIdをクリアしS-01へ強制遷移する。submitErrorは立てない(sequence.md 5.2)', async () => {
     const store = useSessionStore()
     store.startSession(1, 1, 'sentence_count', 1)

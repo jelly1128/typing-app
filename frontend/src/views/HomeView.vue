@@ -3,6 +3,7 @@ import { computed, onMounted, ref } from 'vue'
 import { useRouter } from 'vue-router'
 import { useTopicStore } from '../stores/topicStore'
 import { useUserStore } from '../stores/userStore'
+import { getTraceId } from '../api/errorHandling'
 import type { EndConditionType } from '../types/api'
 
 const router = useRouter()
@@ -10,6 +11,7 @@ const userStore = useUserStore()
 const topicStore = useTopicStore()
 
 const loadError = ref(false)
+const loadErrorTraceId = ref<string | null>(null)
 const selectedTopicSetId = ref<number | null>(null)
 const endConditionType = ref<EndConditionType>('sentence_count')
 const endConditionValue = ref(10)
@@ -20,8 +22,9 @@ onMounted(async () => {
     if (topicStore.topicSets.length > 0) {
       selectedTopicSetId.value = topicStore.topicSets[0].id
     }
-  } catch {
+  } catch (e) {
     loadError.value = true
+    loadErrorTraceId.value = getTraceId(e)
   }
 })
 
@@ -67,7 +70,9 @@ function handleChangeName() {
       </div>
     </header>
 
-    <p v-if="loadError" role="alert" class="text-sm text-red-600 dark:text-red-400">読み込みに失敗しました</p>
+    <p v-if="loadError" role="alert" class="text-sm text-red-600 dark:text-red-400">
+      読み込みに失敗しました<span v-if="loadErrorTraceId" class="text-xs opacity-75">(エラーコード: {{ loadErrorTraceId }})</span>
+    </p>
     <template v-else>
       <fieldset class="card space-y-2">
         <legend class="px-1 text-sm font-semibold text-slate-700 dark:text-slate-200">お題セット</legend>
