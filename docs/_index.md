@@ -96,3 +96,4 @@ updated: 2026-09-10
 | [ADR-002](./00_project/decisions/002-realtime-judgment-frontend.md) | リアルタイムのローマ字判定はフロントエンド完結にする | 2026-08-23 |
 | [ADR-003](./00_project/decisions/003-userid-enumeration-accepted-risk.md) | userId 推測による他人データ閲覧リスクを受け入れる | 2026-08-23 |
 | [ADR-004](./00_project/decisions/004-long-vowel-hyphen-key.md) | 長音「ー」はハイフンキー"-"1つで確定する(P1確定の母音延長方式を上書き) | 2026-08-29 |
+| [ADR-005](./00_project/decisions/005-tailwind-css.md) | フロントエンドのスタイリングは Tailwind CSS を採用する | 2026-09-12 |
